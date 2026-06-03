@@ -213,7 +213,7 @@
             <div
               class="flex items-center gap-2 rounded-full border border-line bg-paper px-4 py-2"
             >
-              <span class="flow-index text-xs">3</span>
+              <span class="flow-index text-xs">4</span>
               <span class="text-sm font-semibold text-muted">Sesiones</span>
             </div>
             <div
@@ -249,6 +249,15 @@
             <span class="text-sm font-semibold text-ink">Reporte forense</span>
             <span class="ml-auto text-xs text-muted">Análisis</span>
           </div>
+          <div
+            class="flex items-center gap-3 rounded-[1.25rem] border border-line bg-paper-soft px-4 py-3"
+          >
+            <span class="flow-index text-xs">4</span>
+            <span class="text-sm font-semibold text-ink"
+              >Evaluación SOX / SoD</span
+            >
+            <span class="ml-auto text-xs text-muted">A.U.R.A.</span>
+          </div>
         </div>
       </div>
 
@@ -256,9 +265,7 @@
       <div class="mt-12 mb-10 h-px bg-line"></div>
 
       <!-- ═══════════════ SESSIONS ═══════════════ -->
-      <div
-        class="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)_minmax(0,1fr)]"
-      >
+      <div class="grid gap-6 lg:grid-cols-2">
         <!-- ── Session 1: Repaso ── -->
         <a href="cuando-usar-que.html" class="session-card group">
           <div class="flex items-center gap-3">
@@ -369,6 +376,42 @@
             </span>
           </div>
         </a>
+
+        <!-- ── Session 4: Evaluación SOX / SoD ── -->
+        <a href="Sesion3-sox.html" class="session-card group">
+          <div class="flex items-center gap-3">
+            <span class="flow-index">4</span>
+            <p class="kicker text-accent">Práctica</p>
+          </div>
+          <h2
+            class="section-title text-2xl sm:text-3xl font-bold text-ink leading-tight"
+          >
+            Evaluación SOX / SoD
+          </h2>
+          <p class="text-sm leading-6 text-muted">
+            Taller práctico con metodología A.U.R.A. Evaluá la segregación de
+            funciones en CxP y Tesorería. Cruzá permisos, detectá conflictos y
+            armá tu tablero de control SOX.
+          </p>
+          <div class="mt-auto pt-2">
+            <span class="session-arrow">
+              Ir al taller
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 15 15"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M8.146 3.146a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L11.293 8 8.146 4.854a.5.5 0 0 1 0-.708Z"
+                  fill="currentColor"
+                />
+                <path d="M3.5 8.5h8.5v-1H3.5v1Z" fill="currentColor" />
+              </svg>
+            </span>
+          </div>
+        </a>
       </div>
 
       <!-- ═══════════════ DIVIDER ═══════════════ -->
@@ -412,6 +455,12 @@
               <span class="text-sm text-muted">Paso 3</span>
               <span class="text-sm font-semibold text-ink"
                 >Reporte forense</span
+              >
+            </div>
+            <div class="stat-line">
+              <span class="text-sm text-muted">Paso 4</span>
+              <span class="text-sm font-semibold text-ink"
+                >Evaluación SOX / SoD</span
               >
             </div>
           </div>
