@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monitoreo de Riesgos y Auditoría Forense · Ecosistema de Terceros</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+          display: ['Space Grotesk', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        },
+        colors: {
+          ink:    '#0f172a',
+          surface:'#ffffff',
+          panel:  '#f8fafc',
+          panel2: '#f1f5f9',
+          line:   '#e2e8f0',
+          mute:   '#64748b',
+          soft:   '#334155',
+          gold:   '#b47b2b',
+          gold2:  '#d97706',
+          danger: '#ef4444',
+          warn:   '#f59e0b',
+          ok:     '#10b981',
+          info:   '#3b82f6',
+        }
+      }
+    }
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(180,123,43,.06), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(59,130,246,.06), transparent 60%),
+      #ffffff;
+    color: #0f172a;
+  }
+  .font-display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.01em; }
+  .material-symbols-rounded { font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+  .ring-gold { box-shadow: 0 0 0 1px rgba(180,123,43,.35), 0 8px 30px rgba(180,123,43,.08); }
+  .chip { display:inline-flex; align-items:center; gap:.35rem; padding:.2rem .55rem; border-radius:9999px; font-size:.7rem; font-weight:600; letter-spacing:.02em; }
+  .grad-text {
+    background: linear-gradient(90deg, #d97706 0%, #b47b2b 50%, #92400e 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .divider-dot::before { content:'·'; margin:0 .5rem; color:#cbd5e1; }
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  .reviewed { opacity: .55; }
+  .reviewed .review-stamp { display:inline-flex !important; }
+  @media print {
+    body { background:#fff !important; color:#000 !important; }
+    .no-print { display:none !important; }
+    .glass, .card { border-color:#cbd5e1 !important; background:#fff !important; color:#000 !important; box-shadow:none !important; }
+    section { page-break-inside: avoid; }
+  }
+  /* Sliding underline tabs */
+  .tab-btn[aria-selected="true"] { color:#b47b2b; border-color:#b47b2b; font-weight: 600; }
+  /* Scrollbar */
+  ::-webkit-scrollbar { height:8px; width:8px; }
+  ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:8px; }
+  ::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
+</style>
+</head>
+<body class="font-sans antialiased">
+
+<!-- ===================== NAV ===================== -->
+<header class="sticky top-0 z-40 no-print backdrop-blur bg-surface/80 border-b border-line">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-rounded text-gold text-3xl">policy</span>
+      <div class="leading-tight">
+        <div class="font-display font-semibold text-sm sm:text-base">Forensic Due Diligence</div>
+        <div class="text-[10px] sm:text-xs text-mute -mt-0.5">Ecosistema de Terceros · v1.0</div>
+      </div>
+    </div>
+    <nav class="hidden md:flex items-center gap-1 ml-6 text-sm">
+      <a href="#resumen" class="px-3 py-1.5 rounded-md hover:bg-panel">Resumen</a>
+      <a href="#metodologia" class="px-3 py-1.5 rounded-md hover:bg-panel">Metodología</a>
+      <a href="#kpis" class="px-3 py-1.5 rounded-md hover:bg-panel">KPIs</a>
+      <a href="#hallazgos" class="px-3 py-1.5 rounded-md hover:bg-panel">Hallazgos</a>
+      <a href="#red" class="px-3 py-1.5 rounded-md hover:bg-panel">Red Forense</a>
+      <a href="#remediacion" class="px-3 py-1.5 rounded-md hover:bg-panel">Remediación</a>
+    </nav>
+    <div class="ml-auto flex items-center gap-2">
+      <button id="btn-reset" title="Reiniciar revisión" class="hidden sm:inline-flex items-center gap-1 text-xs text-mute hover:text-gold px-2 py-1.5 rounded-md hover:bg-panel">
+        <span class="material-symbols-rounded text-base">restart_alt</span>Reset
+      </button>
+      <button onclick="window.print()" class="inline-flex items-center gap-1 text-xs sm:text-sm bg-gold/10 text-gold border border-gold/30 hover:bg-gold/20 px-3 py-1.5 rounded-md">
+        <span class="material-symbols-rounded text-base">print</span>Exportar
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== HERO ===================== -->
+<section class="relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-10">
+    <div class="flex items-center gap-2 text-xs text-mute mb-4">
+      <span class="chip bg-gold/10 text-gold border border-gold/20"><span class="material-symbols-rounded text-sm">verified_user</span>Confidencial</span>
+      <span class="chip bg-info/10 text-info border border-info/20">KYC · Fraude · SoD</span>
+      <span class="chip bg-panel text-soft border border-line">MIPP</span>
+    </div>
+    <h1 class="font-display text-3xl sm:text-5xl md:text-6xl font-bold leading-tight">
+      Monitoreo de Riesgos y Auditoría <span class="grad-text">Forense</span> sobre el<br class="hidden sm:block"/> ecosistema de <span class="grad-text">terceros</span>
+    </h1>
+    <p class="mt-4 max-w-2xl text-soft text-sm sm:text-base">
+      Análisis cruzado de <b class="text-ink">Clientes</b>, <b class="text-ink">Proveedores</b> y <b class="text-ink">Empleados</b>
+      bajo un entorno sin MDM (Gestión de Datos Maestros). Detección de <i>dueños en la sombra</i> (shadow owners), conflictos SoD, registros genéricos y debilidades de integridad (IPE)
+      que materializan riesgos de KYC y fraude.
+    </p>
+    <div class="mt-6 flex flex-wrap items-center gap-3 text-xs text-mute">
+      <span class="inline-flex items-center gap-1"><span class="material-symbols-rounded text-base">calendar_month</span>Cierre de análisis · Junio 2026</span>
+      <span class="divider-dot"></span>
+      <span class="inline-flex items-center gap-1"><span class="material-symbols-rounded text-base">database</span>3 fuentes IPE</span>
+      <span class="divider-dot"></span>
+      <span class="inline-flex items-center gap-1"><span class="material-symbols-rounded text-base">gavel</span>Marco: ISO 37301 / COSO ERM / NIIF</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== RESUMEN EJECUTIVO ===================== -->
+<section id="resumen" class="max-w-7xl mx-auto px-4 sm:px-6 pb-6">
+  <div class="glass rounded-2xl p-5 sm:p-7 ring-gold">
+    <div class="flex items-start gap-3">
+      <span class="material-symbols-rounded text-gold text-3xl">flag</span>
+      <div>
+        <h2 class="font-display text-xl sm:text-2xl font-semibold">Resumen ejecutivo</h2>
+        <p class="text-soft text-sm mt-1">
+          Se identificaron <b class="text-gold">8 hallazgos</b> de los cuales <b class="text-danger">3 son de riesgo Alto</b> con materialización inmediata.
+          El cruce forense reveló <b class="text-ink">vinculación activa empleado–proveedor</b> en el área de Compras,
+          un caso de <b class="text-ink">empleado retirado operando como proveedor activo</b> y reutilización de un correo corporativo de Tesorería como contacto comercial de un tercero.
+          La debilidad transversal es la ausencia de un <b class="text-ink">Master Data Management (Gestión de Datos Maestros)</b> y de validaciones automáticas en el alta de terceros (KYC).
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== KPIs ===================== -->
+<section id="kpis" class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+    <div class="glass rounded-xl p-4">
+      <div class="text-mute text-xs flex items-center gap-1"><span class="material-symbols-rounded text-base">groups</span>Terceros analizados</div>
+      <div class="font-display text-2xl sm:text-3xl font-bold mt-1">~340</div>
+      <div class="text-[11px] text-mute mt-1">150 Clientes · 40 Proveedores · 59 Empleados</div>
+    </div>
+    <div class="glass rounded-xl p-4">
+      <div class="text-mute text-xs flex items-center gap-1"><span class="material-symbols-rounded text-base">crisis_alert</span>Hallazgos</div>
+      <div class="font-display text-2xl sm:text-3xl font-bold mt-1">8</div>
+      <div class="text-[11px] mt-1"><span class="text-danger">3 Altos</span> · <span class="text-warn">4 Medios</span> · <span class="text-info">1 Bajo</span></div>
+    </div>
+    <div class="glass rounded-xl p-4">
+      <div class="text-mute text-xs flex items-center gap-1"><span class="material-symbols-rounded text-base">link</span>Cruces inter-base</div>
+      <div class="font-display text-2xl sm:text-3xl font-bold mt-1">4</div>
+      <div class="text-[11px] text-mute mt-1">Empleado ↔ Proveedor ↔ Cliente</div>
+    </div>
+    <div class="glass rounded-xl p-4">
+      <div class="text-mute text-xs flex items-center gap-1"><span class="material-symbols-rounded text-base">do_not_disturb_on</span>Calidad IPE</div>
+      <div class="font-display text-2xl sm:text-3xl font-bold mt-1">62<span class="text-base text-mute">/100</span></div>
+      <div class="text-[11px] text-mute mt-1">Score compuesto (nulos+duplicados+genéricos)</div>
+    </div>
+  </div>
+
+  <!-- Gráficos -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
+    <div class="glass rounded-2xl p-5 lg:col-span-1">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-display font-semibold">Hallazgos por nivel de riesgo</h3>
+        <span class="material-symbols-rounded text-mute">donut_large</span>
+      </div>
+      <canvas id="chartRiesgo" height="220"></canvas>
+    </div>
+    <div class="glass rounded-2xl p-5 lg:col-span-1">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-display font-semibold">Hallazgos por fuente</h3>
+        <span class="material-symbols-rounded text-mute">stacked_bar_chart</span>
+      </div>
+      <canvas id="chartFuente" height="220"></canvas>
+    </div>
+    <div class="glass rounded-2xl p-5 lg:col-span-1">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-display font-semibold">Calidad de datos por dataset</h3>
+        <span class="material-symbols-rounded text-mute">radar</span>
+      </div>
+      <canvas id="chartCalidad" height="220"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== METODOLOGÍA ===================== -->
+<section id="metodologia" class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+  <div class="flex items-end justify-between mb-6">
+    <div>
+      <div class="text-xs text-gold uppercase tracking-widest mb-1">01 — Marco de trabajo</div>
+      <h2 class="font-display text-2xl sm:text-3xl font-bold">Metodología forense aplicada</h2>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <!-- Cards -->
+    <div class="glass rounded-2xl p-5"><div class="flex items-center gap-2 mb-2"><span class="material-symbols-rounded text-gold">flag</span><h3 class="font-display font-semibold">1. Planificación</h3></div><p class="text-sm text-soft">Foco en KYC, fraude y debida diligencia de terceros. Vector principal: conflictos de interés y <i>dueños en la sombra</i> (shadow owners).</p></div>
+    <div class="glass rounded-2xl p-5"><div class="flex items-center gap-2 mb-2"><span class="material-symbols-rounded text-gold">explore</span><h3 class="font-display font-semibold">2. Contexto</h3></div><p class="text-sm text-soft">Entorno sin MDM (Gestión de Datos Maestros). Alta probabilidad de duplicados, datos asimétricos, registros sintéticos e inactividad no controlada.</p></div>
+    <div class="glass rounded-2xl p-5"><div class="flex items-center gap-2 mb-2"><span class="material-symbols-rounded text-gold">database</span><h3 class="font-display font-semibold">3. Fuentes (IPE)</h3></div><p class="text-sm text-soft"><span class="font-mono text-xs">datos_clientes.csv</span> · <span class="font-mono text-xs">datos_proveedores.csv</span> · <span class="font-mono text-xs">datos_empleados.csv</span>. Verificación de integridad y exhaustividad.</p></div>
+    <div class="glass rounded-2xl p-5"><div class="flex items-center gap-2 mb-2"><span class="material-symbols-rounded text-gold">build</span><h3 class="font-display font-semibold">4. Procesamiento</h3></div><p class="text-sm text-soft">Validación IPE (nulos, genéricos, duplicados) + Cruce forense por <span class="font-mono text-xs">Documento</span>, correo y teléfono.</p></div>
+    <div class="glass rounded-2xl p-5"><div class="flex items-center gap-2 mb-2"><span class="material-symbols-rounded text-gold">summarize</span><h3 class="font-display font-semibold">5. Resultados</h3></div><p class="text-sm text-soft">Reporte MIPP (Criterio · Condición · Causa · Impacto) con clasificación de riesgo.</p></div>
+    <div class="glass rounded-2xl p-5"><div class="flex items-center gap-2 mb-2"><span class="material-symbols-rounded text-gold">handyman</span><h3 class="font-display font-semibold">6. Remediación</h3></div><p class="text-sm text-soft">Matriz integral: preventivos, correctivos, controles ITGC y reglas de negocio.</p></div>
+  </div>
+</section>
+
+<!-- ===================== HALLAZGOS ===================== -->
+<section id="hallazgos" class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-6 gap-3">
+    <div>
+      <div class="text-xs text-gold uppercase tracking-widest mb-1">02 — Resultados</div>
+      <h2 class="font-display text-2xl sm:text-3xl font-bold">Hallazgos MIPP</h2>
+      <p class="text-sm text-mute mt-1">Marque cada hallazgo como revisado; el estado se conserva en este dispositivo (localStorage).</p>
+    </div>
+    <div class="flex items-center gap-2 text-xs no-print" role="tablist">
+      <button data-filter="all" class="tab-btn px-3 py-1.5 border-b-2 border-transparent text-soft" aria-selected="true">Todos</button>
+      <button data-filter="Alto" class="tab-btn px-3 py-1.5 border-b-2 border-transparent text-soft" aria-selected="false">Alto</button>
+      <button data-filter="Medio" class="tab-btn px-3 py-1.5 border-b-2 border-transparent text-soft" aria-selected="false">Medio</button>
+      <button data-filter="Bajo" class="tab-btn px-3 py-1.5 border-b-2 border-transparent text-soft" aria-selected="false">Bajo</button>
+    </div>
+  </div>
+
+  <div id="findings-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+</section>
+
+<!-- ===================== RED FORENSE ===================== -->
+<section id="red" class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+  <div class="text-xs text-gold uppercase tracking-widest mb-1">03 — Cruce forense</div>
+  <h2 class="font-display text-2xl sm:text-3xl font-bold mb-2">Red de vinculaciones activas</h2>
+  <p class="text-sm text-mute mb-6 max-w-2xl">Visualización de las relaciones detectadas entre identidades del mismo individuo a través de los tres maestros.</p>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <!-- Nodo 1: Luis Gomez -->
+    <div class="glass rounded-2xl p-5 border-l-4 border-danger">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="material-symbols-rounded text-danger">priority_high</span>
+        <span class="chip bg-danger/15 text-danger border border-danger/40">Riesgo Alto · SoD</span>
+      </div>
+      <h3 class="font-display text-lg font-semibold">Luis Gómez · CC 1.020.304.050</h3>
+      <p class="text-xs text-mute mb-4">Misma persona con 3 roles activos simultáneos.</p>
+      <div class="relative">
+        <div class="grid grid-cols-3 gap-3">
+          <div class="rounded-xl p-3 bg-panel border border-line text-center">
+            <span class="material-symbols-rounded text-info">badge</span>
+            <div class="text-xs text-mute mt-1">Empleado</div>
+            <div class="text-sm font-semibold">E001 · Compras</div>
+            <div class="text-[10px] text-ok mt-1">Activo</div>
+          </div>
+          <div class="rounded-xl p-3 bg-panel border border-line text-center">
+            <span class="material-symbols-rounded text-info">person</span>
+            <div class="text-xs text-mute mt-1">Cliente</div>
+            <div class="text-sm font-semibold">C-002</div>
+            <div class="text-[10px] text-ok mt-1">Activo</div>
+          </div>
+          <div class="rounded-xl p-3 bg-panel border border-line text-center">
+            <span class="material-symbols-rounded text-danger">factory</span>
+            <div class="text-xs text-mute mt-1">Rep. Legal Proveedor</div>
+            <div class="text-sm font-semibold">Suministros C&amp;C SAS</div>
+            <div class="text-[10px] text-ok mt-1">Activo · OC 2026-05-01</div>
+          </div>
+        </div>
+        <div class="mt-3 text-xs text-soft bg-danger/10 border border-danger/30 rounded-lg p-2 flex items-start gap-2">
+          <span class="material-symbols-rounded text-danger text-base">warning</span>
+          Empleado del área de <b>Compras</b> es el representante legal de un proveedor activo con orden de compra reciente. Conflicto SoD inminente.
+        </div>
+      </div>
+    </div>
+
+    <!-- Nodo 2: Carlos Ruiz -->
+    <div class="glass rounded-2xl p-5 border-l-4 border-danger">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="material-symbols-rounded text-danger">priority_high</span>
+        <span class="chip bg-danger/15 text-danger border border-danger/40">Riesgo Alto · Ghost vendor</span>
+      </div>
+      <h3 class="font-display text-lg font-semibold">Carlos Ruiz · CC 5.566.778.899</h3>
+      <p class="text-xs text-mute mb-4">Ex-empleado de Logística vinculado como proveedor activo.</p>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="rounded-xl p-3 bg-panel border border-line text-center">
+          <span class="material-symbols-rounded text-mute">badge</span>
+          <div class="text-xs text-mute mt-1">Empleado</div>
+          <div class="text-sm font-semibold">E003 · Logística</div>
+          <div class="text-[10px] text-mute mt-1">Inactivo</div>
+        </div>
+        <div class="rounded-xl p-3 bg-panel border border-line text-center">
+          <span class="material-symbols-rounded text-danger">factory</span>
+          <div class="text-xs text-mute mt-1">Rep. Legal Proveedor</div>
+          <div class="text-sm font-semibold">Ruiz Distribuciones</div>
+          <div class="text-[10px] text-ok mt-1">Activo · OC 2025-11-10</div>
+        </div>
+      </div>
+      <div class="mt-3 text-xs text-soft bg-danger/10 border border-danger/30 rounded-lg p-2 flex items-start gap-2">
+        <span class="material-symbols-rounded text-danger text-base">warning</span>
+        Falta de control en <b>off-boarding</b>: persona desvinculada continúa transando con la entidad como tercero comercial.
+      </div>
+    </div>
+
+    <!-- Nodo 3: Ana Martinez -->
+    <div class="glass rounded-2xl p-5 border-l-4 border-warn">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="material-symbols-rounded text-warn">flag</span>
+        <span class="chip bg-warn/15 text-warn border border-warn/40">Riesgo Medio · Suplantación de canal</span>
+      </div>
+      <h3 class="font-display text-lg font-semibold">Ana Martínez · Tesorería</h3>
+      <p class="text-xs text-mute mb-4">Correo corporativo usado como contacto de proveedor externo.</p>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="rounded-xl p-3 bg-panel border border-line">
+          <div class="text-xs text-mute">Empleado E002</div>
+          <div class="text-sm font-mono">amartinez@empresa.com</div>
+        </div>
+        <div class="rounded-xl p-3 bg-panel border border-line">
+          <div class="text-xs text-mute">Proveedor 901222333 · Consultores Estratégicos</div>
+          <div class="text-sm font-mono text-warn">amartinez@empresa.com</div>
+        </div>
+      </div>
+      <div class="mt-3 text-xs text-soft bg-warn/10 border border-warn/30 rounded-lg p-2 flex items-start gap-2">
+        <span class="material-symbols-rounded text-warn text-base">mark_email_unread</span>
+        Notificaciones, OCs y pagos pueden ser interceptados por un empleado con acceso al canal del proveedor.
+      </div>
+    </div>
+
+    <!-- Nodo 4: NIT duplicado -->
+    <div class="glass rounded-2xl p-5 border-l-4 border-warn">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="material-symbols-rounded text-warn">content_copy</span>
+        <span class="chip bg-warn/15 text-warn border border-warn/40">Riesgo Medio · Duplicados MDM</span>
+      </div>
+      <h3 class="font-display text-lg font-semibold">NITs / IDs duplicados</h3>
+      <ul class="text-sm text-soft space-y-2 mt-2">
+        <li class="flex items-start gap-2"><span class="material-symbols-rounded text-warn text-base mt-0.5">circle</span><div><b>NIT 800.111.222</b> — registrado como cliente C-003 (Activo) y C-004 (Inactivo) con razón social variante.</div></li>
+        <li class="flex items-start gap-2"><span class="material-symbols-rounded text-warn text-base mt-0.5">circle</span><div><b>NIT 900.222.111</b> — Distribuidora Andina aparece dos veces (Activo / Inactivo) con OC más reciente 2026-05-28.</div></li>
+        <li class="flex items-start gap-2"><span class="material-symbols-rounded text-warn text-base mt-0.5">circle</span><div><b>ID_Empleado E003</b> — colisión de PK con dos documentos distintos (5566778899 y 53210148).</div></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== REMEDIACIÓN ===================== -->
+<section id="remediacion" class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+  <div class="text-xs text-gold uppercase tracking-widest mb-1">04 — Plan de acción</div>
+  <h2 class="font-display text-2xl sm:text-3xl font-bold mb-6">Matriz integral de remediación</h2>
+
+  <div class="overflow-x-auto rounded-2xl glass">
+    <table class="w-full text-sm min-w-[760px]">
+      <thead class="text-left text-mute text-xs uppercase tracking-wider">
+        <tr class="border-b border-line">
+          <th class="px-4 py-3">#</th>
+          <th class="px-4 py-3">Acción</th>
+          <th class="px-4 py-3">Tipo</th>
+          <th class="px-4 py-3">Categoría</th>
+          <th class="px-4 py-3">Responsable</th>
+          <th class="px-4 py-3">Plazo</th>
+        </tr>
+      </thead>
+      <tbody id="remTable"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="border-t border-line mt-10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 text-xs text-mute flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+    <div>
+      <div class="font-display text-soft text-sm">Forensic Due Diligence & Risk Monitoring Report</div>
+      <div>Generado para monitoreo de riesgos y auditoría interna · Uso confidencial</div>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="inline-flex items-center gap-1"><span class="material-symbols-rounded text-base">lock</span>Datos locales (localStorage)</span>
+      <span class="divider-dot"></span>
+      <span>© 2026</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ===================== DATA + JS ===================== -->
+<script>
+const FINDINGS = [
+  {
+    id: 'H-01',
+    titulo: 'Conflicto SoD — Empleado de Compras es Rep. Legal de proveedor activo',
+    riesgo: 'Alto',
+    fuente: 'Empleados ↔ Proveedores ↔ Clientes',
+    icon: 'gpp_bad',
+    criterio: 'ISO 37301 (Compliance) y COSO ERM: segregación de funciones entre quien autoriza compras y quien provee bienes/servicios. Política interna de Conflictos de Interés.',
+    condicion: 'Luis Gómez (CC 1.020.304.050) figura como empleado E001 del área de Compras (Activo), como cliente C-002 y como Representante Legal del proveedor 900.888.777 — Suministros C&C SAS (Activo, última OC 2026-05-01).',
+    causa: 'Inexistencia de un cruce automatizado entre maestros, ausencia de declaración obligatoria de conflictos de interés en el alta de terceros y de bloqueo por coincidencia de documento.',
+    impacto: 'Direccionamiento de compras, sobrecostos, fraude transaccional, exposición regulatoria (Ley anti-soborno) y deterioro reputacional. Probable materialización de pérdidas y observación de auditoría externa.'
+  },
+  {
+    id: 'H-02',
+    titulo: 'Ghost vendor — Ex-empleado activo como representante legal de proveedor',
+    riesgo: 'Alto',
+    fuente: 'Empleados ↔ Proveedores',
+    icon: 'person_off',
+    criterio: 'Procedimiento de off-boarding y revisión periódica del maestro de terceros (KYC continuo).',
+    condicion: 'Carlos Ruiz (CC 5.566.778.899) figura como empleado E003 de Logística en estado Inactivo, pero es Rep. Legal del proveedor 900.111.222 — Ruiz Distribuciones (Activo, OC 2025-11-10).',
+    causa: 'El proceso de baja del empleado no dispara una revisión cruzada de su vinculación como tercero comercial.',
+    impacto: 'Posible uso de información privilegiada post-empleo, fuga de información, fraude y litigios laborales/comerciales.'
+  },
+  {
+    id: 'H-03',
+    titulo: 'Suplantación de canal — Correo corporativo de Tesorería usado por proveedor',
+    riesgo: 'Alto',
+    fuente: 'Empleados ↔ Proveedores',
+    icon: 'mark_email_unread',
+    criterio: 'Política de uso de correo corporativo y controles anti-fraude en cuentas por pagar.',
+    condicion: 'El correo amartinez@empresa.com (empleada E002 — Ana Martínez, Tesorería) está registrado como Email_Contacto del proveedor 901.222.333 — Consultores Estratégicos LTDA.',
+    causa: 'Falta de validación de dominio de correo en el alta de proveedores y de regla que prohíba el uso de dominios corporativos como contacto de terceros.',
+    impacto: 'Riesgo de interceptación de OCs, cambios de cuenta bancaria fraudulentos (BEC/CEO fraud) y pagos a terceros indebidos.'
+  },
+  {
+    id: 'H-04',
+    titulo: 'Duplicados de NIT y razón social en maestros (falta de MDM)',
+    riesgo: 'Medio',
+    fuente: 'Clientes · Proveedores',
+    icon: 'content_copy',
+    criterio: 'Principio de unicidad del maestro de terceros y norma interna de calidad de datos.',
+    condicion: 'NIT 800.111.222 con dos registros de cliente (C-003 Activo / C-004 Inactivo, razón social variante). NIT 900.222.111 con dos registros de proveedor (Activo / Inactivo, fechas de OC distintas).',
+    causa: 'Ausencia de validación de duplicados al crear terceros y de proceso de homologación / merge controlado.',
+    impacto: 'Distorsión de reportes, doble pago, fraude por proveedor "espejo" y errores de conciliación NIIF (cuentas por cobrar/pagar).'
+  },
+  {
+    id: 'H-05',
+    titulo: 'Colisión de clave primaria en maestro de empleados',
+    riesgo: 'Medio',
+    fuente: 'Empleados',
+    icon: 'key_off',
+    criterio: 'Integridad referencial — la clave primaria ID_Empleado debe ser única.',
+    condicion: 'El identificador E003 aparece dos veces con documentos distintos (5566778899 y 53210148) y áreas diferentes (Logística / Operaciones).',
+    causa: 'Falta de constraint UNIQUE en la fuente o validación a nivel de aplicación. Codificación inconsistente (E001-E009 vs E0010+).',
+    impacto: 'Errores de nómina, asignación incorrecta de accesos, dificultad de trazabilidad en investigaciones forenses.'
+  },
+  {
+    id: 'H-06',
+    titulo: 'Registros genéricos / identificadores ficticios en clientes',
+    riesgo: 'Medio',
+    fuente: 'Clientes',
+    icon: 'block',
+    criterio: 'KYC — todo tercero debe estar plenamente identificado.',
+    condicion: 'Cliente C-000 "CONSUMIDOR FINAL" con NIT 999.999.999 y C-001 "CUANTIAS MENORES" con NIT 222.222.222 son usados como destino genérico de transacciones.',
+    causa: 'Uso operativo de cuentas comodín sin trazabilidad, sin tope de movimientos ni alerta de uso frecuente.',
+    impacto: 'Ocultamiento de operaciones individuales, riesgo LA/FT, debilidad ante requerimientos de la UIAF y de auditorías regulatorias.'
+  },
+  {
+    id: 'H-07',
+    titulo: 'Campos críticos nulos / "N/A" en maestro de proveedores',
+    riesgo: 'Medio',
+    fuente: 'Proveedores',
+    icon: 'help_outline',
+    criterio: 'Completitud mínima del expediente de tercero (Representante Legal, documento, contacto).',
+    condicion: 'Proveedor 900.555.444 "Logistica Nacional Express" sin Representante Legal, sin documento y sin email/teléfono. Más del 80% de los proveedores carecen de Email_Contacto válido.',
+    causa: 'Formulario de alta sin campos obligatorios y sin validación de formato; carga masiva sin control de calidad.',
+    impacto: 'Incumplimiento KYC, imposibilidad de notificaciones contractuales, riesgo legal y fiscal.'
+  },
+  {
+    id: 'H-08',
+    titulo: 'Inactividad no controlada — tercero activo sin operaciones',
+    riesgo: 'Bajo',
+    fuente: 'Proveedores',
+    icon: 'hourglass_disabled',
+    criterio: 'Política de dormancy — todo tercero sin movimientos por más de 12 meses debe ser bloqueado preventivamente.',
+    condicion: 'Registro duplicado de Distribuidora Andina (900.222.111) en estado Activo con última OC 2023-01-01 (más de 3 años).',
+    causa: 'Sin job programado de revisión de inactividad; sin alerta automática al dueño funcional.',
+    impacto: 'Superficie de ataque ampliada (cuentas dormidas), riesgo de reactivación fraudulenta.'
+  }
+];
+
+const REMEDIATION = [
+  ['R-01','Implementar cruce automatizado de documento entre Empleados↔Proveedores↔Clientes al alta y mensualmente.','Preventivo','ITGC · Integración','TI + Compliance','30 días'],
+  ['R-02','Bloquear creación de tercero cuando el documento coincida con un empleado activo, salvo aprobación dual.','Preventivo','Regla de Negocio','Compras + Compliance','30 días'],
+  ['R-03','Implantar MDM de terceros con clave única NIT/Doc y motor de deduplicación (fuzzy match razón social).','Correctivo','ITGC · Arquitectura','CIO','90 días'],
+  ['R-04','Disparar revisión cruzada al off-boarding del empleado: ¿figura como tercero?','Preventivo','Regla de Negocio','RR.HH. + Compras','60 días'],
+  ['R-05','Restringir uso de dominios corporativos como Email_Contacto de proveedores/clientes (regex bloqueante).','Preventivo','Regla de Negocio','TI + AP','15 días'],
+  ['R-06','Política de doble verificación (out-of-band) para cambios de cuenta bancaria de proveedores.','Preventivo','Regla de Negocio','Tesorería','30 días'],
+  ['R-07','Declaración anual obligatoria de Conflictos de Interés con afirmación digital firmada.','Preventivo','Compliance','Compliance + RR.HH.','Anual'],
+  ['R-08','Job de calidad de datos: detección de nulos, genéricos (99999999, 222222222) y secuencias sintéticas.','Detectivo','ITGC · DQ','TI / Analytics','45 días'],
+  ['R-09','Topes monetarios y de frecuencia a cuentas "CONSUMIDOR FINAL" / "CUANTIAS MENORES" con alerta a Compliance.','Correctivo','Regla de Negocio','Compliance','30 días'],
+  ['R-10','Bloqueo automático de terceros sin movimientos > 12 meses (dormancy) y workflow de reactivación.','Preventivo','Regla de Negocio + ITGC','TI + Compras','60 días'],
+  ['R-11','Campos obligatorios en alta de tercero: Rep. Legal, doc, email, teléfono — con validación de formato.','Preventivo','Regla de Negocio','TI + Compras','30 días'],
+  ['R-12','Constraint UNIQUE en ID_Empleado y normalización del formato (Eyyyy zero-padded).','Correctivo','ITGC · Base de datos','TI','15 días'],
+  ['R-13','Tablero ejecutivo mensual de KPIs de KYC y conflictos de interés en activo.','Monitoreo','Gobierno de datos','Compliance','60 días'],
+];
+
+// ============== Render hallazgos ==============
+const riesgoColor = {
+  Alto:  { bd: 'border-danger',  bg:'bg-danger/15',  tx:'text-danger',  ic:'gpp_bad' },
+  Medio: { bd: 'border-warn',    bg:'bg-warn/15',    tx:'text-warn',    ic:'flag' },
+  Bajo:  { bd: 'border-info',    bg:'bg-info/15',    tx:'text-info',    ic:'info' }
+};
+const grid = document.getElementById('findings-grid');
+
+const reviewedKey = 'forense-revisados-v1';
+const reviewed = new Set(JSON.parse(localStorage.getItem(reviewedKey) || '[]'));
+
+function persistReviewed() {
+  localStorage.setItem(reviewedKey, JSON.stringify([...reviewed]));
+}
+
+FINDINGS.forEach(f => {
+  const r = riesgoColor[f.riesgo];
+  const card = document.createElement('article');
+  card.className = `card glass rounded-2xl p-5 border-l-4 ${r.bd} ${reviewed.has(f.id) ? 'reviewed' : ''}`;
+  card.dataset.riesgo = f.riesgo;
+  card.dataset.id = f.id;
+  card.innerHTML = `
+    <div class="flex items-start justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-rounded ${r.tx}">${f.icon}</span>
+        <span class="chip ${r.bg} ${r.tx} border border-current/20">${f.riesgo}</span>
+        <span class="chip bg-panel text-soft border border-line font-mono">${f.id}</span>
+        <span class="review-stamp chip bg-ok/15 text-ok border border-ok/30" style="display:none">
+          <span class="material-symbols-rounded text-sm">check_circle</span>Revisado
+        </span>
+      </div>
+      <label class="text-[11px] text-mute flex items-center gap-1 cursor-pointer no-print select-none">
+        <input type="checkbox" class="rev-toggle accent-gold" ${reviewed.has(f.id)?'checked':''}/>
+        Marcar
+      </label>
+    </div>
+    <h3 class="font-display text-base sm:text-lg font-semibold mt-2">${f.titulo}</h3>
+    <div class="text-[11px] text-mute mt-0.5 flex items-center gap-1">
+      <span class="material-symbols-rounded text-base">hub</span>${f.fuente}
+    </div>
+    <dl class="mt-3 grid grid-cols-1 gap-2 text-sm">
+      <div class="rounded-lg bg-white border border-line p-3 shadow-sm">
+        <dt class="text-[11px] uppercase tracking-wider text-gold">Criterio</dt>
+        <dd class="text-soft mt-0.5">${f.criterio}</dd>
+      </div>
+      <div class="rounded-lg bg-white border border-line p-3 shadow-sm">
+        <dt class="text-[11px] uppercase tracking-wider text-gold">Condición</dt>
+        <dd class="text-soft mt-0.5">${f.condicion}</dd>
+      </div>
+      <div class="rounded-lg bg-white border border-line p-3 shadow-sm">
+        <dt class="text-[11px] uppercase tracking-wider text-gold">Causa</dt>
+        <dd class="text-soft mt-0.5">${f.causa}</dd>
+      </div>
+      <div class="rounded-lg bg-white border border-line p-3 shadow-sm">
+        <dt class="text-[11px] uppercase tracking-wider text-gold">Impacto</dt>
+        <dd class="text-soft mt-0.5">${f.impacto}</dd>
+      </div>
+    </dl>
+  `;
+  grid.appendChild(card);
+});
+
+// Toggle reviewed
+grid.addEventListener('change', (e) => {
+  const cb = e.target.closest('.rev-toggle');
+  if (!cb) return;
+  const card = cb.closest('.card');
+  const id = card.dataset.id;
+  if (cb.checked) { reviewed.add(id); card.classList.add('reviewed'); }
+  else { reviewed.delete(id); card.classList.remove('reviewed'); }
+  persistReviewed();
+});
+
+// Filtros
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    const f = btn.dataset.filter;
+    document.querySelectorAll('#findings-grid .card').forEach(c => {
+      c.style.display = (f==='all' || c.dataset.riesgo===f) ? '' : 'none';
+    });
+  });
+});
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+  if (!confirm('¿Restablecer el estado de revisión de los hallazgos?')) return;
+  reviewed.clear();
+  persistReviewed();
+  document.querySelectorAll('#findings-grid .card').forEach(c => {
+    c.classList.remove('reviewed');
+    const cb = c.querySelector('.rev-toggle'); if (cb) cb.checked = false;
+  });
+});
+
+// ============== Render tabla remediación ==============
+const tbody = document.getElementById('remTable');
+const tipoColor = {
+  'Preventivo':'bg-info/15 text-info border-info/30',
+  'Correctivo':'bg-gold/15 text-gold border-gold/30',
+  'Detectivo':'bg-warn/15 text-warn border-warn/30',
+  'Monitoreo':'bg-ok/15 text-ok border-ok/30'
+};
+REMEDIATION.forEach(row => {
+  const [id, acc, tipo, cat, resp, plazo] = row;
+  const tr = document.createElement('tr');
+  tr.className = 'border-b border-line/60 hover:bg-panel/40';
+  tr.innerHTML = `
+    <td class="px-4 py-3 font-mono text-xs text-mute">${id}</td>
+    <td class="px-4 py-3 text-soft">${acc}</td>
+    <td class="px-4 py-3"><span class="chip border ${tipoColor[tipo]||'bg-panel text-soft border-line'}">${tipo}</span></td>
+    <td class="px-4 py-3 text-mute text-xs">${cat}</td>
+    <td class="px-4 py-3 text-soft text-xs">${resp}</td>
+    <td class="px-4 py-3 text-xs"><span class="chip bg-panel text-soft border border-line"><span class="material-symbols-rounded text-sm">schedule</span>${plazo}</span></td>
+  `;
+  tbody.appendChild(tr);
+});
+
+// ============== Charts ==============
+Chart.defaults.color = '#64748b'; // mute color
+Chart.defaults.borderColor = '#e2e8f0'; // line color
+Chart.defaults.font.family = "'Inter', sans-serif";
+
+new Chart(document.getElementById('chartRiesgo'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Alto', 'Medio', 'Bajo'],
+    datasets: [{
+      data: [3, 4, 1],
+      backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6'],
+      borderColor: '#ffffff', borderWidth: 3
+    }]
+  },
+  options: {
+    cutout: '65%',
+    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 14 } } }
+  }
+});
+
+new Chart(document.getElementById('chartFuente'), {
+  type: 'bar',
+  data: {
+    labels: ['Clientes', 'Proveedores', 'Empleados', 'Cruces'],
+    datasets: [{
+      label: 'Hallazgos',
+      data: [2, 4, 1, 3],
+      backgroundColor: ['#3b82f6','#b47b2b','#10b981','#ef4444'],
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display:false } },
+      y: { beginAtZero: true, ticks: { stepSize: 1 } }
+    }
+  }
+});
+
+new Chart(document.getElementById('chartCalidad'), {
+  type: 'radar',
+  data: {
+    labels: ['Completitud', 'Unicidad', 'Validez', 'Consistencia', 'Vigencia'],
+    datasets: [
+      { label:'Clientes',    data:[80, 70, 75, 60, 78], borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,.15)' },
+      { label:'Proveedores', data:[35, 55, 45, 40, 60], borderColor:'#b47b2b', backgroundColor:'rgba(180,123,43,.18)' },
+      { label:'Empleados',   data:[85, 70, 80, 65, 85], borderColor:'#10b981', backgroundColor:'rgba(16,185,129,.15)' }
+    ]
+  },
+  options: {
+    plugins: { legend: { position: 'bottom', labels: { boxWidth:10, padding:12 } } },
+    scales: { r: { angleLines:{color:'#e2e8f0'}, grid:{color:'#e2e8f0'}, pointLabels:{color:'#64748b'}, ticks:{display:false}, suggestedMin:0, suggestedMax:100 } }
+  }
+});
+</script>
+</body>
+</html>

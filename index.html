@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Taller IA · HiPanda &amp; 4Hands Partners</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Libre Franklin"', "system-ui", "sans-serif"],
+            },
+            boxShadow: {
+              paper: "0 24px 80px rgba(45, 39, 32, 0.08)",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      :root {
+        /* Fondos */
+        --paper: oklch(0.985 0.005 85);
+        --paper-soft: oklch(0.969 0.007 82);
+        --paper-strong: oklch(0.944 0.008 82);
+
+        /* Texto */
+        --ink: oklch(0.252 0.012 252);
+        --muted: oklch(0.53 0.016 250);
+
+        /* Estructura */
+        --line: oklch(0.865 0.008 80);
+
+        /* Acento */
+        --accent: oklch(0.59 0.074 46);
+        --accent-soft: oklch(0.946 0.022 46);
+      }
+
+      /* ── Globales ── */
+      html {
+        scroll-behavior: smooth;
+        font-family: "Libre Franklin", system-ui, sans-serif;
+      }
+
+      body {
+        background:
+          radial-gradient(
+            circle at top left,
+            oklch(0.96 0.012 50) 0,
+            transparent 28%
+          ),
+          radial-gradient(
+            circle at top right,
+            oklch(0.958 0.012 235) 0,
+            transparent 30%
+          ),
+          linear-gradient(180deg, var(--paper) 0%, oklch(0.978 0.006 84) 100%);
+        color: var(--ink);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* ── Tipografía ── */
+      .kicker {
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-size: 0.73rem;
+        font-weight: 700;
+      }
+
+      .section-title {
+        line-height: 1.02;
+        letter-spacing: -0.04em;
+      }
+
+      .measure {
+        max-width: 72ch;
+      }
+
+      /* ── Contract shell ── */
+      .contract-shell::before {
+        content: "";
+        display: block;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          color-mix(in oklab, var(--accent) 95%, transparent),
+          color-mix(in oklab, var(--accent) 30%, transparent)
+        );
+        margin-bottom: 1.25rem;
+        border-radius: 999px;
+      }
+
+      /* ── Flow index ── */
+      .flow-index {
+        width: 2.2rem;
+        height: 2.2rem;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: color-mix(in oklab, var(--paper) 84%, var(--accent-soft));
+        color: var(--ink);
+        font-size: 0.85rem;
+        font-weight: 700;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          background 0.25s ease,
+          border-color 0.25s ease;
+      }
+
+      /* ── Day card ── */
+      .day-card {
+        transition:
+          transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+          box-shadow 0.3s ease;
+      }
+      .day-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 24px 80px rgba(45, 39, 32, 0.1);
+      }
+      .day-card:hover .flow-index {
+        background: color-mix(in oklab, var(--accent-soft) 80%, var(--paper));
+        border-color: var(--accent);
+      }
+
+      /* ── CTA button ── */
+      .cta-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: var(--ink);
+        transition:
+          color 0.2s ease,
+          gap 0.2s ease;
+      }
+      .day-card:hover .cta-link {
+        color: var(--accent);
+        gap: 0.65rem;
+      }
+      .cta-arrow {
+        transition: transform 0.2s ease;
+      }
+      .day-card:hover .cta-arrow {
+        transform: translateX(3px);
+      }
+
+      /* ── Stagger animations ── */
+      @keyframes fadeInUp {
+        0% {
+          opacity: 0;
+          transform: translateY(24px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animate-in {
+        animation: fadeInUp 0.55s cubic-bezier(0.25, 1, 0.5, 1) both;
+      }
+
+      /* ── Accent underline on hover ── */
+      .hover-accent {
+        transition: color 0.2s ease;
+      }
+      .hover-accent:hover {
+        color: color-mix(in oklab, var(--accent) 85%, var(--ink));
+      }
+    </style>
+  </head>
+  <body class="antialiased">
+    <!-- ═══════════════════════════════════════════════════════
+       HERO
+  ═══════════════════════════════════════════════════════ -->
+    <main class="mx-auto max-w-7xl px-5 pb-16 pt-6 sm:px-8 lg:px-10 lg:pt-10">
+      <section
+        class="grid gap-10 lg:grid-cols-[minmax(0,1.35fr)_minmax(19rem,0.7fr)] lg:gap-14 items-start"
+      >
+        <!-- Columna izquierda: texto -->
+        <div class="animate-in" style="animation-delay: 0s">
+          <p class="kicker text-[var(--accent)] mb-4">Taller · Mayo 2026</p>
+
+          <h1
+            class="font-extrabold text-5xl sm:text-6xl lg:text-[4.6rem] text-[var(--ink)] leading-none section-title mb-5 max-w-[16ch]"
+          >
+            Inteligencia Artificial Aplicada
+          </h1>
+
+          <p
+            class="text-lg sm:text-xl text-[var(--muted)] measure leading-relaxed mb-8"
+          >
+            Tres sesiones prácticas para transformar procesos administrativos,
+            contables y financieros con herramientas de IA. Sin tecnicismos, sin
+            humo: aplicaciones directas que podés usar desde el primer día.
+          </p>
+
+          <p class="text-sm text-[var(--muted)]">
+            Dictado por
+            <strong class="text-[var(--ink)]">Juan David Jaramillo</strong>
+            <span class="mx-2 text-[var(--line)]">·</span>
+            <span class="hover-accent">
+              <a
+                href="https://hipanda.io"
+                target="_blank"
+                rel="noopener noreferrer"
+                >HiPanda.io</a
+              >
+            </span>
+          </p>
+        </div>
+
+        <!-- Columna derecha: cheat sheet destacado -->
+        <div
+          class="animate-in contract-shell bg-white rounded-[2rem] shadow-paper border border-[var(--line)] p-6 sm:p-7 lg:sticky lg:top-10"
+          style="animation-delay: 0.1s"
+        >
+          <p class="kicker text-[var(--accent)] mb-3">Recurso</p>
+          <h2
+            class="font-extrabold text-2xl sm:text-3xl text-[var(--ink)] leading-tight section-title mb-3"
+          >
+            Cheat Sheet
+          </h2>
+          <p class="text-sm text-[var(--muted)] leading-relaxed mb-5">
+            Palabras clave y fragmentos listos para copiar a tu IA favorita.
+            Atajos prácticos para cada módulo del taller.
+          </p>
+          <a
+            href="cheats/index.html"
+            class="inline-flex items-center gap-2 rounded-full bg-[var(--accent)] text-white px-5 py-2.5 text-sm font-bold transition-colors duration-200 hover:opacity-90"
+          >
+            Ver Cheat Sheet
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
+              />
+            </svg>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════
+       SESIONES
+  ═══════════════════════════════════════════════════════ -->
+    <section class="mx-auto max-w-7xl px-5 pb-20 sm:px-8 lg:px-10">
+      <div class="mb-8">
+        <p class="kicker text-[var(--muted)] mb-2">Sesiones</p>
+        <h2
+          class="font-extrabold text-3xl sm:text-4xl text-[var(--ink)] section-title"
+        >
+          Los tres días del taller
+        </h2>
+      </div>
+
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <!-- ─── DÍA 1 ─── -->
+        <a
+          href="dia1/index.html"
+          class="day-card contract-shell group block bg-white rounded-[1.75rem] shadow-paper border border-[var(--line)] p-6 no-underline animate-in"
+          style="animation-delay: 0.15s"
+        >
+          <div class="flex items-start justify-between mb-5">
+            <div class="flex items-center gap-3">
+              <span class="flow-index shrink-0">1</span>
+              <div>
+                <p class="kicker text-[var(--accent)] mb-0.5">Día 1</p>
+                <h3
+                  class="font-extrabold text-xl text-[var(--ink)] leading-snug"
+                >
+                  Taller IA HiPanda &amp; 4Hands
+                </h3>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-sm text-[var(--muted)] leading-relaxed measure mb-6">
+            Introducción al taller, fundamentos de IA generativa y primeras
+            herramientas para el entorno administrativo.
+          </p>
+
+          <span class="cta-link">
+            Ver sesión
+            <svg
+              class="cta-arrow w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
+              />
+            </svg>
+          </span>
+        </a>
+
+        <!-- ─── DÍA 2 ─── -->
+        <a
+          href="dia2/index.html"
+          class="day-card contract-shell group block bg-white rounded-[1.75rem] shadow-paper border border-[var(--line)] p-6 no-underline animate-in"
+          style="animation-delay: 0.25s"
+        >
+          <div class="flex items-start justify-between mb-5">
+            <div class="flex items-center gap-3">
+              <span class="flow-index shrink-0">2</span>
+              <div>
+                <p class="kicker text-[var(--accent)] mb-0.5">Día 2</p>
+                <h3
+                  class="font-extrabold text-xl text-[var(--ink)] leading-snug"
+                >
+                  Superpoderes de Desarrollador
+                </h3>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-sm text-[var(--muted)] leading-relaxed measure mb-6">
+            Herramientas, automatizaciones y cómo pensar como desarrollador para
+            potenciar tus procesos administrativos con IA.
+          </p>
+
+          <span class="cta-link">
+            Ver sesión
+            <svg
+              class="cta-arrow w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
+              />
+            </svg>
+          </span>
+        </a>
+
+        <!-- ─── DÍA 3 ─── -->
+        <a
+          href="dia3/index.html"
+          class="day-card contract-shell group block bg-white rounded-[1.75rem] shadow-paper border border-[var(--line)] p-6 no-underline animate-in"
+          style="animation-delay: 0.35s"
+        >
+          <div class="flex items-start justify-between mb-5">
+            <div class="flex items-center gap-3">
+              <span class="flow-index shrink-0">3</span>
+              <div>
+                <p class="kicker text-[var(--accent)] mb-0.5">Día 3</p>
+                <h3
+                  class="font-extrabold text-xl text-[var(--ink)] leading-snug"
+                >
+                  Gestionar con datos e IA
+                </h3>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-sm text-[var(--muted)] leading-relaxed measure mb-6">
+            Aplicaciones prácticas: análisis de datos, casos de uso en
+            contabilidad y finanzas, y cierre del taller con próximos pasos.
+          </p>
+
+          <span class="cta-link">
+            Ver sesión
+            <svg
+              class="cta-arrow w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
+              />
+            </svg>
+          </span>
+        </a>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════════════════════ -->
+    <footer class="border-t border-[var(--line)] bg-white">
+      <div class="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
+        <div
+          class="flex flex-col sm:flex-row items-center justify-between gap-6"
+        >
+          <div class="text-center sm:text-left">
+            <p class="font-extrabold text-lg text-[var(--ink)] tracking-tight">
+              HiPanda<span class="text-[var(--accent)]">.</span>io
+            </p>
+            <p class="text-xs text-[var(--muted)] mt-1">
+              Taller IA · Mayo 2026
+            </p>
+          </div>
+
+          <div
+            class="flex flex-col items-center sm:items-end gap-2 text-center sm:text-right"
+          >
+            <p class="text-sm text-[var(--ink)] font-semibold">
+              Juan David Jaramillo &amp; Yuly Jaramillo
+            </p>
+            <p class="text-xs text-[var(--muted)]">4Hands Partners</p>
+            <div class="flex gap-2 mt-1">
+              <span class="w-2 h-2 rounded-full bg-[var(--accent)]"></span>
+              <span class="w-2 h-2 rounded-full bg-[var(--muted)]/30"></span>
+              <span class="w-2 h-2 rounded-full bg-[var(--ink)]/20"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

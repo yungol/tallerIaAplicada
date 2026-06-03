@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taller Práctico S.Y.M.B.I.O.S - Vinculación de Terceros</title>
+    <!-- Modern Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <style>
+        :root {
+            /* Colores Principales extraídos del diseño base */
+            --nr001-a: #F18446; /* Naranja intenso */
+            --nr025-t: #FEDB9B; /* Mágico suroeste */
+            --az087-a: #093E5E; /* Morazul */
+            --ne287-a: #1c1c1c; /* Paisaje nocturno */
+            --bg-body: #FBF3E4; /* Jengibre dulce */
+            --bg-surface: #ffffff;
+            
+            /* Gradient Colors for Modern UI */
+            --brand-blue: #0ea5e9;
+            --brand-green: #10b981;
+            --brand-orange: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--ne287-a);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            min-height: 100vh;
+            background: var(--bg-surface);
+            position: relative;
+            border-top: 8px solid var(--nr001-a);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            padding: 30px 50px 100px 50px;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow: visible;
+        }
+
+        h1, h2 { color: var(--az087-a); }
+        h1 { font-size: 2.2em; margin-bottom: 10px; }
+        h2 { font-size: 1.8em; margin-bottom: 20px; border-bottom: 2px solid var(--nr025-t); padding-bottom: 10px; }
+        h3 { color: var(--nr001-a); font-size: 1.4em; margin-top: 20px; margin-bottom: 10px; }
+        p { font-size: 1.1em; line-height: 1.6; margin-bottom: 16px; color: #4B4B4C; }
+        
+        .tag {
+            background-color: var(--nr001-a);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75em;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        
+        .table-custom th {
+            background: rgba(9, 62, 94, 0.05);
+            padding: 6px;
+            border-bottom: 1px solid #cbd5e1;
+            text-align: left;
+            color: var(--az087-a);
+            font-weight: 600;
+        }
+
+        .table-custom td {
+            padding: 6px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #334155;
+        }
+
+        /* Flowchart steps */
+        .step-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-bubble {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border-radius: 30px;
+            padding: 4px 14px 4px 4px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            min-width: max-content;
+        }
+
+        .step-number {
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85em;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .step-desc {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            border: 1px dashed #94a3b8;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 0.7em;
+            font-weight: 500;
+            color: #475569;
+            text-align: center;
+            line-height: 1.3;
+        }
+        
+        /* Flex rows */
+        .flex-row {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 20px;
+        }
+
+        .col-card {
+            flex: 1;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="presentation-container">
+        
+        <div class="slide">
+            
+            <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: left; overflow-y: auto;">
+                <span class="tag" style="background-color: var(--brand-green); font-size: 1.2em; margin-bottom: 20px; flex-shrink: 0; text-align: center;">Taller Práctico - Compliance</span>
+                <h2 style="border:none; font-size: 1.8em; margin-bottom: 10px; flex-shrink: 0; text-align: center; color: var(--az087-a);">Análisis y evaluación en Vinculación de Terceros</h2>
+                <p style="font-size: 0.9em; text-align: center; color: #64748b; max-width: 800px; margin-bottom: 20px;">Aplicación del método de análisis para detectar riesgos, fraude, conflictos de interés y brechas de Calidad de Datos (KYC/KYE) en estructuras independientes y desarticuladas.</p>
+                
+                <!-- Flowchart Metodología -->
+                <div style="display: flex; justify-content: center; align-items: flex-start; gap: 8px; margin-bottom: 25px; margin-top: 10px; width: 100%; max-width: 1200px; flex-wrap: wrap;">
+                    <!-- Paso 1 -->
+                    <div class="step-container">
+                        <div class="step-bubble" style="border: 1px solid #cbd5e1;">
+                            <div class="step-number" style="background: var(--az087-a);">1</div>
+                            <span style="font-size: 0.85em; font-weight: 600; color: var(--az087-a);">Planificación</span>
+                        </div>
+                        <div class="step-desc" style="width: 135px;">Riesgo KYC & Fraude<br>Due Diligence Terceros</div>
+                    </div>
+                    <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1.2em; margin-top: 6px;">east</span>
+
+                    <!-- Paso 2 -->
+                    <div class="step-container">
+                        <div class="step-bubble" style="border: 1px solid #cbd5e1;">
+                            <div class="step-number" style="background: var(--az087-a);">2</div>
+                            <span style="font-size: 0.85em; font-weight: 600; color: var(--az087-a);">Contexto</span>
+                        </div>
+                        <div class="step-desc" style="width: 130px;">Datos dispersos, activos vs inactivos, genéricos.</div>
+                    </div>
+                    <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1.2em; margin-top: 6px;">east</span>
+
+                    <!-- Paso 3 -->
+                    <div class="step-container">
+                        <div class="step-bubble" style="border: 1px solid #cbd5e1;">
+                            <div class="step-number" style="background: var(--az087-a);">3</div>
+                            <span style="font-size: 0.85em; font-weight: 600; color: var(--az087-a);">Fuentes Info.</span>
+                        </div>
+                        <div class="step-desc" style="width: 130px;">Clientes, Proveedores y Empleados (ERP/HR)</div>
+                    </div>
+                    <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1.2em; margin-top: 6px;">east</span>
+
+                    <!-- Paso 4 -->
+                    <div class="step-container">
+                        <div class="step-bubble" style="border: 1px solid var(--brand-green); box-shadow: 0 4px 6px rgba(16,185,129,0.15);">
+                            <div class="step-number" style="background: var(--brand-green);">4</div>
+                            <span style="font-size: 0.85em; font-weight: 600; color: var(--brand-green);">Procesamiento</span>
+                        </div>
+                        <div class="step-desc" style="width: 120px; border-color: #34d399; background: #f0fdf4; color: #065f46;">Prompt Forense IA<br>Cruce Multidimensional</div>
+                    </div>
+                    <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1.2em; margin-top: 6px;">east</span>
+
+                    <!-- Paso 5 -->
+                    <div class="step-container">
+                        <div class="step-bubble" style="border: 1px solid var(--brand-green); box-shadow: 0 4px 6px rgba(16,185,129,0.15);">
+                            <div class="step-number" style="background: var(--brand-green);">5</div>
+                            <span style="font-size: 0.85em; font-weight: 600; color: var(--brand-green);">Resultados</span>
+                        </div>
+                        <div class="step-desc" style="width: 110px; border-color: #34d399; background: #f0fdf4; color: #065f46;">Match y MIPP</div>
+                    </div>
+                    <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1.2em; margin-top: 6px;">east</span>
+
+                    <!-- Paso 6 -->
+                    <div class="step-container">
+                        <div class="step-bubble" style="border: 1px solid var(--nr001-a); box-shadow: 0 4px 6px rgba(241,132,70,0.15);">
+                            <div class="step-number" style="background: var(--nr001-a);">6</div>
+                            <span style="font-size: 0.85em; font-weight: 600; color: var(--nr001-a);">Remediación</span>
+                        </div>
+                        <div class="step-desc" style="width: 120px; border-color: #fb923c; background: #fff7ed; color: #9a3412;">MDM & Controles</div>
+                    </div>
+                </div>
+
+                <!-- First Row: Planificación y Fuentes -->
+                <div class="flex-row">
+                    
+                    <!-- Columna: Planificación -->
+                    <div class="col-card" style="flex: 0.9;">
+                        <h3 style="color: var(--nr001-a); font-size: 1.1em; margin-top: 0; display: flex; align-items: center; gap: 5px;"><span class="material-symbols-outlined" style="font-size: 1.1em;">checklist</span> 1 y 2. Planificación y Contexto</h3>
+                        <p style="font-size: 0.8em; color: #64748b; margin-bottom: 10px; line-height: 1.4;">El objetivo es evaluar el gobierno de datos maestros (MDM) de terceros. Debido a la carencia de repositorios centralizados, los datos son asimétricos, de recolección deficiente o desactualizados.</p>
+
+                        <h4 style="font-size: 0.85em; color: var(--az087-a); margin-bottom: 6px;">Matriz de Riesgos de Terceros</h4>
+                        <table class="table-custom">
+                            <tr><th>Cód.</th><th>Riesgo / Cruce</th><th>Nivel</th></tr>
+                            <tr><td style="font-weight:bold;">T01</td><td>Empleado activo = Proveedor activo (Conflicto de interés)</td><td style="color:#ef4444; font-weight:bold;">ALTO</td></tr>
+                            <tr><td style="font-weight:bold;">T02</td><td>ID/NIT compartido entre bases distintas</td><td style="color:#ef4444; font-weight:bold;">ALTO</td></tr>
+                            <tr><td style="font-weight:bold;">T03</td><td>Registros duplicados (mismo tercero, varios IDs)</td><td style="color:#f59e0b; font-weight:bold;">MED</td></tr>
+                            <tr><td style="font-weight:bold;">T04</td><td>Cliente genérico / datos incompletos (KYC)</td><td style="color:#f59e0b; font-weight:bold;">MED</td></tr>
+                            <tr><td style="font-weight:bold;">T05</td><td>Registro inactivo con movimiento reciente</td><td style="color:#f59e0b; font-weight:bold;">MED</td></tr>
+                            <tr><td style="font-weight:bold;">T06</td><td>Datos inconsistentes entre fuentes (mismo ID, distinto nombre)</td><td style="color:#ef4444; font-weight:bold;">ALTO</td></tr>
+                        </table>
+
+                        <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px; border-radius: 4px; font-size: 0.78em; color: #92400e; line-height: 1.4;">
+                            <strong>Validación IPE previa:</strong> El Prompt debe exigir a la IA confirmar integridad (totales de registros por base), exactitud (campos clave no nulos) y unicidad (sin duplicados) antes de ejecutar los cruces forenses.
+                        </div>
+                    </div>
+
+                    <!-- Columna: Datos (Contexto y Fuentes) -->
+                    <div class="col-card" style="flex: 1.2;">
+                        <h3 style="color: var(--az087-a); font-size: 1.1em; margin-top: 0;">3. Fuentes de Información (Archivos)</h3>
+                        
+                        <p style="font-size: 0.8em; color: #64748b; margin-bottom: 15px; line-height: 1.4;">Para esta auditoría, el sistema ha sido alimentado con los extractos completos de los sistemas origen. Se evidencian datos sucios, duplicidades y campos nulos propios de un ambiente sin gobierno cruzado (ej. no hay cruces pre-existentes entre HR y Financiero).</p>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                            <!-- Botón y preview Clientes -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <strong style="font-size: 0.8em; color: var(--brand-green); display: flex; align-items: center; gap: 5px;"><span class="material-symbols-outlined" style="font-size: 1.2em;">storefront</span> datos_clientes.csv</strong>
+                                    <a href="datos_clientes.csv" download style="background: white; border: 1px solid #cbd5e1; color: #475569; padding: 4px 10px; border-radius: 4px; text-decoration: none; font-size: 0.75em; font-weight: bold; display: flex; align-items: center; gap: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);"><span class="material-symbols-outlined" style="font-size: 1.1em;">download</span> Descargar</a>
+                                </div>
+                                <div style="font-size: 0.7em; color: #64748b; font-family: monospace;">150 registros | Base de CRM. Alta duplicidad, genéricos (CONSUMIDOR FINAL) y correos nulos.</div>
+                            </div>
+                            
+                            <!-- Botón y preview Proveedores -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <strong style="font-size: 0.8em; color: var(--brand-blue); display: flex; align-items: center; gap: 5px;"><span class="material-symbols-outlined" style="font-size: 1.2em;">local_shipping</span> datos_proveedores.csv</strong>
+                                    <a href="datos_proveedores.csv" download style="background: white; border: 1px solid #cbd5e1; color: #475569; padding: 4px 10px; border-radius: 4px; text-decoration: none; font-size: 0.75em; font-weight: bold; display: flex; align-items: center; gap: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);"><span class="material-symbols-outlined" style="font-size: 1.1em;">download</span> Descargar</a>
+                                </div>
+                                <div style="font-size: 0.7em; color: #64748b; font-family: monospace;">40 registros | Base ERP. Contiene campos vacíos en Representante Legal, registros inactivos con OCs recientes.</div>
+                            </div>
+
+                            <!-- Botón y preview Empleados -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <strong style="font-size: 0.8em; color: var(--nr001-a); display: flex; align-items: center; gap: 5px;"><span class="material-symbols-outlined" style="font-size: 1.2em;">badge</span> datos_empleados.csv</strong>
+                                    <a href="datos_empleados.csv" download style="background: white; border: 1px solid #cbd5e1; color: #475569; padding: 4px 10px; border-radius: 4px; text-decoration: none; font-size: 0.75em; font-weight: bold; display: flex; align-items: center; gap: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);"><span class="material-symbols-outlined" style="font-size: 1.1em;">download</span> Descargar</a>
+                                </div>
+                                <div style="font-size: 0.7em; color: #64748b; font-family: monospace;">60 registros | Nómina y HCM. Documentos que coinciden sorpresivamente con las otras bases (riesgo elevado).</div>
+                            </div>
+                        </div>
+                        
+                        <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px; border-radius: 4px; font-size: 0.78em; color: #92400e; line-height: 1.4;">
+                            <strong>Dinámica del Taller:</strong> Descarga los 3 archivos CSV. Configura tu Agente IA con el prompt propuesto adjuntando dichos CSVs. El objetivo es que la IA revele de manera autónoma los conflictos de interés (shadow ownership), facturaciones extrañas y la debilidad en KYC.
+                        </div>
+                    </div>
+
+                    <!-- Columna: Prompt -->
+                    <div class="col-card" style="flex: 1.2;">
+                        <h3 style="color: var(--brand-green); font-size: 1.1em; margin-top: 0;"><span class="material-symbols-outlined" style="vertical-align: text-bottom; font-size: 1.2em;">smart_toy</span> 4. Procesamiento (Prompt IA)</h3>
+                        <div style="background-color: #f8fafc; border-left: 4px solid var(--brand-green); padding: 12px; border-radius: 6px; font-size: 0.75em; line-height: 1.4;">
+                            "Actúa como un Auditor Forense y de Riesgos experto en Análisis de Datos (Due Diligence). Realiza una auditoría sobre el ecosistema de terceros ejecutando la siguiente estructura metodológica:<br><br>
+                            <strong>1. Planificación:</strong> Enfoca el análisis en riesgos de KYC, Fraude y debida diligencia de terceros.<br>
+                            <strong>2. Contexto:</strong> Considera un entorno sin gobierno de datos unificado (MDM), con probabilidad de datos anómalos, asimétricos e inactividad no controlada.<br>
+                            <strong>3. Fuentes de información:</strong> Emplea exhaustivamente las 3 fuentes adjuntas (Clientes, Proveedores y Empleados).<br>
+                            <strong>4. Procesamiento:</strong><br>
+                            &nbsp;&nbsp;&bull; <em>Validación IPE:</em> Analiza la integridad de datos, identificando valores nulos y registros genéricos (ej.'99999999').<br>
+                            &nbsp;&nbsp;&bull; <em>Cruce Forense:</em> Cruza identificaciones y datos de contacto inter-bases para hallar relaciones activas que vulneren la independencia comercial (Shadow Owners / Conflicto SoD).<br>
+                            <strong>5. Resultados esperados:</strong> Genera un reporte estructurado de Hallazgos en formato MIPP (Criterio, Condición, Causa, Impacto). Clasifica claramente los Riesgos Altos y Medios.<br>
+                            <strong>6. Remediación:</strong> Presenta una matriz integral de acciones preventivas, correctivas, controles de TI (ITGC) y reglas de negocio requeridas.<br><br>
+                            <strong>7. Formato de Salida:</strong> Creá una presentación en <strong>HTML autocontenido</strong>, usando <strong>Tailwind CSS</strong> con enfoque <strong>mobile first</strong>. Aplicá principios sólidos de <strong>UX/UI</strong> para lograr una interfaz clara, profesional y visualmente atractiva. Si necesito datos persistentes en el equipo del usuario, guardalos con <strong>localStorage</strong>. Usá tipografías de <strong>Google Fonts</strong> y reemplazá cualquier emoticón por <strong>Material Icons</strong> o <strong>Material Symbols</strong>. Si hay datos, incorporá gráficos con <strong>Chart.js</strong>. <strong>Sorprendeme</strong> con una propuesta creativa, elegante, corporativa y fácil de compartir."
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Second Row: Resultados y Remediación -->
+                <div class="flex-row" style="margin-bottom: 60px;">
+                    
+                    <!-- Resultados -->
+                    <div class="col-card" style="border-top: 4px solid var(--az087-a);">
+                        <h3 style="color: var(--az087-a); font-size: 1.1em; margin-top: 0; display: flex; align-items: center; gap: 5px;"><span class="material-symbols-outlined" style="font-size: 1.2em;">warning</span> 5. Resultados (Simulados MIPP)</h3>
+                        <div style="font-size: 0.8em; line-height: 1.4; color: #334155; margin-bottom: 6px;">
+                            <strong>1. Conflicto Extremo (Fraude y Shadow Ownership):</strong>
+                        </div>
+                        <ul style="font-size: 0.8em; padding-left: 15px; line-height: 1.4; color: #334155; margin-bottom: 10px;">
+                            <li style="margin-bottom: 4px;"><strong>Criterio:</strong> Prohibición estricta de vínculos comerciales con empleados o correos corporativos usados en proveedores.</li>
+                            <li style="margin-bottom: 4px;"><strong>Condición:</strong> Luis Gómez (Compras) es visible como Rep. Legal del proveedor activo "Suministros C&C SAS". Adicionalmente, el proveedor "Consultores Estratégicos LTDA" tiene registrado el email/teléfono que coincide exactamente con Ana Martínez (Tesorería), tipificando un Shadow Owner invisible en sistema pero latente en los datos (Riesgo T01/T02).</li>
+                            <li style="margin-bottom: 4px;"><strong>Causa:</strong> Falta de controles de Onboarding (API vs Nómina) para la debida diligencia ampliada.</li>
+                            <li style="margin-bottom: 0;"><strong>Impacto:</strong> <span style="color: #ef4444; font-weight: bold;">Riesgo materializado de auto-contratación, desvío de fondos y evasión de filtros operativos.</span></li>
+                        </ul>
+                        <div style="font-size: 0.8em; line-height: 1.4; color: #334155; margin-bottom: 6px;">
+                            <strong>2. Riesgo Operativo y KYC (Calidad de Datos):</strong>
+                        </div>
+                        <ul style="font-size: 0.8em; padding-left: 15px; line-height: 1.4; color: #334155; margin-bottom: 0;">
+                            <li style="margin-bottom: 4px;">Uso indebido de comodines ("CONSUMIDOR FINAL", "CUANTIAS MENORES") que rompen por completo la trazabilidad Sarlaft/KYC (T04).</li>
+                            <li style="margin-bottom: 4px;">Alta fragmentación y duplicidad: la empresa Ejemplo SAS está matriculada en distintas versiones, con distintos estados, dificultando el control de crédito (T03).</li>
+                            <li style="margin-bottom: 0;">Fallas graves en ERP: Proveedor "Distribuidora Andina SAS" Inactivo realizando cobros y falta de Representantes Legales en proveedores vigentes (T05/T06).</li>
+                        </ul>
+                    </div>
+
+                    <!-- Remediación -->
+                    <div class="col-card" style="border-top: 4px solid var(--nr001-a);">
+                        <h3 style="color: var(--nr001-a); font-size: 1.1em; margin-top: 0; display: flex; align-items: center; gap: 5px;"><span class="material-symbols-outlined" style="font-size: 1.2em;">build</span> 6. Remediación Segura</h3>
+                        <ul style="font-size: 0.8em; padding-left: 15px; line-height: 1.4; color: #334155; margin-bottom: 0;">
+                            <li style="margin-bottom: 5px;"><strong>Correctivas Temporales:</strong> Bloquear en el ERP al proveedor "Suministros C&C". Lanzar proceso de investigación forense sobre las Órdenes de Compra y Pagos creados bajo ese tercero. Realizar depuración manual de clientes genéricos.</li>
+                            <li style="margin-bottom: 5px;"><strong>Preventivas y TI (ITGC):</strong> Implementar una validación automática mediante API en el flujo de Onboarding de Proveedores contra la base de datos de HCM (Empleados y Ex-Empleados recientes). </li>
+                            <li style="margin-bottom: 5px;"><strong>Gobierno de Datos:</strong> Establecer una iniciativa MDM que defina al "Tercero" como una entidad única en un repositorio central, distinguiendo sus múltiples roles (rol: cliente, rol: proveedor).</li>
+                            <li style="margin-bottom: 0;"><strong>Supervisión Continua (SYMBIOS):</strong> Programar el Agente IA para ejecutar esta auditoría cruzada de forma periódica, emitiendo alertas inmediatas cuando un nuevo registro en HR o Compras genere colisión.</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</body>
+</html>
