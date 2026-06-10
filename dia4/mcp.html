@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP — Model Context Protocol</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --paper: oklch(0.985 0.005 85);
+      --paper-soft: oklch(0.969 0.007 82);
+      --paper-strong: oklch(0.944 0.008 82);
+      --ink: oklch(0.252 0.012 252);
+      --muted: oklch(0.53 0.016 250);
+      --line: oklch(0.865 0.008 80);
+      --slate-soft: oklch(0.95 0.012 245);
+      --slate-line: oklch(0.88 0.014 245);
+      --accent: oklch(0.59 0.074 46);
+      --accent-soft: oklch(0.946 0.022 46);
+      --shadow: 0 24px 80px rgba(45, 39, 32, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, sans-serif;
+      background:
+        radial-gradient(circle at top left, oklch(0.96 0.012 50) 0, transparent 28%),
+        radial-gradient(circle at top right, oklch(0.958 0.012 235) 0, transparent 30%),
+        linear-gradient(180deg, var(--paper) 0%, oklch(0.978 0.006 84) 100%);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+
+    /* ── Slide unit ── */
+    .slide {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    @media (min-width: 1024px) {
+      .slide { padding: 3rem 4rem; }
+    }
+
+    /* ── Kicker ── */
+    .kicker {
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* ── Section title ── */
+    .section-title {
+      line-height: 1.02;
+      letter-spacing: -0.04em;
+    }
+
+    /* ── Measure ── */
+    .measure {
+      max-width: 72ch;
+    }
+
+    /* ── Contract shell ── */
+    .contract-shell {
+      border-radius: 1.75rem;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      padding: 2rem;
+    }
+
+    @media (min-width: 640px) {
+      .contract-shell { padding: 2.5rem; }
+    }
+
+    .contract-shell::before {
+      content: "";
+      display: block;
+      height: 2px;
+      background: linear-gradient(
+        90deg,
+        color-mix(in oklab, var(--accent) 95%, transparent),
+        color-mix(in oklab, var(--accent) 30%, transparent)
+      );
+      margin-bottom: 1.25rem;
+      border-radius: 999px;
+    }
+
+    /* ── Stat line ── */
+    .stat-line {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 1rem;
+      align-items: end;
+      padding: 0.95rem 0;
+      border-top: 1px solid var(--line);
+    }
+    .stat-line:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    /* ── Flow index ── */
+    .flow-index {
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: color-mix(in oklab, var(--paper) 84%, var(--accent-soft));
+      color: var(--ink);
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── Callout / takeaway ── */
+    .callout-accent {
+      border-radius: 1.5rem;
+      border: 1px solid var(--line);
+      background: var(--accent-soft);
+      padding: 1.25rem 1.5rem;
+    }
+
+    .callout-neutral {
+      border-radius: 1.25rem;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      padding: 1rem 1.25rem;
+    }
+
+    /* ── Navigation ── */
+    .slide-nav {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      z-index: 50;
+      background: var(--paper);
+      padding: 0.5rem 1.25rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .nav-btn {
+      padding: 0.6rem 1.25rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+      font-family: inherit;
+    }
+    .nav-btn:hover {
+      background: var(--paper-strong);
+      border-color: var(--accent);
+    }
+    .nav-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .slide-counter {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      min-width: 4.5rem;
+      text-align: center;
+    }
+
+    /* ── Progress bar ── */
+    .progress-bar {
+      height: 2px;
+      background: var(--line);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    /* ── Timeline ── */
+    .timeline-dot {
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 999px;
+      background: var(--accent);
+      flex-shrink: 0;
+      position: relative;
+      top: 0.4rem;
+    }
+    .timeline-dot::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      width: 1px;
+      height: 2.5rem;
+      background: var(--line);
+      transform: translateX(-50%);
+    }
+    .timeline-entry:last-child .timeline-dot::before {
+      display: none;
+    }
+
+    /* ── Comparison table ── */
+    .compare-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .compare-table th,
+    .compare-table td {
+      padding: 1rem 1.5rem;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+    }
+    .compare-table thead th {
+      background: var(--ink);
+      color: var(--paper);
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .compare-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .compare-table tbody td {
+      background: var(--paper);
+    }
+    .compare-table .td-bad {
+      color: oklch(0.45 0.14 20);
+      font-weight: 500;
+    }
+    .compare-table .td-good {
+      color: oklch(0.45 0.09 175);
+      font-weight: 600;
+    }
+
+    /* ── Use case grid ── */
+    .usecase-card {
+      border-radius: 1.5rem;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .usecase-card:hover {
+      box-shadow: var(--shadow);
+      border-color: transparent;
+    }
+    .usecase-icon {
+      font-size: 2rem;
+      line-height: 1;
+    }
+    .usecase-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+    }
+
+    /* ── Stack diagram ── */
+    .stack-layer {
+      border-radius: 1.25rem;
+      border: 1px solid var(--line);
+      padding: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    /* ── Utility ── */
+    .text-accent { color: var(--accent); }
+    .text-muted { color: var(--muted); }
+    .text-ink { color: var(--ink); }
+    .bg-paper { background: var(--paper); }
+    .bg-paper-soft { background: var(--paper-soft); }
+    .bg-accent-soft { background: var(--accent-soft); }
+    .bg-ink { background: var(--ink); }
+  </style>
+</head>
+<body>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width: 10%"></div>
+  </div>
+
+  <main>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 1 — Portada -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-1">
+      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(19rem,0.7fr)] gap-10 items-center max-w-7xl mx-auto w-full">
+
+        <div>
+          <p class="kicker mb-4">Protocolo abierto</p>
+          <h1 class="section-title text-[3.2rem] sm:text-[3.8rem] lg:text-[4.6rem] font-extrabold tracking-[-0.04em] leading-[0.94] text-ink">
+            MCP
+          </h1>
+          <p class="section-title text-[1.6rem] sm:text-[2rem] lg:text-[2.4rem] font-bold tracking-[-0.03em] leading-[1.05] text-muted mt-3">
+            El protocolo que conecta
+            <span class="text-accent">la IA</span>
+            con el mundo real
+          </p>
+          <p class="mt-6 text-lg leading-7 measure text-muted">
+            Model Context Protocol: el estándar abierto que permite a los agentes de inteligencia
+            artificial conectarse a herramientas, datos y servicios como lo haría un profesional humano.
+          </p>
+        </div>
+
+        <aside class="contract-shell">
+          <div class="stat-line">
+            <span class="text-sm text-muted">Creado por</span>
+            <span class="text-base font-semibold text-ink">Anthropic</span>
+          </div>
+          <div class="stat-line">
+            <span class="text-sm text-muted">Lanzamiento</span>
+            <span class="text-base font-semibold text-ink">Noviembre 2024</span>
+          </div>
+          <div class="stat-line">
+            <span class="text-sm text-muted">Estándar</span>
+            <span class="text-base font-semibold text-accent">Abierto (Linux Foundation)</span>
+          </div>
+          <div class="stat-line">
+            <span class="text-sm text-muted">Inspiración</span>
+            <span class="text-base font-semibold text-ink">LSP (editores de código)</span>
+          </div>
+        </aside>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 2 — El problema que existía antes -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-2">
+      <div class="max-w-7xl mx-auto w-full">
+
+        <p class="kicker mb-4">Contexto</p>
+        <h2 class="section-title text-4xl lg:text-5xl font-bold tracking-[-0.04em] leading-[1.02] text-ink">
+          El problema que existía antes
+        </h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10 mt-10 items-start">
+
+          <div class="space-y-5">
+            <p class="text-lg leading-7 measure text-ink">
+              Antes de MCP, cada integración entre un modelo de IA y una herramienta externa
+              requería <span class="text-accent font-semibold">código personalizado</span>.
+            </p>
+
+            <div class="flex gap-3 items-start">
+              <div class="flow-index">1</div>
+              <div>
+                <p class="text-sm font-semibold text-ink">Conectar Claude a Notion</p>
+                <p class="text-sm text-muted leading-5">Conector propio, mantenimiento continuo.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-3 items-start">
+              <div class="flow-index">2</div>
+              <div>
+                <p class="text-sm font-semibold text-ink">Conectar Claude a GitHub</p>
+                <p class="text-sm text-muted leading-5">Otro conector distinto, otra API que aprender.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-3 items-start">
+              <div class="flow-index">3</div>
+              <div>
+                <p class="text-sm font-semibold text-ink">Conectar Claude a una base de datos</p>
+                <p class="text-sm text-muted leading-5">Un tercer desarrollo, con su propio código.</p>
+              </div>
+            </div>
+
+            <div class="callout-accent">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-2">El resultado</p>
+              <p class="text-base leading-7 text-ink">
+                Un problema <strong>N × M</strong>. N modelos de IA × M herramientas = caos de
+                integraciones. Como tener un enchufe diferente para cada país del mundo.
+              </p>
+            </div>
+          </div>
+
+          <aside class="contract-shell">
+            <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-4">Antes vs Después</p>
+            <div class="space-y-4">
+              <div class="rounded-[1.25rem] border border-line p-4" style="background: oklch(0.96 0.015 15)">
+                <p class="text-sm font-semibold text-ink mb-1">Antes: Caos punto a punto</p>
+                <p class="text-xs text-muted leading-5">
+                  Cada modelo necesitaba su propio conector para cada herramienta.
+                  Imposible de escalar. Costoso de mantener.
+                </p>
+              </div>
+              <div class="rounded-[1.25rem] border p-4" style="border-color: oklch(0.45 0.09 175); background: oklch(0.965 0.018 175)">
+                <p class="text-sm font-semibold text-ink mb-1">Ahora: Hub central con MCP</p>
+                <p class="text-xs text-muted leading-5">
+                  Un solo protocolo. Cualquier cliente MCP se conecta a cualquier servidor MCP.
+                  Escribís la integración una vez y funciona con todos.
+                </p>
+              </div>
+            </div>
+          </aside>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 3 — ¿Qué es MCP? -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-3">
+      <div class="max-w-7xl mx-auto w-full">
+
+        <p class="kicker mb-4">Definición</p>
+        <h2 class="section-title text-4xl lg:text-5xl font-bold tracking-[-0.04em] leading-[1.02] text-ink">
+          ¿Qué es MCP?
+        </h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10 mt-10 items-start">
+
+          <div class="space-y-5">
+            <p class="text-lg leading-7 measure text-ink">
+              <strong>MCP (Model Context Protocol)</strong> es un estándar abierto que define una
+              forma universal para que los modelos de IA se conecten a herramientas, datos y
+              servicios externos.
+            </p>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="rounded-[1.25rem] border border-line bg-paper p-4">
+                <p class="text-sm font-semibold text-ink mb-1">Creado por</p>
+                <p class="text-sm text-accent font-bold">Anthropic</p>
+              </div>
+              <div class="rounded-[1.25rem] border border-line bg-paper p-4">
+                <p class="text-sm font-semibold text-ink mb-1">Lanzado en</p>
+                <p class="text-sm text-accent font-bold">Noviembre 2024</p>
+              </div>
+              <div class="rounded-[1.25rem] border border-line bg-paper p-4">
+                <p class="text-sm font-semibold text-ink mb-1">Basado en</p>
+                <p class="text-sm text-accent font-bold">JSON-RPC 2.0</p>
+              </div>
+              <div class="rounded-[1.25rem] border border-line bg-paper p-4">
+                <p class="text-sm font-semibold text-ink mb-1">Inspirado en</p>
+                <p class="text-sm text-accent font-bold">LSP (editores de código)</p>
+              </div>
+            </div>
+          </div>
+
+          <aside class="contract-shell text-center">
+            <div class="text-7xl font-extrabold text-accent tracking-[-0.04em] leading-none mb-4">USB-C</div>
+            <p class="text-lg font-bold text-ink mb-3">MCP es el USB-C de la IA</p>
+            <p class="text-sm text-muted leading-6">
+              Un conector universal que funciona con cualquier dispositivo.
+              Así como USB-C eliminó la necesidad de cables propietarios,
+              MCP elimina la necesidad de integraciones punto a punto entre
+              cada IA y cada herramienta.
+            </p>
+          </aside>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 4 — Cómo funciona (arquitectura) -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-4">
+      <div class="max-w-7xl mx-auto w-full">
+
+        <p class="kicker mb-4">Arquitectura</p>
+        <h2 class="section-title text-4xl lg:text-5xl font-bold tracking-[-0.04em] leading-[1.02] text-ink">
+          Cómo funciona MCP
+        </h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10 mt-10 items-start">
+
+          <div class="space-y-5">
+            <p class="text-lg leading-7 text-ink">
+              MCP define dos roles en su arquitectura:
+            </p>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="rounded-[1.5rem] border border-line bg-paper p-5">
+                <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-2">MCP Server</p>
+                <p class="text-sm text-muted leading-5">
+                  Expone herramientas y datos. Es el que sabe hacer algo: leer correos,
+                  consultar una base de datos, crear un issue en GitHub.
+                </p>
+              </div>
+              <div class="rounded-[1.5rem] border border-line bg-paper p-5">
+                <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-2">MCP Client</p>
+                <p class="text-sm text-muted leading-5">
+                  Se conecta al servidor y usa sus capacidades. Claude, ChatGPT,
+                  Gemini y otros agentes actúan como clientes MCP.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <aside class="contract-shell space-y-4">
+            <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-3">Flujo básico en 5 pasos</p>
+
+            <div class="flex gap-3">
+              <div class="flow-index">1</div>
+              <div>
+                <p class="text-sm font-semibold text-ink">El usuario le pide algo a Claude</p>
+                <p class="text-xs text-muted leading-4">"Revisá mis correos de hoy y resumime los urgentes."</p>
+              </div>
+            </div>
+
+            <div class="flex gap-3">
+              <div class="flow-index">2</div>
+              <div>
+                <p class="text-sm font-semibold text-ink">Claude detecta qué herramienta necesita</p>
+                <p class="text-xs text-muted leading-4">Identifica que necesita el servidor MCP de Gmail.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-3">
+              <div class="flow-index">3</div>
+              <div>
+                <p class="text-sm font-semibold text-ink">Claude llama al MCP Server correspondiente</p>
+                <p class="text-xs text-muted leading-4">Envía una solicitud estándar por JSON-RPC.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-3">
+              <div class="flow-index">4</div>
+              <div>
+                <p class="text-sm font-semibold text-ink">El servidor ejecuta y devuelve el resultado</p>
+                <p class="text-xs text-muted leading-4">Gmail responde con la lista de correos del día.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-3">
+              <div class="flow-index">5</div>
+              <div>
+                <p class="text-sm font-semibold text-ink">Claude usa el resultado para responder</p>
+                <p class="text-xs text-muted leading-4">Procesa los correos y presenta el resumen al usuario.</p>
+              </div>
+            </div>
+          </aside>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 5 — Historia y adopción -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-5">
+      <div class="max-w-7xl mx-auto w-full">
+
+        <p class="kicker mb-4">Historia</p>
+        <h2 class="section-title text-4xl lg:text-5xl font-bold tracking-[-0.04em] leading-[1.02] text-ink">
+          Historia y adopción
+        </h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.78fr)] gap-10 mt-10 items-start">
+
+          <div class="space-y-5">
+
+            <div class="flex gap-4 timeline-entry">
+              <div class="timeline-dot"></div>
+              <div>
+                <p class="text-sm font-semibold text-accent">Noviembre 2024</p>
+                <p class="text-base text-ink font-semibold">Anthropic lanza MCP</p>
+                <p class="text-sm text-muted leading-5 mt-1">
+                  Se publica como estándar abierto bajo la especificación Model Context Protocol,
+                  basado en JSON-RPC 2.0.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-4 timeline-entry">
+              <div class="timeline-dot"></div>
+              <div>
+                <p class="text-sm font-semibold text-accent">2025</p>
+                <p class="text-base text-ink font-semibold">El ecosistema explota</p>
+                <p class="text-sm text-muted leading-5 mt-1">
+                  GitHub, Postgres, Notion, Stripe, Figma y cientos de herramientas más adoptan MCP.
+                  Cursor, VS Code y Windsurf lo integran nativamente. Más de 10.000 servidores
+                  MCP públicos activos.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-4 timeline-entry">
+              <div class="timeline-dot"></div>
+              <div>
+                <p class="text-sm font-semibold text-accent">Noviembre 2025</p>
+                <p class="text-base text-ink font-semibold">Donación a la Agentic AI Foundation</p>
+                <p class="text-sm text-muted leading-5 mt-1">
+                  Anthropic dona MCP a la fundación respaldada por la Linux Foundation,
+                  co-fundada con Block y OpenAI. ChatGPT, Gemini y Microsoft Copilot
+                  anuncian su adopción.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-4 timeline-entry">
+              <div class="timeline-dot"></div>
+              <div>
+                <p class="text-sm font-semibold text-accent">Diciembre 2025</p>
+                <p class="text-base text-ink font-semibold">Estándar de facto de la industria</p>
+                <p class="text-sm text-muted leading-5 mt-1">
+                  MCP se consolida como el estándar universal para la conexión entre
+                  agentes de IA y el mundo exterior.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <aside class="space-y-4">
+            <div class="contract-shell">
+              <p class="text-5xl font-extrabold text-accent tracking-[-0.04em] leading-none">10K+</p>
+              <p class="text-sm font-semibold text-ink mt-2">Servidores MCP activos</p>
+              <p class="text-xs text-muted leading-5 mt-1">
+                Comunidad global de desarrolladores creando y publicando servidores
+                MCP para todo tipo de herramientas y servicios.
+              </p>
+            </div>
+
+            <div class="callout-neutral">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-2">Gobernanza</p>
+              <p class="text-sm leading-6 text-muted">
+                MCP es gobernado por la <strong>Agentic AI Foundation</strong>, parte de la
+                Linux Foundation, con Anthropic, Block y OpenAI como co-fundadores.
+              </p>
+            </div>
+          </aside>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 6 — Para qué sirve en la práctica -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-6">
+      <div class="max-w-7xl mx-auto w-full">
+
+        <p class="kicker mb-4">Aplicaciones</p>
+        <h2 class="section-title text-4xl lg:text-5xl font-bold tracking-[-0.04em] leading-[1.02] text-ink">
+          Para qué sirve en la práctica
+        </h2>
+
+        <p class="mt-4 text-lg leading-7 text-muted measure">
+          Con MCP podés conectar cualquier agente de IA a las herramientas que tu empresa ya usa.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-8">
+
+          <div class="usecase-card">
+            <div class="usecase-icon">Correo</div>
+            <p class="usecase-label">Correo y calendario</p>
+            <p class="text-sm text-muted leading-5">
+              Leer, redactar, archivar correos. Agendar reuniones,
+              consultar disponibilidad, enviar recordatorios.
+            </p>
+          </div>
+
+          <div class="usecase-card">
+            <div class="usecase-icon">Code</div>
+            <p class="usecase-label">Repositorios de código</p>
+            <p class="text-sm text-muted leading-5">
+              Crear issues, revisar pull requests, hacer commits,
+              buscar en el historial, analizar cambios.
+            </p>
+          </div>
+
+          <div class="usecase-card">
+            <div class="usecase-icon">Data</div>
+            <p class="usecase-label">Bases de datos</p>
+            <p class="text-sm text-muted leading-5">
+              Consultar tablas, insertar registros, generar reportes,
+              analizar tendencias con lenguaje natural.
+            </p>
+          </div>
+
+          <div class="usecase-card">
+            <div class="usecase-icon">Docs</div>
+            <p class="usecase-label">Documentos y archivos</p>
+            <p class="text-sm text-muted leading-5">
+              Leer contratos, generar resúmenes, extraer datos de PDFs,
+              clasificar informes automáticamente.
+            </p>
+          </div>
+
+          <div class="usecase-card">
+            <div class="usecase-icon">ERP</div>
+            <p class="usecase-label">ERPs y sistemas internos</p>
+            <p class="text-sm text-muted leading-5">
+              Automatizar flujos de trabajo, conciliar cuentas, generar
+              asientos contables, validar transacciones.
+            </p>
+          </div>
+
+          <div class="usecase-card">
+            <div class="usecase-icon">API</div>
+            <p class="usecase-label">APIs y servicios web</p>
+            <p class="text-sm text-muted leading-5">
+              Integrar con Stripe, Slack, Salesforce, SAP y cualquier
+              servicio que exponga una API REST.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 7 — MCP vs. integraciones tradicionales -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-7">
+      <div class="max-w-7xl mx-auto w-full">
+
+        <p class="kicker mb-4">Comparativa</p>
+        <h2 class="section-title text-4xl lg:text-5xl font-bold tracking-[-0.04em] leading-[1.02] text-ink">
+          MCP vs. integraciones tradicionales
+        </h2>
+
+        <div class="mt-10 overflow-x-auto">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th style="width:25%">Factor</th>
+                <th style="width:37.5%">Integración tradicional</th>
+                <th style="width:37.5%">Con MCP</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-sm font-semibold text-ink">Tiempo de setup</td>
+                <td class="text-sm td-bad">Días o semanas. Cada integración requiere desarrollo a medida.</td>
+                <td class="text-sm td-good">Horas. El servidor MCP se escribe una vez y funciona con cualquier cliente.</td>
+              </tr>
+              <tr>
+                <td class="text-sm font-semibold text-ink">Mantenimiento</td>
+                <td class="text-sm td-bad">Alto. Hay que mantener un conector por cada modelo de IA.</td>
+                <td class="text-sm td-good">Una sola vez. El servidor MCP se mantiene independiente del cliente.</td>
+              </tr>
+              <tr>
+                <td class="text-sm font-semibold text-ink">Compatibilidad</td>
+                <td class="text-sm td-bad">Solo funciona con el modelo para el que se desarrolló.</td>
+                <td class="text-sm td-good">Cualquier cliente MCP (Claude, ChatGPT, Gemini, Copilot).</td>
+              </tr>
+              <tr>
+                <td class="text-sm font-semibold text-ink">Estándar</td>
+                <td class="text-sm td-bad">Propietario y cerrado. Atado a un proveedor.</td>
+                <td class="text-sm td-good">Abierto. Gobernado por la Linux Foundation.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout-accent mt-8 measure">
+          <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-2">El cambio fundamental</p>
+          <p class="text-base leading-7 text-ink">
+            Con MCP, la integración se convierte en un <strong>activo reutilizable</strong>.
+            La escribís una vez y funciona con Claude, ChatGPT, Gemini y cualquier agente
+            que implemente el protocolo.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 8 — El stack moderno del agente IA -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-8">
+      <div class="max-w-7xl mx-auto w-full">
+
+        <p class="kicker mb-4">Arquitectura</p>
+        <h2 class="section-title text-4xl lg:text-5xl font-bold tracking-[-0.04em] leading-[1.02] text-ink">
+          El stack moderno del agente de IA
+        </h2>
+
+        <p class="mt-4 text-lg leading-7 text-muted measure">
+          MCP es una pieza de un ecosistema que se consolidó en 2025.
+          Cada capa resuelve un problema distinto.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10 mt-8 items-start">
+
+          <div class="space-y-4">
+
+            <div class="stack-layer bg-ink" style="color: var(--paper); border-color: var(--ink)">
+              <p class="text-xs uppercase tracking-[0.12em] opacity-60 mb-1">Capa 1</p>
+              <p class="text-xl">Agente de IA</p>
+              <p class="text-sm font-normal opacity-70 mt-1">Claude, GPT, Gemini, Copilot</p>
+            </div>
+
+            <div class="stack-layer bg-accent-soft" style="border-color: var(--accent)">
+              <p class="text-xs uppercase tracking-[0.12em] text-accent mb-1">Capa 2</p>
+              <p class="text-xl text-ink">MCP</p>
+              <p class="text-sm font-normal text-muted mt-1">Cómo se conecta a datos y herramientas</p>
+            </div>
+
+            <div class="stack-layer bg-paper-soft">
+              <p class="text-xs uppercase tracking-[0.12em] text-muted mb-1">Capa 3</p>
+              <p class="text-xl text-ink">Agent Skills</p>
+              <p class="text-sm font-normal text-muted mt-1">Cómo ejecuta tareas con criterio especializado</p>
+            </div>
+
+            <div class="stack-layer bg-paper">
+              <p class="text-xs uppercase tracking-[0.12em] text-muted mb-1">Capa 4</p>
+              <p class="text-xl text-ink">Herramientas y fuentes de datos</p>
+              <p class="text-sm font-normal text-muted mt-1">Qué puede usar: APIs, bases de datos, archivos</p>
+            </div>
+
+          </div>
+
+          <aside class="space-y-5">
+            <div class="callout-accent">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-2">La distinción clave</p>
+              <p class="text-base leading-7 text-ink">
+                <strong>MCP</strong> resuelve el <em>cómo conectar</em>.
+                Las <strong>Skills</strong> resuelven el <em>cómo hacer</em>.
+                Juntos forman el dual-stack de la era moderna de agentes de IA.
+              </p>
+            </div>
+
+            <div class="callout-neutral">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-2">Analogía</p>
+              <p class="text-sm leading-6 text-muted">
+                MCP es el sistema operativo que le da acceso al hardware.
+                Las Skills son las aplicaciones que saben qué hacer con ese acceso.
+              </p>
+            </div>
+          </aside>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 9 — Relevancia para negocios -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-9">
+      <div class="max-w-7xl mx-auto w-full">
+
+        <p class="kicker mb-4">Negocios</p>
+        <h2 class="section-title text-4xl lg:text-5xl font-bold tracking-[-0.04em] leading-[1.02] text-ink">
+          Relevancia para el mundo empresarial
+        </h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10 mt-10 items-start">
+
+          <div class="space-y-5">
+            <p class="text-lg leading-7 measure text-ink">
+              Si trabajás con ERP, auditoría, contabilidad o sistemas empresariales,
+              MCP cambia las reglas del juego:
+            </p>
+
+            <div class="flex gap-3 items-start">
+              <div class="flow-index">1</div>
+              <div>
+                <p class="text-sm font-semibold text-ink">Leer tu ERP sin integraciones costosas</p>
+                <p class="text-sm text-muted leading-5">
+                  Un agente con MCP puede consultar SAP, Dynamics u Oracle directamente,
+                  sin necesidad de desarrollar conectores a medida.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-3 items-start">
+              <div class="flow-index">2</div>
+              <div>
+                <p class="text-sm font-semibold text-ink">Cruzar datos entre sistemas</p>
+                <p class="text-sm text-muted leading-5">
+                  El agente puede consultar el ERP, el CRM y el correo simultáneamente
+                  y cruzar información que hoy vive en silos.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-3 items-start">
+              <div class="flow-index">3</div>
+              <div>
+                <p class="text-sm font-semibold text-ink">Automatizaciones en días, no meses</p>
+                <p class="text-sm text-muted leading-5">
+                  Lo que antes requería un proyecto de integración de semanas,
+                  con MCP se configura en horas.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-3 items-start">
+              <div class="flow-index">4</div>
+              <div>
+                <p class="text-sm font-semibold text-ink">Sin vendor lock-in</p>
+                <p class="text-sm text-muted leading-5">
+                  Al ser un estándar abierto gobernado por la Linux Foundation,
+                  no quedás atado a un solo proveedor de IA.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <aside class="contract-shell space-y-4">
+            <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-3">Caso concreto</p>
+
+            <div class="space-y-3">
+              <div class="flex gap-3 items-center">
+                <div class="flow-index">A</div>
+                <p class="text-sm text-muted leading-5">
+                  Un agente consulta el <strong>ERP</strong> para obtener el listado
+                  de facturas pendientes de conciliación.
+                </p>
+              </div>
+              <div class="flex gap-3 items-center">
+                <div class="flow-index">B</div>
+                <p class="text-sm text-muted leading-5">
+                  Cruza esa información con los <strong>extractos bancarios</strong>
+                  obtenidos vía otro servidor MCP.
+                </p>
+              </div>
+              <div class="flex gap-3 items-center">
+                <div class="flow-index">C</div>
+                <p class="text-sm text-muted leading-5">
+                  Genera la <strong>conciliación automática</strong> y marca las
+                  discrepancias para revisión humana.
+                </p>
+              </div>
+              <div class="flex gap-3 items-center">
+                <div class="flow-index">D</div>
+                <p class="text-sm text-muted leading-5">
+                  Envía el <strong>reporte por correo</strong> y agenda una reunión
+                  de revisión en el calendario del equipo.
+                </p>
+              </div>
+            </div>
+
+            <p class="text-xs text-accent font-semibold mt-2">
+              De punta a punta, sin intervención manual.
+            </p>
+          </aside>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 10 — Cierre -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-10">
+      <div class="max-w-7xl mx-auto w-full">
+
+        <p class="kicker mb-4">Cierre</p>
+        <h2 class="section-title text-4xl lg:text-5xl font-bold tracking-[-0.04em] leading-[1.02] text-ink">
+          MCP en una frase
+        </h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.78fr)] gap-10 mt-10 items-start">
+
+          <div class="space-y-5">
+            <div class="callout-accent">
+              <p class="text-lg font-bold leading-7 text-ink">
+                "El protocolo que convirtió a los modelos de IA en agentes que realmente
+                pueden actuar en el mundo."
+              </p>
+            </div>
+
+            <div class="callout-neutral">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-3">Lo que viene</p>
+              <ul class="space-y-3 text-sm text-muted leading-6" style="list-style:none;padding-left:0">
+                <li class="flex gap-2">
+                  <span class="text-accent font-bold">1.</span>
+                  Agentes multi-modelo colaborando entre sí vía MCP.
+                </li>
+                <li class="flex gap-2">
+                  <span class="text-accent font-bold">2.</span>
+                  Ecosistema de servidores MCP especializados por industria.
+                </li>
+                <li class="flex gap-2">
+                  <span class="text-accent font-bold">3.</span>
+                  Automatización empresarial profunda sin código a medida.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <aside class="contract-shell text-center">
+            <p class="text-6xl font-extrabold text-accent tracking-[-0.04em] leading-none">MCP</p>
+            <p class="text-sm font-semibold text-ink mt-3">Model Context Protocol</p>
+            <div class="flex justify-center gap-3 mt-4">
+              <div class="flow-index">USB-C</div>
+            </div>
+            <p class="text-sm text-muted leading-5 mt-3">
+              Abierto. Universal. Gobernado por la comunidad. El estándar que
+              eliminó las integraciones punto a punto entre la IA y el mundo.
+            </p>
+          </aside>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Navigation ── -->
+  <nav class="slide-nav">
+    <button class="nav-btn" id="prevBtn" disabled>← Anterior</button>
+    <span class="slide-counter" id="slideCounter">1 / 10</span>
+    <button class="nav-btn" id="nextBtn">Siguiente →</button>
+  </nav>
+
+  <script>
+    (function () {
+      const slides = document.querySelectorAll('.slide');
+      const total = slides.length;
+      let current = 0;
+
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const counter = document.getElementById('slideCounter');
+      const progress = document.getElementById('progressFill');
+
+      function updateUI() {
+        slides.forEach((s, i) => {
+          s.style.display = i === current ? 'flex' : 'none';
+        });
+        prevBtn.disabled = current === 0;
+        nextBtn.disabled = current === total - 1;
+        counter.textContent = (current + 1) + ' / ' + total;
+        progress.style.width = ((current + 1) / total * 100) + '%';
+      }
+
+      function goTo(index) {
+        if (index < 0 || index >= total) return;
+        current = index;
+        updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      prevBtn.addEventListener('click', () => goTo(current - 1));
+      nextBtn.addEventListener('click', () => goTo(current + 1));
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          goTo(current + 1);
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          goTo(current - 1);
+        }
+      });
+
+      updateUI();
+    })();
+  </script>
+
+</body>
+</html>

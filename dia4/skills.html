@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skills — El arte de enseñarle a la IA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --paper: oklch(0.985 0.005 85);
+      --paper-soft: oklch(0.969 0.007 82);
+      --paper-strong: oklch(0.944 0.008 82);
+      --ink: oklch(0.252 0.012 252);
+      --muted: oklch(0.53 0.016 250);
+      --line: oklch(0.865 0.008 80);
+      --slate-soft: oklch(0.95 0.012 245);
+      --slate-line: oklch(0.88 0.014 245);
+      --accent: oklch(0.59 0.074 46);
+      --accent-soft: oklch(0.946 0.022 46);
+      --shadow: 0 24px 80px rgba(45, 39, 32, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, sans-serif;
+      background:
+        radial-gradient(circle at top left, oklch(0.96 0.012 50) 0, transparent 28%),
+        radial-gradient(circle at top right, oklch(0.958 0.012 235) 0, transparent 30%),
+        linear-gradient(180deg, var(--paper) 0%, oklch(0.978 0.006 84) 100%);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+
+    /* ── Slide unit ── */
+    .slide {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    @media (min-width: 1024px) {
+      .slide { padding: 3rem 4rem; }
+    }
+
+    /* ── Kicker ── */
+    .kicker {
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* ── Section title ── */
+    .section-title {
+      line-height: 1.02;
+      letter-spacing: -0.04em;
+    }
+
+    /* ── Measure ── */
+    .measure {
+      max-width: 72ch;
+    }
+
+    /* ── Contract shell ── */
+    .contract-shell {
+      border-radius: 1.75rem;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      padding: 2rem;
+    }
+
+    @media (min-width: 640px) {
+      .contract-shell { padding: 2.5rem; }
+    }
+
+    .contract-shell::before {
+      content: "";
+      display: block;
+      height: 2px;
+      background: linear-gradient(
+        90deg,
+        color-mix(in oklab, var(--accent) 95%, transparent),
+        color-mix(in oklab, var(--accent) 30%, transparent)
+      );
+      margin-bottom: 1.25rem;
+      border-radius: 999px;
+    }
+
+    /* ── Stat line ── */
+    .stat-line {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 1rem;
+      align-items: end;
+      padding: 0.95rem 0;
+      border-top: 1px solid var(--line);
+    }
+    .stat-line:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    /* ── Flow index ── */
+    .flow-index {
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: color-mix(in oklab, var(--paper) 84%, var(--accent-soft));
+      color: var(--ink);
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── Callout / takeaway ── */
+    .callout-accent {
+      border-radius: 1.5rem;
+      border: 1px solid var(--line);
+      background: var(--accent-soft);
+      padding: 1.25rem 1.5rem;
+    }
+
+    .callout-neutral {
+      border-radius: 1.25rem;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      padding: 1rem 1.25rem;
+    }
+
+    /* ── Navigation ── */
+    .slide-nav {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      z-index: 50;
+      background: var(--paper);
+      padding: 0.5rem 1.25rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .nav-btn {
+      padding: 0.6rem 1.25rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+      font-family: inherit;
+    }
+    .nav-btn:hover {
+      background: var(--paper-strong);
+      border-color: var(--accent);
+    }
+    .nav-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .slide-counter {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      min-width: 4.5rem;
+      text-align: center;
+    }
+
+    /* ── Progress bar ── */
+    .progress-bar {
+      height: 2px;
+      background: var(--line);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    /* ── CTA button ── */
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.9rem 2rem;
+      border-radius: 999px;
+      background: var(--ink);
+      color: var(--paper);
+      font-weight: 700;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: background 0.2s ease, transform 0.15s ease;
+      font-family: inherit;
+      letter-spacing: -0.01em;
+    }
+    .cta-btn:hover {
+      background: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* ── Timeline ── */
+    .timeline-dot {
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 999px;
+      background: var(--accent);
+      flex-shrink: 0;
+      position: relative;
+      top: 0.4rem;
+    }
+    .timeline-dot::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      width: 1px;
+      height: 2.5rem;
+      background: var(--line);
+      transform: translateX(-50%);
+    }
+    .timeline-entry:last-child .timeline-dot::before {
+      display: none;
+    }
+
+    /* ── Utility ── */
+    .text-accent { color: var(--accent); }
+    .text-muted { color: var(--muted); }
+    .text-ink { color: var(--ink); }
+    .bg-paper { background: var(--paper); }
+    .bg-paper-soft { background: var(--paper-soft); }
+    .bg-accent-soft { background: var(--accent-soft); }
+  </style>
+</head>
+<body>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width: 16.6%"></div>
+  </div>
+
+  <main>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 1 — Hero -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-1">
+      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(19rem,0.7fr)] gap-10 items-center max-w-7xl mx-auto w-full">
+
+        <div>
+          <p class="kicker mb-4">Conceptos fundamentales</p>
+          <h1 class="section-title text-[3.2rem] sm:text-[3.8rem] lg:text-[4.6rem] font-extrabold tracking-[-0.04em] leading-[0.94] text-ink">
+            Skills
+          </h1>
+          <p class="section-title text-[1.6rem] sm:text-[2rem] lg:text-[2.4rem] font-bold tracking-[-0.03em] leading-[1.05] text-muted mt-3">
+            El arte de enseñarle
+            <span class="text-accent">oficios</span>
+            a la inteligencia artificial
+          </p>
+          <p class="mt-6 text-lg leading-7 measure text-muted">
+            Instrucciones modulares que transforman un modelo de lenguaje generalista
+            en un especialista capaz de ejecutar tareas concretas con criterio.
+          </p>
+        </div>
+
+        <aside class="contract-shell">
+          <div class="stat-line">
+            <span class="text-sm text-muted">Formato</span>
+            <span class="text-base font-semibold text-ink">Markdown + frontmatter</span>
+          </div>
+          <div class="stat-line">
+            <span class="text-sm text-muted">Propósito</span>
+            <span class="text-base font-semibold text-ink">Especialización modular</span>
+          </div>
+          <div class="stat-line">
+            <span class="text-sm text-muted">Alcance</span>
+            <span class="text-base font-semibold text-accent">Ilimitado por dominio</span>
+          </div>
+          <div class="stat-line">
+            <span class="text-sm text-muted">Origen</span>
+            <span class="text-base font-semibold text-ink">Anthropic, 2025</span>
+          </div>
+        </aside>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 2 — ¿Qué es una skill? -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-2">
+      <div class="max-w-7xl mx-auto w-full">
+
+        <p class="kicker mb-4">Definición</p>
+        <h2 class="section-title text-4xl lg:text-5xl font-bold tracking-[-0.04em] leading-[1.02] text-ink">
+          ¿Qué es una skill?
+        </h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10 mt-10 items-start">
+
+          <div class="space-y-6">
+            <p class="text-lg leading-7 measure text-ink">
+              Una <strong>skill</strong> es un archivo de instrucciones en Markdown que le enseña
+              a un agente de IA cómo realizar una tarea específica. Es el equivalente digital
+              de un <span class="text-accent font-semibold">manual de oficio</span>: contiene el
+              conocimiento procedural, las reglas, las referencias y los patrones que el agente
+              necesita para ejecutar con criterio.
+            </p>
+
+            <div class="callout-accent">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-2">Analogía</p>
+              <p class="text-base leading-7 text-ink">
+                Si el modelo de lenguaje es un profesional recién graduado con conocimiento teórico
+                enciclopédico, una skill es el <strong>manual del puesto</strong> que le explica
+                cómo aplicar ese conocimiento en un contexto real, siguiendo las convenciones
+                y criterios de un equipo concreto.
+              </p>
+            </div>
+          </div>
+
+          <div class="contract-shell space-y-5">
+            <h3 class="text-xl font-bold tracking-[-0.03em] text-ink">Anatomía de una skill</h3>
+
+            <div class="flex gap-3">
+              <div class="flow-index">1</div>
+              <div>
+                <p class="text-sm font-semibold text-ink">Frontmatter YAML</p>
+                <p class="text-sm text-muted leading-5">Nombre, descripción, triggers que activan la skill.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-3">
+              <div class="flow-index">2</div>
+              <div>
+                <p class="text-sm font-semibold text-ink">Instrucciones procedurales</p>
+                <p class="text-sm text-muted leading-5">Workflow paso a paso, reglas de decisión, criterios de calidad.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-3">
+              <div class="flow-index">3</div>
+              <div>
+                <p class="text-sm font-semibold text-ink">Referencias y contexto</p>
+                <p class="text-sm text-muted leading-5">Archivos adjuntos, ejemplos, documentación de dominio.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-3">
+              <div class="flow-index">4</div>
+              <div>
+                <p class="text-sm font-semibold text-ink">Directorio autocontenido</p>
+                <p class="text-sm text-muted leading-5">Todo lo que la skill necesita vive en su propia carpeta.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 3 — ¿Para qué sirve? -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-3">
+      <div class="max-w-7xl mx-auto w-full">
+
+        <p class="kicker mb-4">Propósito</p>
+        <h2 class="section-title text-4xl lg:text-5xl font-bold tracking-[-0.04em] leading-[1.02] text-ink">
+          ¿Para qué sirve una skill?
+        </h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
+
+          <div class="contract-shell">
+            <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-3">Especialización</p>
+            <p class="text-base leading-7 text-ink">
+              Convierte un modelo generalista en un experto para un dominio concreto.
+              La skill encapsula el conocimiento tácito que normalmente solo existe
+              en la cabeza del equipo.
+            </p>
+          </div>
+
+          <div class="contract-shell">
+            <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-3">Consistencia</p>
+            <p class="text-base leading-7 text-ink">
+              Garantiza que el agente siempre siga las mismas convenciones, patrones
+              y criterios de calidad. Cada ejecución produce resultados predecibles
+              y alineados con el estándar del equipo.
+            </p>
+          </div>
+
+          <div class="contract-shell">
+            <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-3">Reutilización</p>
+            <p class="text-base leading-7 text-ink">
+              Una skill bien escrita se comparte entre proyectos, equipos y herramientas.
+              Es el equivalente a un paquete de npm pero para conocimiento operativo
+              de agentes de IA.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="callout-accent mt-8 measure">
+          <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-2">El cambio de paradigma</p>
+          <p class="text-base leading-7 text-ink">
+            Antes le pedíamos al modelo que <em>improvisara</em> cada vez. Con las skills,
+            le entregamos un <strong>estándar escrito</strong> que puede seguir, refinar
+            y mejorar iterativamente. Pasamos de prompts artesanales a instrucción
+            ingenieril.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 4 — Historia -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-4">
+      <div class="max-w-7xl mx-auto w-full">
+
+        <p class="kicker mb-4">Historia</p>
+        <h2 class="section-title text-4xl lg:text-5xl font-bold tracking-[-0.04em] leading-[1.02] text-ink">
+          ¿Quién creó las skills?
+        </h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.78fr)] gap-10 mt-10 items-start">
+
+          <div class="space-y-6">
+
+            <div class="flex gap-4 timeline-entry">
+              <div class="timeline-dot"></div>
+              <div>
+                <p class="text-sm font-semibold text-accent">Noviembre 2024</p>
+                <p class="text-base text-ink font-semibold">Model Context Protocol (MCP)</p>
+                <p class="text-sm text-muted leading-5 mt-1">
+                  Anthropic lanza MCP como estándar abierto. Es la infraestructura sobre la que
+                  luego se construyen las skills: estandariza cómo Claude se conecta a herramientas
+                  y fuentes de datos externas.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-4 timeline-entry">
+              <div class="timeline-dot"></div>
+              <div>
+                <p class="text-sm font-semibold text-accent">Octubre 2025</p>
+                <p class="text-base text-ink font-semibold">Skills (primera versión)</p>
+                <p class="text-sm text-muted leading-5 mt-1">
+                  Anthropic introduce Skills como patrón formal para extender las capacidades
+                  de Claude con conocimiento especializado y flujos de trabajo. Cada skill es
+                  una carpeta con un archivo SKILL.md que Claude descubre y carga dinámicamente
+                  según la tarea.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-4 timeline-entry">
+              <div class="timeline-dot"></div>
+              <div>
+                <p class="text-sm font-semibold text-accent">Diciembre 2025</p>
+                <p class="text-base text-ink font-semibold">Agent Skills como estándar abierto</p>
+                <p class="text-sm text-muted leading-5 mt-1">
+                  Anthropic lanza oficialmente Agent Skills como estándar abierto y lo dona
+                  a la Agentic AI Foundation (respaldada por la Linux Foundation). Junto con
+                  MCP forma el dual-stack de la era moderna de IA: MCP define cómo los agentes
+                  se conectan a datos, Agent Skills define cómo ejecutan tareas.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-4 timeline-entry">
+              <div class="timeline-dot"></div>
+              <div>
+                <p class="text-sm font-semibold text-accent">Febrero 2026</p>
+                <p class="text-base text-ink font-semibold">Agent Teams</p>
+                <p class="text-sm text-muted leading-5 mt-1">
+                  Se lanzan oficialmente los Agent Teams: instancias independientes de Claude Code
+                  que se comunican entre sí, llevando el ecosistema de skills y agentes
+                  un paso más allá.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <aside class="space-y-5">
+            <div class="contract-shell">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-3">Creador</p>
+              <p class="text-2xl font-bold text-ink tracking-[-0.03em]">Anthropic</p>
+              <p class="text-sm text-muted leading-5 mt-1">
+                La empresa detrás de Claude creó las skills como patrón formal para extender
+                agentes de IA con conocimiento especializado. El estándar fue donado a la
+                <strong>Agentic AI Foundation</strong>, respaldada por la Linux Foundation.
+              </p>
+            </div>
+
+            <div class="callout-neutral">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-2">Dual-stack</p>
+              <p class="text-sm leading-6 text-muted">
+                <strong>MCP + Agent Skills</strong> es el dual-stack de la era moderna de IA:
+                MCP define cómo los agentes se conectan a datos y herramientas; Agent Skills
+                define cómo ejecutan tareas con criterio especializado.
+              </p>
+            </div>
+          </aside>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 5 — El ecosistema -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-5">
+      <div class="max-w-7xl mx-auto w-full text-center">
+
+        <p class="kicker mb-4">Ecosistema</p>
+        <h2 class="section-title text-4xl lg:text-5xl font-bold tracking-[-0.04em] leading-[1.02] text-ink">
+          skills.sh
+        </h2>
+        <p class="mt-4 text-lg leading-7 text-muted measure mx-auto">
+          El directorio comunitario donde descubrir, instalar y compartir skills
+          para agentes de IA. Un ecosistema abierto que crece con cada contribución.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10 max-w-3xl mx-auto">
+
+          <div class="contract-shell text-left">
+            <p class="text-3xl font-extrabold text-accent tracking-[-0.03em]">1</p>
+            <p class="text-sm font-semibold text-ink mt-2">Descubrí</p>
+            <p class="text-sm text-muted leading-5 mt-1">
+              Navegá skills por categoría, herramienta o popularidad.
+            </p>
+          </div>
+
+          <div class="contract-shell text-left">
+            <p class="text-3xl font-extrabold text-accent tracking-[-0.03em]">2</p>
+            <p class="text-sm font-semibold text-ink mt-2">Instalá</p>
+            <p class="text-sm text-muted leading-5 mt-1">
+              Un comando y la skill queda disponible en tu agente.
+            </p>
+          </div>
+
+          <div class="contract-shell text-left">
+            <p class="text-3xl font-extrabold text-accent tracking-[-0.03em]">3</p>
+            <p class="text-sm font-semibold text-ink mt-2">Publicá</p>
+            <p class="text-sm text-muted leading-5 mt-1">
+              Compartí tus skills con la comunidad global de desarrolladores.
+            </p>
+          </div>
+
+        </div>
+
+        <a
+          href="https://www.skills.sh/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="cta-btn mt-10"
+        >
+          Explorar skills.sh
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/>
+            <line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 6 — Cierre -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-6">
+      <div class="max-w-7xl mx-auto w-full">
+
+        <p class="kicker mb-4">Cierre</p>
+        <h2 class="section-title text-4xl lg:text-5xl font-bold tracking-[-0.04em] leading-[1.02] text-ink">
+          En resumen
+        </h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.78fr)] gap-10 mt-10 items-start">
+
+          <div class="space-y-5">
+            <div class="callout-accent">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-2">Key takeaway</p>
+              <p class="text-base leading-7 text-ink">
+                Una skill es un <strong>manual de oficio digital</strong> que transforma
+                un agente de IA generalista en un especialista con criterio. Es el puente
+                entre el conocimiento teórico del modelo y la práctica concreta de un dominio.
+              </p>
+            </div>
+
+            <div class="callout-neutral">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-2">Para recordar</p>
+              <ul class="space-y-2 text-sm text-muted leading-6" style="list-style:none;padding-left:0">
+                <li class="flex gap-2">
+                  <span class="text-accent font-bold">1.</span>
+                  Son modulares, autocontenidas y reutilizables.
+                </li>
+                <li class="flex gap-2">
+                  <span class="text-accent font-bold">2.</span>
+                  Usan Markdown + YAML: simples de escribir, poderosas en ejecución.
+                </li>
+                <li class="flex gap-2">
+                  <span class="text-accent font-bold">3.</span>
+                  Nacieron en Anthropic pero son un formato abierto e interoperable.
+                </li>
+                <li class="flex gap-2">
+                  <span class="text-accent font-bold">4.</span>
+                  El ecosistema crece en <a href="https://www.skills.sh/" target="_blank" rel="noopener noreferrer" class="text-accent underline underline-offset-2">skills.sh</a>.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <aside class="contract-shell text-center">
+            <p class="text-6xl font-extrabold text-accent tracking-[-0.04em] leading-none">∞</p>
+            <p class="text-sm font-semibold text-ink mt-3">Posibilidades</p>
+            <p class="text-sm text-muted leading-5 mt-1">
+              Cada dominio, cada oficio, cada especialidad puede codificarse como una skill.
+              El límite lo pone la comunidad.
+            </p>
+          </aside>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Navigation ── -->
+  <nav class="slide-nav">
+    <button class="nav-btn" id="prevBtn" disabled>← Anterior</button>
+    <span class="slide-counter" id="slideCounter">1 / 6</span>
+    <button class="nav-btn" id="nextBtn">Siguiente →</button>
+  </nav>
+
+  <script>
+    (function () {
+      const slides = document.querySelectorAll('.slide');
+      const total = slides.length;
+      let current = 0;
+
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const counter = document.getElementById('slideCounter');
+      const progress = document.getElementById('progressFill');
+
+      function updateUI() {
+        slides.forEach((s, i) => {
+          s.style.display = i === current ? 'flex' : 'none';
+        });
+        prevBtn.disabled = current === 0;
+        nextBtn.disabled = current === total - 1;
+        counter.textContent = (current + 1) + ' / ' + total;
+        progress.style.width = ((current + 1) / total * 100) + '%';
+      }
+
+      function goTo(index) {
+        if (index < 0 || index >= total) return;
+        current = index;
+        updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      prevBtn.addEventListener('click', () => goTo(current - 1));
+      nextBtn.addEventListener('click', () => goTo(current + 1));
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          goTo(current + 1);
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          goTo(current - 1);
+        }
+      });
+
+      updateUI();
+    })();
+  </script>
+
+</body>
+</html>
