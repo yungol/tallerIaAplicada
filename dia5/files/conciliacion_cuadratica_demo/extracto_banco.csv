@@ -1,0 +1,12 @@
+fecha,concepto,tipo,valor,saldo
+2026-05-01,Saldo anterior,saldo_inicial,0,10000000
+2026-05-03,Consignacion cliente A,credito,8000000,18000000
+2026-05-05,Pago cheque 1201,debito,4000000,14000000
+2026-05-10,Transferencia recibida cliente B,credito,6500000,20500000
+2026-05-12,Pago nomina mayo,debito,7000000,13500000
+2026-05-15,Pago cheque 1202,debito,3000000,10500000
+2026-05-18,Consignacion cliente C,credito,5500000,16000000
+2026-05-20,Pago PSE servicios publicos,debito,2200000,13800000
+2026-05-25,Transferencia recibida cliente D,credito,5000000,18800000
+2026-05-28,Pago cheque 1203,debito,1500000,17300000
+2026-05-31,Nota debito - comision manejo y GMF 4x1000,debito,300000,17000000

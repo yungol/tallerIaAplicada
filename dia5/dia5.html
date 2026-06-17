@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Sesión 5 - Análisis Inteligente de Datos Estructurados</title>
+    <!-- Modern Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <style>
+        :root {
+            /* Colores Principales extraidos del diseño base */
+            --nr001-a: #F18446; /* Naranja intenso */
+            --nr025-t: #FEDB9B; /* Mágico suroeste */
+            --az087-a: #093E5E; /* Morazul */
+            --ne287-a: #1c1c1c; /* Paisaje nocturno */
+            --bg-body: #FBF3E4; /* Jengibre dulce */
+            --vd214-t: #BED4CF; /* Gran lago */
+            --bg-surface: #ffffff;
+            
+            /* Gradient Colors for Modern UI */
+            --brand-blue: #0ea5e9;
+            --brand-green: #10b981;
+            --brand-orange: #f59e0b;
+            --brand-purple: #8b5cf6;
+            --brand-red: #ef4444;
+            --brand-teal: #06b6d4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--ne287-a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Contenedor del Carrusel */
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            background: var(--bg-surface);
+            position: relative;
+            overflow: hidden;
+            border-top: 8px solid var(--nr001-a);
+        }
+
+        /* Pista de Slides */
+        .slides-track {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 30px 50px 100px 50px;
+            overflow-y: auto;
+            display: none !important;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+
+        .slide.active-slide {
+            display: flex !important;
+        }
+
+        /* Estilos Internos */
+        h1, h2 { color: var(--az087-a); }
+        h1 { font-size: 2.2em; margin-bottom: 10px; }
+        h2 { font-size: 1.8em; margin-bottom: 20px; border-bottom: 2px solid var(--nr025-t); padding-bottom: 10px; }
+        h3 { color: var(--nr001-a); font-size: 1.4em; margin-top: 20px; margin-bottom: 10px; }
+        p { font-size: 1.1em; line-height: 1.6; margin-bottom: 16px; color: #4B4B4C; }
+        ul { padding-left: 20px; margin-bottom: 20px; }
+        li { font-size: 1.1em; margin-bottom: 12px; line-height: 1.5; color: #4B4B4C; }
+        
+        .tag {
+            background-color: var(--nr001-a);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .prompt-box {
+            background-color: #FEF0C4;
+            padding: 24px;
+            border-radius: 8px;
+            border-left: 6px solid var(--nr025-t);
+            font-size: 1.05em;
+            line-height: 1.6;
+        }
+
+        /* Botones de Navegación */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 40px;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .btn {
+            background-color: var(--az087-a);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover { background-color: var(--nr001-a); }
+        .btn:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
+
+        .indicators {
+            display: flex;
+            gap: 10px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background-color: #ccc;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .dot.active {
+            background-color: var(--nr001-a);
+            transform: scale(1.3);
+        }
+
+        .center-layout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+        }
+
+        /* Case Card Styles */
+        .case-card {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .case-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            border-color: rgba(9,62,94,0.2);
+        }
+
+        .case-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+            box-shadow: 0 0 0 4px #fff;
+        }
+
+        .case-card-title {
+            font-weight: 700;
+            color: var(--az087-a);
+            font-size: 1.1em;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .case-card-desc {
+            font-size: 0.85em;
+            color: #475569;
+            line-height: 1.4;
+        }
+
+        /* Workshop Section */
+        .workshop-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .workshop-section h3 {
+            font-size: 1.1em;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .step-badge {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            border-radius: 30px;
+            padding: 4px 14px 4px 4px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            min-width: max-content;
+        }
+
+        .step-num {
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85em;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .doc-format-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="presentation-container">
+        
+        <div class="slides-track" id="slidesTrack">
+
+            <!-- ============================================================ -->
+            <!-- SLIDE 0: Portada / Hub de Navegación -->
+            <!-- ============================================================ -->
+            <div class="slide active-slide" style="display:flex">
+                <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; padding: 10px 40px; overflow-y: auto;">
+                    
+                    <span class="tag" style="background: linear-gradient(135deg, var(--nr001-a), #e05a2a); font-size: 1.1em; margin-bottom: 15px; flex-shrink: 0;">Sesión 5 &mdash; Taller Práctico</span>
+                    <h2 style="border:none; font-size: 2em; margin-bottom: 8px; flex-shrink: 0; color: var(--az087-a);">
+                        <span class="material-symbols-outlined" style="vertical-align: bottom; font-size: 1.1em;">database</span>
+                        Análisis Inteligente de Datos Estructurados
+                    </h2>
+                    <p style="font-size: 1.05em; max-width: 850px; line-height: 1.6; margin-bottom: 10px; color: #475569; flex-shrink: 0;">
+                        Casos de uso aplicados de <strong>procesamiento, validación y análisis</strong> de datos estructurados en formatos tabulares (CSV, Excel, bases de datos), utilizando Inteligencia Artificial como herramienta de procesamiento analítico y detección de anomalías.
+                    </p>
+
+                    <!-- Metodología mini-flow con palabras clave -->
+                    <div style="display: flex; justify-content: center; align-items: flex-start; gap: 6px; margin-bottom: 20px; width: 100%; max-width: 1100px; flex-wrap: nowrap; flex-shrink: 0;">
+                        <!-- Paso 1 -->
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge">
+                                <div class="step-num" style="background: var(--az087-a);">1</div>
+                                <span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Planificación</span>
+                            </div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.62em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.35;">
+                                Modelo de Negocio · Gobernanza · Materialidad · Visión de Riesgos · Controles Clave
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 8px;">east</span>
+                        <!-- Paso 2 -->
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge">
+                                <div class="step-num" style="background: var(--az087-a);">2</div>
+                                <span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Contexto</span>
+                            </div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.62em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.35;">
+                                Marco Normativo · Info. Sectorial · Histórico de Decisiones · Variables del Entorno
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 8px;">east</span>
+                        <!-- Paso 3 -->
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge">
+                                <div class="step-num" style="background: var(--az087-a);">3</div>
+                                <span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Fuentes de Info.</span>
+                            </div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.62em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.35;">
+                                Integridad · Exactitud · Parámetros · Conciliación · Controles TI
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 8px;">east</span>
+                        <!-- Paso 4 -->
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--brand-green);">
+                                <div class="step-num" style="background: var(--brand-green);">4</div>
+                                <span style="font-size: 0.8em; font-weight: 600; color: var(--brand-green);">Procesamiento IA</span>
+                            </div>
+                            <div style="background: #f0fdf4; border: 1px dashed #34d399; border-radius: 8px; padding: 5px 8px; font-size: 0.62em; font-weight: 500; color: #065f46; text-align: center; width: 130px; line-height: 1.35;">
+                                Cobertura Poblacional · Procedimiento de Revisión · Factores de Decisión
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 8px;">east</span>
+                        <!-- Paso 5 -->
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--brand-green);">
+                                <div class="step-num" style="background: var(--brand-green);">5</div>
+                                <span style="font-size: 0.8em; font-weight: 600; color: var(--brand-green);">Resultados</span>
+                            </div>
+                            <div style="background: #f0fdf4; border: 1px dashed #34d399; border-radius: 8px; padding: 5px 8px; font-size: 0.62em; font-weight: 500; color: #065f46; text-align: center; width: 130px; line-height: 1.35;">
+                                Criterio · Condición · Causa · Impacto (MIPP)
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 8px;">east</span>
+                        <!-- Paso 6 -->
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--nr001-a);">
+                                <div class="step-num" style="background: var(--nr001-a);">6</div>
+                                <span style="font-size: 0.8em; font-weight: 600; color: var(--nr001-a);">Remediación</span>
+                            </div>
+                            <div style="background: #fff7ed; border: 1px dashed #fb923c; border-radius: 8px; padding: 5px 8px; font-size: 0.62em; font-weight: 500; color: #9a3412; text-align: center; width: 130px; line-height: 1.35;">
+                                Planes de Acción · Monitoreo Continuo · Reentrenamiento
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grid de 5 Casos de Uso -->
+                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; width: 100%; max-width: 1200px; margin-bottom: 25px;">
+                        
+                        <!-- Caso 1: Estados Financieros -->
+                        <div class="case-card" onclick="goToSlide(1)" style="border-bottom: 4px solid var(--brand-red);">
+                            <div class="case-icon" style="background: #fee2e2; border: 2px solid var(--brand-red);">
+                                <span class="material-symbols-outlined" style="font-size: 1.8em; color: var(--brand-red);">monitoring</span>
+                            </div>
+                            <div class="case-card-title">Caso 1<br>Estados Financieros</div>
+                            <div class="case-card-desc">Análisis de riesgos financieros: liquidez, rentabilidad, posición de caja y apalancamiento a partir de estados financieros estructurados.</div>
+                            <div style="margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;">
+                                <span class="doc-format-tag" style="background: #d1fae5; color: var(--brand-green);">
+                                    <span class="material-symbols-outlined" style="font-size: 1em;">grid_on</span> CSV
+                                </span>
+                                <span class="doc-format-tag" style="background: #e0f2fe; color: var(--brand-blue);">
+                                    <span class="material-symbols-outlined" style="font-size: 1em;">table_view</span> XLSX
+                                </span>
+                                <span class="doc-format-tag" style="background: #fee2e2; color: var(--brand-red);">
+                                    <span class="material-symbols-outlined" style="font-size: 1em;">description</span> XBRL
+                                </span>
+                            </div>
+                        </div>
+
+                    
+<!-- Caso 2: Transacciones Financieras -->
+                        <div class="case-card" onclick="goToSlide(2)" style="border-bottom: 4px solid var(--brand-blue);">
+                            <div class="case-icon" style="background: #e0f2fe; border: 2px solid var(--brand-blue);">
+                                <span class="material-symbols-outlined" style="font-size: 1.8em; color: var(--brand-blue);">account_balance</span>
+                            </div>
+                            <div class="case-card-title">Caso 2<br>Transacciones Financieras</div>
+                            <div class="case-card-desc">Análisis de registros transaccionales: detección de anomalías, duplicados, patrones de fraude y conciliación contable.</div>
+                            <div style="margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;">
+                                <span class="doc-format-tag" style="background: #d1fae5; color: var(--brand-green);">
+                                    <span class="material-symbols-outlined" style="font-size: 1em;">grid_on</span> CSV
+                                </span>
+                                <span class="doc-format-tag" style="background: #e0f2fe; color: var(--brand-blue);">
+                                    <span class="material-symbols-outlined" style="font-size: 1em;">table_view</span> XLSX
+                                </span>
+                                <span class="doc-format-tag" style="background: #ede9fe; color: var(--brand-purple);">
+                                    <span class="material-symbols-outlined" style="font-size: 1em;">storage</span> SQL
+                                </span>
+                            </div>
+                        </div>
+
+                        
+<!-- Caso 3: Nómina y Recursos Humanos -->
+                        <div class="case-card" onclick="goToSlide(3)" style="border-bottom: 4px solid var(--brand-green);">
+                            <div class="case-icon" style="background: #d1fae5; border: 2px solid var(--brand-green);">
+                                <span class="material-symbols-outlined" style="font-size: 1.8em; color: var(--brand-green);">groups</span>
+                            </div>
+                            <div class="case-card-title">Caso 3<br>Nómina y Recursos Humanos</div>
+                            <div class="case-card-desc">Auditoría de liquidaciones de nómina, deducciones, aportes a seguridad social y detección de empleados fantasma.</div>
+                            <div style="margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;">
+                                <span class="doc-format-tag" style="background: #d1fae5; color: var(--brand-green);">
+                                    <span class="material-symbols-outlined" style="font-size: 1em;">grid_on</span> CSV
+                                </span>
+                                <span class="doc-format-tag" style="background: #e0f2fe; color: var(--brand-blue);">
+                                    <span class="material-symbols-outlined" style="font-size: 1em;">table_view</span> XLSX
+                                </span>
+                            </div>
+                        </div>
+
+                        
+<!-- Caso 4: Inventarios y Activos Fijos -->
+                        <div class="case-card" onclick="goToSlide(4)" style="border-bottom: 4px solid var(--brand-orange);">
+                            <div class="case-icon" style="background: #fef3c7; border: 2px solid var(--brand-orange);">
+                                <span class="material-symbols-outlined" style="font-size: 1.8em; color: var(--brand-orange);">inventory_2</span>
+                            </div>
+                            <div class="case-card-title">Caso 4<br>Inventarios y Activos Fijos</div>
+                            <div class="case-card-desc">Análisis de existencias, valorización, obsolescencia, discrepancias físico-contables y vida útil de activos fijos.</div>
+                            <div style="margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;">
+                                <span class="doc-format-tag" style="background: #d1fae5; color: var(--brand-green);">
+                                    <span class="material-symbols-outlined" style="font-size: 1em;">grid_on</span> CSV
+                                </span>
+                                <span class="doc-format-tag" style="background: #e0f2fe; color: var(--brand-blue);">
+                                    <span class="material-symbols-outlined" style="font-size: 1em;">table_view</span> XLSX
+                                </span>
+                                <span class="doc-format-tag" style="background: #ede9fe; color: var(--brand-purple);">
+                                    <span class="material-symbols-outlined" style="font-size: 1em;">storage</span> ERP
+                                </span>
+                            </div>
+                        </div>
+
+                        
+<!-- Caso 5: Segregación de Funciones (SoD) -->
+                        <div class="case-card" onclick="goToSlide(5)" style="border-bottom: 4px solid var(--brand-purple);">
+                            <div class="case-icon" style="background: #ede9fe; border: 2px solid var(--brand-purple);">
+                                <span class="material-symbols-outlined" style="font-size: 1.8em; color: var(--brand-purple);">admin_panel_settings</span>
+                            </div>
+                            <div class="case-card-title">Caso 5<br>Segregación de Funciones (SoD)</div>
+                            <div class="case-card-desc">Análisis de matrices de accesos y roles: detección de conflictos SoD, acumulación de privilegios y usuarios críticos en ERP/sistemas.</div>
+                            <div style="margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;">
+                                <span class="doc-format-tag" style="background: #d1fae5; color: var(--brand-green);">
+                                    <span class="material-symbols-outlined" style="font-size: 1em;">grid_on</span> CSV
+                                </span>
+                                <span class="doc-format-tag" style="background: #e0f2fe; color: var(--brand-blue);">
+                                    <span class="material-symbols-outlined" style="font-size: 1em;">table_view</span> XLSX
+                                </span>
+                                <span class="doc-format-tag" style="background: #fef3c7; color: var(--brand-orange);">
+                                    <span class="material-symbols-outlined" style="font-size: 1em;">security</span> RBAC
+                                </span>
+                            </div>
+                        </div>
+
+                        
+
+                    </div>
+
+                    <!-- Nota de Objetivo -->
+                    <div style="background: rgba(9, 62, 94, 0.04); border-left: 4px solid var(--az087-a); padding: 15px 25px; border-radius: 8px; max-width: 1100px; width: 100%; text-align: left;">
+                        <p style="font-size: 0.95em; color: var(--az087-a); margin-bottom: 0; line-height: 1.5;">
+                            <strong><span class="material-symbols-outlined" style="vertical-align: text-bottom; font-size: 1.2em;">target</span> Objetivo de la sesión:</strong> Desarrollar como taller práctico, casos de uso aplicados de procesamiento, validación y análisis de datos estructurados en formatos tabulares (CSV, Excel, bases de datos), aplicando la metodología de 6 pasos con Inteligencia Artificial como motor de detección de anomalías, patrones y riesgos sobre volúmenes masivos de registros.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- SLIDE 1: Caso 1 — Análisis de Estados Financieros -->
+            <!-- ============================================================ -->
+            <div class="slide" style="display:none">
+                <button onclick="goToSlide(0)" style="position: absolute; top: 30px; left: 30px; background: transparent; border: 1px solid var(--az087-a); color: var(--az087-a); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s; z-index: 10;">
+                    <span class="material-symbols-outlined" style="vertical-align: text-bottom; font-size: 1.25em;">arrow_back</span> Volver al Hub
+                </button>
+                <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: left; padding: 20px 40px; overflow-y: auto;">
+                    <span class="tag" style="background-color: var(--brand-red); font-size: 1.1em; margin-bottom: 15px;">Caso 1 de 5</span>
+                    <h2 style="border:none; font-size: 1.8em; margin-bottom: 8px; text-align: center; color: var(--az087-a);">
+                        <span class="material-symbols-outlined" style="vertical-align: bottom; font-size: 1.1em;">monitoring</span>
+                        Análisis Inteligente de Estados Financieros
+                        <span style="font-size: 0.5em; display: block; color: var(--brand-red); font-weight: 500;">Multiempresa · Liquidez · Rentabilidad · Posición de Caja · Apalancamiento</span>
+                    </h2>
+                    <p style="font-size: 0.95em; color: #64748b; text-align: center; margin-bottom: 20px; max-width: 900px;">Análisis masivo de riesgos financieros sobre una <strong>base de datos multiempresa</strong> con tres archivos de estados financieros estructurados (Situación Financiera, Resultado Integral, Flujos de Efectivo): cálculo de indicadores de liquidez, rentabilidad, apalancamiento, posición de caja, ranking comparativo entre compañías y detección de señales de alerta de continuidad de negocio (empresa en marcha).</p>
+
+                    <!-- Flowchart de Metodología -->
+                    <div style="display: flex; justify-content: center; align-items: flex-start; gap: 8px; margin-bottom: 20px; width: 100%; max-width: 1100px; flex-wrap: wrap;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge"><div class="step-num" style="background: var(--az087-a);">1</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Planificación</span></div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.3;">Base multiempresa<br>Sector y comparables</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge"><div class="step-num" style="background: var(--az087-a);">2</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Contexto</span></div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.3;">NIIF, NIA 570<br>Empresa en marcha</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge"><div class="step-num" style="background: var(--az087-a);">3</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Fuentes</span></div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.3;">3 archivos XBRL<br>210030, 310030, 520000</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--brand-green);"><div class="step-num" style="background: var(--brand-green);">4</div><span style="font-size: 0.8em; font-weight: 600; color: var(--brand-green);">Procesamiento</span></div>
+                            <div style="background: #f0fdf4; border: 1px dashed #34d399; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #065f46; text-align: center; width: 130px; line-height: 1.3;">Ratios por empresa<br>Ranking y anomalías</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--brand-green);"><div class="step-num" style="background: var(--brand-green);">5</div><span style="font-size: 0.8em; font-weight: 600; color: var(--brand-green);">Resultados</span></div>
+                            <div style="background: #f0fdf4; border: 1px dashed #34d399; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #065f46; text-align: center; width: 130px; line-height: 1.3;">Diagnóstico multiempresa<br>Scoring comparativo</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--nr001-a);"><div class="step-num" style="background: var(--nr001-a);">6</div><span style="font-size: 0.8em; font-weight: 600; color: var(--nr001-a);">Remediación</span></div>
+                            <div style="background: #fff7ed; border: 1px dashed #fb923c; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #9a3412; text-align: center; width: 130px; line-height: 1.3;">Reestructuración<br>Alertas de Going Concern</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 20px; width: 100%; max-width: 1100px; margin-bottom: 20px;">
+                        
+                        <!-- Columna 1: Planificación -->
+                        <div class="workshop-section" style="flex: 1; display: flex; flex-direction: column;">
+                            <h3 style="color: var(--nr001-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">checklist</span> 1. Planificación</h3>
+                            <p style="font-size: 0.8em; color: #64748b; margin-bottom: 10px; line-height: 1.4;">Definición del alcance del análisis multiempresa, base de datos fuente, sector económico y criterios de selección.</p>
+                            <ul style="font-size: 0.8em; padding-left: 15px; color: #334155; line-height: 1.4; margin-bottom: 15px;">
+                                <li><strong>Base de Datos:</strong> Repositorio multiempresa con EEFF estandarizados (taxonomía XBRL/Supersociedades). Análisis transversal de N compañías.</li>
+                                <li><strong>Objetivo:</strong> Evaluar riesgos de liquidez, rentabilidad, apalancamiento, posición de caja y continuidad (empresa en marcha) de forma comparativa entre múltiples compañías. El resultado debe permitir <strong>filtrar por sector económico (CIIU)</strong> para segmentar el análisis y comparar empresas dentro de un mismo sector.</li>
+                                <li><strong>Alcance:</strong> 3 archivos: Estado de Situación Financiera (210030), Estado de Resultado Integral (310030), Estado de Flujos de Efectivo (520000). Cada archivo contiene datos de múltiples empresas.</li>
+                                <li><strong>Materialidad:</strong> Total activos, ingresos operacionales, patrimonio neto y deuda financiera por empresa. Segmentación por tamaño, sector (CIIU) y región.</li>
+                                <li><strong>Hipótesis de Riesgo:</strong> Empresas con iliquidez, deterioro de márgenes, sobreendeudamiento, flujo de caja negativo, pérdida de patrimonio, indicadores de no continuidad. Ranking sectorial de riesgo.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Columna 2: Contexto y Fuentes -->
+                        <div class="workshop-section" style="flex: 1.2; display: flex; flex-direction: column;">
+                            <h3 style="color: var(--az087-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">monitoring</span> 2-3. Contexto y Fuentes</h3>
+                            <p style="font-size: 0.8em; color: #64748b; margin-bottom: 10px; line-height: 1.4;">Marco NIIF aplicable y los 3 archivos de la base de datos multiempresa a procesar.</p>
+                            
+                            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                                <span class="doc-format-tag" style="background: #d1fae5; color: var(--brand-green);"><span class="material-symbols-outlined" style="font-size: 1em;">grid_on</span> 210030_Situación Financiera</span>
+                                <span class="doc-format-tag" style="background: #e0f2fe; color: var(--brand-blue);"><span class="material-symbols-outlined" style="font-size: 1em;">table_view</span> 310030_Resultado Integral</span>
+                                <span class="doc-format-tag" style="background: #fee2e2; color: var(--brand-red);"><span class="material-symbols-outlined" style="font-size: 1em;">swap_horiz</span> 520000_Flujos de Efectivo</span>
+                            </div>
+
+                            <h4 style="font-size: 0.85em; color: var(--az087-a); margin-bottom: 8px;">Estructura de los Archivos (multiempresa):</h4>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.78em; margin-bottom: 10px;">
+                                <tr style="background: rgba(9, 62, 94, 0.05); text-align: left;"><th style="padding: 5px; border-bottom: 1px solid #cbd5e1;">Campo</th><th style="padding: 5px; border-bottom: 1px solid #cbd5e1;">Descripción</th></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">NIT / ID Empresa</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Identificador único de cada compañía en la base</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Razón Social</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Nombre de la empresa reportante</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">CIIU / Sector</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Código de actividad económica y sector</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Período / Fecha Corte</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Año y período del reporte financiero</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Cuenta / Rubro XBRL</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Código taxonómico XBRL y descripción de la cuenta</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Saldo Actual / Anterior</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Montos del período actual y comparativo por empresa</td></tr>
+                                <tr><td style="padding: 5px; font-weight: 600;">Tamaño / Supervisado</td><td style="padding: 5px;">Clasificación por tamaño de empresa y ente supervisor</td></tr>
+                            </table>
+
+                            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px; border-radius: 4px; font-size: 0.78em; color: #92400e; line-height: 1.4; margin-top: 10px;">
+                                <strong><span class="material-symbols-outlined" style="font-size: 1em; vertical-align: text-bottom;">verified_user</span> Validación de Fuentes (antes de IA):</strong>
+                                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                                    <div style="flex: 1;">
+                                        <strong style="font-size: 0.95em; color: #b45309;"><span class="material-symbols-outlined" style="font-size: 0.95em; vertical-align: text-bottom;">memory</span> Técnica:</strong>
+                                        <ul style="padding-left: 14px; margin: 4px 0 0 0; line-height: 1.35;">
+                                            <li>Mismo NIT presente en los 3 archivos</li>
+                                            <li>Ecuación: Activo = Pasivo + Patrimonio por empresa</li>
+                                            <li>Consistencia de períodos entre archivos</li>
+                                        </ul>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <strong style="font-size: 0.95em; color: #b45309;"><span class="material-symbols-outlined" style="font-size: 0.95em; vertical-align: text-bottom;">person_check</span> Negocio:</strong>
+                                        <ul style="padding-left: 14px; margin: 4px 0 0 0; line-height: 1.35;">
+                                            <li>Fuente oficial (Supersociedades/SFC)</li>
+                                            <li>Sector y CIIU coherente con universo</li>
+                                            <li>Moneda y unidad de medida consistente</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Columna 3: Prompt IA -->
+                        <div class="workshop-section" style="flex: 1.8;">
+                            <h3 style="color: var(--brand-green);"><span class="material-symbols-outlined" style="font-size: 1.1em;">chat</span> 4. Procesamiento (Prompt IA)</h3>
+                            <div style="background-color: #f8fafc; border-left: 4px solid var(--brand-green); padding: 10px; border-radius: 6px; font-size: 0.72em; line-height: 1.35; margin-bottom: 10px; font-family: 'Courier New', monospace; color: #1e293b;">
+                                <strong style="color: var(--brand-green);">Rol:</strong> Eres un Analista Financiero Senior y Auditor experto en NIIF/NIC (NIC 1 — Presentación de EEFF, NIC 7 — Flujos de Efectivo, NIIF 9 — Instrumentos Financieros), NIA 570 (Empresa en Marcha), NIA 520 (Procedimientos Analíticos), análisis financiero avanzado, ratios financieros, modelos de predicción de insolvencia (Altman Z-Score, Ohlson O-Score), análisis comparativo sectorial y evaluación masiva de riesgos de continuidad de negocio sobre bases de datos multiempresa.<br><br>
+                                <strong style="color: var(--brand-green);">Contexto:</strong> Se te entregarán <strong>3 archivos</strong> de una base de datos multiempresa con estados financieros estructurados de <strong>múltiples compañías</strong>:<br>
+                                <div style="margin: 4px 0 6px 8px; padding: 4px 8px; background: #eff6ff; border-radius: 4px; border: 1px solid #bfdbfe;">
+                                    <strong style="color: #1e40af;">Archivo 1:</strong> <code>210030_Estado de situación financiera</code> — Balance General de cada empresa (activos corrientes/no corrientes, pasivos C/NC, patrimonio).<br>
+                                    <strong style="color: #1e40af;">Archivo 2:</strong> <code>310030_Estado de resultado integral</code> — P&amp;G de cada empresa (ingresos, costos, gastos, utilidad bruta/operacional/neta).<br>
+                                    <strong style="color: #1e40af;">Archivo 3:</strong> <code>520000_Estado de flujos de efectivo</code> — Flujos de operación, inversión y financiación de cada empresa.
+                                </div>
+                                Cada archivo contiene registros de múltiples empresas identificadas por NIT/Razón Social, con rubros en taxonomía XBRL y saldos del período actual y anterior. La clave de cruce entre archivos es el NIT de la empresa. Marco aplicable: NIIF/NIC completas, NIA 520 (procedimientos analíticos), NIA 570 (empresa en marcha), Supersociedades (Colombia), benchmarks sectoriales por CIIU.<br><br>
+                                <strong style="color: var(--brand-green);">Tarea 1 — Consolidación y Perfilamiento Multiempresa:</strong><br>
+                                <ul style="padding-left: 16px; margin: 3px 0 6px 0; line-height: 1.3;">
+                                    <li><strong>Cruce de archivos:</strong> Unificar los 3 archivos usando NIT como clave. Identificar empresas que no aparecen en los 3 archivos (datos incompletos)</li>
+                                    <li><strong>Universo:</strong> Total de empresas, distribución por sector CIIU, tamaño, región. Resumen de totales: suma de activos, ingresos, patrimonio del universo</li>
+                                    <li><strong>Perfilamiento por empresa:</strong> Para cada compañía: composición del balance (% activos corrientes/no corrientes, pasivos C/NC, patrimonio), estructura del P&amp;G (márgenes bruto, operacional, neto), flujo operativo, de inversión, de financiación</li>
+                                    <li><strong>Análisis horizontal:</strong> Variación período actual vs. anterior por empresa. Identificar empresas con variaciones &gt;30% en rubros clave</li>
+                                </ul>
+                                <strong style="color: var(--brand-green);">Tarea 2 — Indicadores Financieros de Riesgo (por empresa):</strong> Para <strong>cada compañía</strong> del universo, calcular y evaluar los siguientes ratios agrupados por dimensión de riesgo:<br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #fef2f2; border-radius: 4px; border: 1px solid #fecaca;">
+                                    <strong style="color: #991b1b;">R1. LIQUIDEZ</strong> — Razón Corriente (AC / PC); Prueba Ácida ((AC − Inventarios) / PC); Capital de Trabajo Neto; Ciclo de Conversión de Efectivo. <em>Umbrales: RC &lt; 1.0 = alto; 1.0–1.5 = medio. Comparar vs. mediana del sector CIIU.</em><br>
+                                    <strong style="color: #991b1b;">R2. RENTABILIDAD</strong> — Margen Bruto; Margen Operacional (EBIT / Ingresos); Margen Neto; ROA; ROE; EBITDA Margin. <em>Evaluar tendencia por empresa y comparar con percentiles del sector.</em><br>
+                                    <strong style="color: #991b1b;">R3. POSICIÓN DE CAJA</strong> — Flujo Operativo / Deuda Total; Cobertura de Intereses (EBIT / Gastos Financieros); Cash Burn Rate (si flujo operativo negativo); Efectivo / Pasivo Corriente. <em>Cobertura &lt; 1.5x = alto.</em><br>
+                                    <strong style="color: #991b1b;">R4. APALANCAMIENTO</strong> — Endeudamiento (Pasivo / Activo); D/E (Pasivo / Patrimonio); Endeudamiento Financiero; Concentración Pasivo CP (PC / Pasivo Total). <em>D/E &gt; 2.0 = alto; &gt; 3.0 = crítico. Comparar con sector.</em>
+                                </div>
+                                <strong style="color: var(--brand-green);">Tarea 3 — Detección de Red Flags Financieros y Going Concern (multiempresa):</strong><br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #fef2f2; border-radius: 4px; border: 1px solid #fecaca;">
+                                    <strong style="color: #dc2626;">🔍 RF1. Señales de Iliquidez</strong> — Empresas con capital de trabajo negativo; razón corriente &lt; 1.0 y peor que la mediana del sector; ciclo de conversión de efectivo creciente; concentración de activos ilíquidos.<br>
+                                    <strong style="color: #dc2626;">🔍 RF2. Deterioro de Rentabilidad</strong> — Empresas con márgenes por debajo del percentil 25 de su sector; utilidad operacional negativa; costos de ventas como % de ingresos significativamente mayor que peers; pérdidas netas recurrentes.<br>
+                                    <strong style="color: #dc2626;">🔍 RF3. Estrés de Caja</strong> — Empresas con flujo operativo negativo; dependencia de financiación para cubrir operación; cash burn rate &lt; 6 meses; flujo operativo negativo + deuda alta; efectivo como % de pasivo corriente &lt; 5%.<br>
+                                    <strong style="color: #dc2626;">🔍 RF4. Sobreendeudamiento</strong> — Empresas con D/E &gt; 2x y superior a la mediana sectorial; concentración de deuda en corto plazo (&gt;70%); cobertura de intereses &lt; 1.5x; patrimonio negativo o erosionado; endeudamiento financiero outlier en su sector.<br>
+                                    <strong style="color: #dc2626;">🔍 RF5. Indicadores de No Continuidad (NIA 570)</strong> — Empresas con patrimonio negativo o en causal de disolución; combinación de flujo operativo negativo + pérdida neta + D/E &gt; 3x; Altman Z-Score &lt; 1.81 (zona de quiebra); empresas con múltiples dimensiones en riesgo simultáneo.<br>
+                                    <strong style="color: #dc2626;">🔍 RF6. Anomalías en Datos Reportados</strong> — Empresas con activo ≠ pasivo + patrimonio (desbalance); rubros con variaciones &gt;100% sin proporción con sector; ingresos = 0 pero activos significativos; flujo de efectivo inconsistente con utilidad neta.</div>
+                                <strong style="color: var(--brand-green);">Tarea 4 — Scoring Integral y Ranking de Riesgo Financiero (por empresa):</strong><br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #eff6ff; border-radius: 4px; border: 1px solid #bfdbfe;">
+                                    <strong style="color: #1e40af;">A) Scoring por Dimensión (por empresa):</strong> Score 1–5 para Liquidez, Rentabilidad, Caja, Apalancamiento según umbrales y posición relativa vs. sector.<br>
+                                    <strong style="color: #1e40af;">B) Altman Z-Score (por empresa):</strong> Z = 1.2×(CTN/AT) + 1.4×(UR/AT) + 3.3×(EBIT/AT) + 0.6×(PM/PT) + 1.0×(Ventas/AT). Clasificar: &gt;2.99 = seguro; 1.81–2.99 = gris; &lt;1.81 = riesgo quiebra.<br>
+                                    <strong style="color: #1e40af;">C) Riesgo Final por empresa = promedio ponderado de dimensiones + ajuste por red flags:</strong><br>
+                                    <span style="padding-left: 8px;">• <strong style="color: #dc2626;">Crítico:</strong> Z-Score &lt; 1.81 o patrimonio negativo o flujo operativo negativo + D/E &gt; 3x</span><br>
+                                    <span style="padding-left: 8px;">• <strong style="color: #dc2626;">Alto:</strong> ≥ 3 red flags o Z-Score en zona gris + deterioro</span><br>
+                                    <span style="padding-left: 8px;">• <strong style="color: #f59e0b;">Medio:</strong> 1–2 red flags o deterioro parcial en 1–2 dimensiones</span><br>
+                                    <span style="padding-left: 8px;">• <strong style="color: #16a34a;">Bajo:</strong> Ratios saludables y sin red flags</span><br><br>
+                                    <strong style="color: #1e40af;">D) Ranking Comparativo:</strong> Ordenar todas las empresas por riesgo final (de mayor a menor). Generar estadísticas del universo: % empresas por nivel de riesgo, distribución por sector, empresas con mayor concentración de red flags. <strong>Incluir filtros interactivos por sector económico (CIIU)</strong> que permitan segmentar el ranking y las estadísticas por sector seleccionado.
+                                </div>
+
+                                <strong style="color: var(--brand-green);">Formato de salida — HTML AUTOCONTENIDO:</strong> La respuesta DEBE ser ÚNICAMENTE un archivo HTML autocontenido que funcione como Tablero de Control moderno y ejecutivo.<br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #f0fdf4; border-radius: 4px; border: 1px solid #bbf7d0;">
+                                    <strong style="color: #065f46;">Tecnologías:</strong> Tailwind CSS (CDN), fuente Inter + Monotype, gráficos con CSS/SVG o Chart.js.<br>
+                                    <strong style="color: #065f46;">Diseño:</strong> Colores sobrios — fondos blancos, azul corporativo, verde y rojo. Estilo ejecutivo y limpio.
+                                </div>
+                                <strong style="color: var(--brand-green);">Filtros Interactivos:</strong> El tablero DEBE incluir un <strong>panel de filtros por sector económico (código CIIU)</strong> que permita al usuario seleccionar uno o varios sectores y que todas las secciones, gráficos, rankings y estadísticas se actualicen dinámicamente según la selección. Incluir también filtro por nivel de riesgo y por tamaño de empresa.<br><br>
+                                <strong style="color: var(--brand-green);">Secciones del Tablero:</strong><br>
+                                <span style="padding-left: 8px;">1.</span> <strong>Resumen Ejecutivo:</strong> KPIs financieros — Total Activos, Ingresos, Utilidad Neta, EBITDA, Efectivo, Deuda Total, Z-Score, Nivel de Riesgo Global<br>
+                                <span style="padding-left: 8px;">2.</span> <strong>Análisis de Estructura:</strong> Composición del balance (gráfico de barras apiladas), análisis vertical y horizontal, tendencias de rubros principales<br>
+                                <span style="padding-left: 8px;">3.</span> <strong>Dashboard de Ratios por Dimensión:</strong> Panel de 4 cuadrantes (Liquidez, Rentabilidad, Caja, Apalancamiento) con gráficos radar/gauge, cada ratio con valor, tendencia (↑↓→) y semáforo (🟢🟡🔴)<br>
+                                <span style="padding-left: 8px;">4.</span> <strong>Análisis de Tendencias:</strong> Gráficos de línea comparando períodos para márgenes, ratios de liquidez, endeudamiento y flujo de caja<br>
+                                <span style="padding-left: 8px;">5.</span> <strong>Red Flags y Going Concern:</strong> Dashboard de alertas RF1–RF6, Altman Z-Score con interpretación visual, señales NIA 570<br>
+                                <span style="padding-left: 8px;">6.</span> <strong>Observaciones MIPP:</strong> Hallazgos con Criterio (NIC 1, NIA 570, NIA 520), Condición (ratio/anomalía detectada), Causa (origen del deterioro) e Impacto (efecto financiero/regulatorio/continuidad)<br>
+                                <span style="padding-left: 8px;">7.</span> <strong>Remediación, Monitoreo y Mejora Continua:</strong><br>
+                                <span style="padding-left: 24px;">a)</span> <strong>Planes de Acción:</strong> Reestructuración de deuda, mejora de capital de trabajo, reducción de gastos, plan de generación de caja<br>
+                                <span style="padding-left: 24px;">b)</span> <strong>Monitoreo:</strong> KRIs financieros — razón corriente mensual, EBITDA rolling 12M, flujo operativo acumulado, D/E trimestral, cash position semanal<br>
+                                <span style="padding-left: 24px;">c)</span> <strong>Reentrenamiento:</strong> Feedback del auditor para actualizar benchmarks sectoriales y umbrales de alerta<br>
+                                <span style="padding-left: 8px;">8.</span> <strong>Scoring Integral:</strong> Radar de 4 dimensiones de riesgo, Altman Z-Score, tabla comparativa entre períodos, mapa de calor de evolución
+                            </div>
+
+                            <h3 style="color: var(--az087-a); font-size: 1em;"><span class="material-symbols-outlined" style="font-size: 1.1em;">verified</span> 5-6. Resultados y Remediación</h3>
+                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                <div style="flex: 1; background: #f0fdf4; padding: 8px; border-radius: 6px; border-top: 3px solid var(--brand-green);">
+                                    <strong style="font-size: 0.78em; color: var(--brand-green); display: block; margin-bottom: 4px;">Entregables Analíticos</strong>
+                                    <ul style="font-size: 0.72em; padding-left: 12px; color: #334155; line-height: 1.3; margin-bottom: 0;">
+                                        <li>Perfilamiento y estructura financiera</li>
+                                        <li>Ratios por dimensión de riesgo</li>
+                                        <li>Altman Z-Score y Going Concern</li>
+                                        <li>Scoring integral multidimensional</li>
+                                    </ul>
+                                </div>
+                                <div style="flex: 1; background: #fef2f2; padding: 8px; border-radius: 6px; border-top: 3px solid var(--brand-red);">
+                                    <strong style="font-size: 0.78em; color: var(--brand-red); display: block; margin-bottom: 4px;">Dashboard Consolidado</strong>
+                                    <ul style="font-size: 0.72em; padding-left: 12px; color: #334155; line-height: 1.3; margin-bottom: 0;">
+                                        <li>Panel de 4 cuadrantes de riesgo</li>
+                                        <li>Tendencias y análisis comparativo</li>
+                                        <li>Red flags y señales NIA 570</li>
+                                        <li>Mapa de calor de evolución</li>
+                                    </ul>
+                                </div>
+                                <div style="flex: 1; background: #fff7ed; padding: 8px; border-radius: 6px; border-top: 3px solid var(--nr001-a);">
+                                    <strong style="font-size: 0.78em; color: var(--nr001-a); display: block; margin-bottom: 4px;">Remediación y Mejora Continua</strong>
+                                    <ul style="font-size: 0.72em; padding-left: 12px; color: #334155; line-height: 1.3; margin-bottom: 0;">
+                                        <li><strong>Planes:</strong> Reestructuración de deuda, mejora de capital de trabajo</li>
+                                        <li><strong>Monitoreo:</strong> KRIs financieros mensuales/trimestrales</li>
+                                        <li><strong>Reentrenamiento:</strong> Actualización de benchmarks sectoriales</li>
+                                        <li>Alertas de empresa en marcha (Going Concern)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <!-- Escala de valoración visual -->
+                            <div style="display: flex; gap: 6px; align-items: center; font-size: 0.7em; color: #64748b; padding: 4px 0; flex-wrap: wrap;">
+                                <span style="font-weight: 600;">Riesgo Final = f(Liquidez, Rentabilidad, Caja, Apalancamiento, Going Concern):</span>
+                                <span style="background: #7f1d1d; color: #fff; padding: 2px 8px; border-radius: 10px; font-weight: 600;">Crítico</span>
+                                <span style="background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 10px; font-weight: 600;">Alto</span>
+                                <span style="background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 10px; font-weight: 600;">Medio</span>
+                                <span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 10px; font-weight: 600;">Bajo</span>
+                                <span style="margin-left: 4px;">| Modelos: Altman Z-Score · Ratios NIIF · NIA 570</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Footer -->
+                <div style="margin-top: auto; width: 100%; padding: 0 50px;">
+                    <hr style="margin-top: 10px; margin-bottom: 10px; border: none; border-top: 1px solid rgba(9, 62, 94, 0.15);">
+                    <div style="font-size: 0.85em; color: #64748b;">
+                        <strong>Formatos:</strong> CSV, XLSX, XBRL &nbsp;|&nbsp; <strong>Marcos:</strong> NIC 1 (EEFF), NIC 7 (Flujos), NIIF 9, NIA 520 (Analíticos), NIA 570 (Going Concern), Supersociedades &nbsp;|&nbsp; <strong>Técnicas:</strong> Ratios financieros, Altman Z-Score, análisis horizontal/vertical, tendencias, benchmarking sectorial.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- SLIDE 2: Caso 2 — Análisis de Transacciones Financieras -->
+            <!-- ============================================================ -->
+            <div class="slide" style="display:none">
+                <button onclick="goToSlide(0)" style="position: absolute; top: 30px; left: 30px; background: transparent; border: 1px solid var(--az087-a); color: var(--az087-a); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s; z-index: 10;">
+                    <span class="material-symbols-outlined" style="vertical-align: text-bottom; font-size: 1.25em;">arrow_back</span> Volver al Hub
+                </button>
+                <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: left; padding: 20px 40px; overflow-y: auto;">
+                    <span class="tag" style="background-color: var(--brand-blue); font-size: 1.1em; margin-bottom: 15px;">Caso 2 de 5</span>
+                    <h2 style="border:none; font-size: 1.8em; margin-bottom: 8px; text-align: center; color: var(--az087-a);">
+                        <span class="material-symbols-outlined" style="vertical-align: bottom; font-size: 1.1em;">account_balance</span>
+                        Análisis Inteligente de Transacciones Financieras
+                    </h2>
+                    <p style="font-size: 0.95em; color: #64748b; text-align: center; margin-bottom: 20px; max-width: 800px;">Procesamiento masivo de registros transaccionales: detección de anomalías, duplicados, patrones de fraude, conciliación contable y análisis forense de datos financieros a partir de archivos CSV/Excel y extracciones de sistemas.</p>
+
+                    <!-- Flowchart de Metodología con datos clave -->
+                    <div style="display: flex; justify-content: center; align-items: flex-start; gap: 8px; margin-bottom: 20px; width: 100%; max-width: 1100px; flex-wrap: wrap;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge"><div class="step-num" style="background: var(--az087-a);">1</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Planificación</span></div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.3;">Ciclo contable<br>Período y cuentas</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge"><div class="step-num" style="background: var(--az087-a);">2</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Contexto</span></div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.3;">NIIF/NIC, NIA<br>Políticas contables</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge"><div class="step-num" style="background: var(--az087-a);">3</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Fuentes</span></div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.3;">CSV/XLSX libro mayor<br>Extractos bancarios</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--brand-green);"><div class="step-num" style="background: var(--brand-green);">4</div><span style="font-size: 0.8em; font-weight: 600; color: var(--brand-green);">Procesamiento</span></div>
+                            <div style="background: #f0fdf4; border: 1px dashed #34d399; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #065f46; text-align: center; width: 130px; line-height: 1.3;">Benford, duplicados<br>Outliers, patrones IA</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--brand-green);"><div class="step-num" style="background: var(--brand-green);">5</div><span style="font-size: 0.8em; font-weight: 600; color: var(--brand-green);">Resultados</span></div>
+                            <div style="background: #f0fdf4; border: 1px dashed #34d399; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #065f46; text-align: center; width: 130px; line-height: 1.3;">Hallazgos MIPP<br>Scoring de riesgo</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--nr001-a);"><div class="step-num" style="background: var(--nr001-a);">6</div><span style="font-size: 0.8em; font-weight: 600; color: var(--nr001-a);">Remediación</span></div>
+                            <div style="background: #fff7ed; border: 1px dashed #fb923c; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #9a3412; text-align: center; width: 130px; line-height: 1.3;">Ajustes contables<br>Controles automatizados</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 20px; width: 100%; max-width: 1100px; margin-bottom: 20px;">
+                        
+                        <!-- Columna 1: Planificación -->
+                        <div class="workshop-section" style="flex: 1; display: flex; flex-direction: column;">
+                            <h3 style="color: var(--nr001-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">checklist</span> 1. Planificación</h3>
+                            <p style="font-size: 0.8em; color: #64748b; margin-bottom: 10px; line-height: 1.4;">Definición del objetivo de análisis, período fiscal y cuentas contables a evaluar.</p>
+                            <ul style="font-size: 0.8em; padding-left: 15px; color: #334155; line-height: 1.4; margin-bottom: 15px;">
+                                <li><strong>Ciclo Contable:</strong> Período de análisis (mensual, trimestral, anual).</li>
+                                <li><strong>Objetivo:</strong> Detectar anomalías, duplicados, fraude y validar integridad de datos.</li>
+                                <li><strong>Alcance:</strong> Cuentas contables, centros de costo, monedas y sistemas fuente.</li>
+                                <li><strong>Materialidad:</strong> Umbral de significancia y bases de muestreo.</li>
+                                <li><strong>Hipótesis de Riesgo:</strong> Transacciones duplicadas, montos atípicos, registros fuera de horario, fraccionamiento, concentración.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Columna 2: Contexto y Fuentes -->
+                        <div class="workshop-section" style="flex: 1.2; display: flex; flex-direction: column;">
+                            <h3 style="color: var(--az087-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">description</span> 2-3. Contexto y Fuentes</h3>
+                            <p style="font-size: 0.8em; color: #64748b; margin-bottom: 10px; line-height: 1.4;">Marco normativo contable y los datasets fuente a procesar.</p>
+                            
+                            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                                <span class="doc-format-tag" style="background: #d1fae5; color: var(--brand-green);"><span class="material-symbols-outlined" style="font-size: 1em;">grid_on</span> Libro Mayor CSV</span>
+                                <span class="doc-format-tag" style="background: #e0f2fe; color: var(--brand-blue);"><span class="material-symbols-outlined" style="font-size: 1em;">table_view</span> Auxiliar XLSX</span>
+                                <span class="doc-format-tag" style="background: #ede9fe; color: var(--brand-purple);"><span class="material-symbols-outlined" style="font-size: 1em;">storage</span> Extracto Bancario</span>
+                                <span class="doc-format-tag" style="background: #fef3c7; color: var(--brand-orange);"><span class="material-symbols-outlined" style="font-size: 1em;">swap_horiz</span> Diario Contable</span>
+                            </div>
+
+                            <h4 style="font-size: 0.85em; color: var(--az087-a); margin-bottom: 8px;">Campos Clave del Dataset:</h4>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.78em; margin-bottom: 10px;">
+                                <tr style="background: rgba(9, 62, 94, 0.05); text-align: left;"><th style="padding: 5px; border-bottom: 1px solid #cbd5e1;">Campo</th><th style="padding: 5px; border-bottom: 1px solid #cbd5e1;">Descripción</th></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Fecha / Timestamp</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Fecha y hora del registro contable</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Nro. Comprobante</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Número de asiento o documento contable</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Cuenta Contable</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Código PUC y descripción de la cuenta</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Débito / Crédito</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Monto del movimiento débito y crédito</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Tercero / NIT</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Identificación del tercero asociado</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Centro de Costo</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Área o proyecto al que se imputa</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Descripción / Concepto</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Glosa o detalle de la transacción</td></tr>
+                                <tr><td style="padding: 5px; font-weight: 600;">Usuario / Aprobador</td><td style="padding: 5px;">Quién registró y quién aprobó la transacción</td></tr>
+                            </table>
+
+                            <!-- Validación de Calidad de Fuentes -->
+                            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px; border-radius: 4px; font-size: 0.78em; color: #92400e; line-height: 1.4; margin-top: 10px;">
+                                <strong><span class="material-symbols-outlined" style="font-size: 1em; vertical-align: text-bottom;">verified_user</span> Validación de Fuentes (antes de IA):</strong>
+                                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                                    <div style="flex: 1;">
+                                        <strong style="font-size: 0.95em; color: #b45309;"><span class="material-symbols-outlined" style="font-size: 0.95em; vertical-align: text-bottom;">memory</span> Técnica (automatizable):</strong>
+                                        <ul style="padding-left: 14px; margin: 4px 0 0 0; line-height: 1.35;">
+                                            <li>Sin filas vacías ni duplicadas por carga</li>
+                                            <li>Tipos de datos correctos por columna</li>
+                                            <li>Balanceo débitos = créditos por asiento</li>
+                                        </ul>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <strong style="font-size: 0.95em; color: #b45309;"><span class="material-symbols-outlined" style="font-size: 0.95em; vertical-align: text-bottom;">person_check</span> Negocio (humana):</strong>
+                                        <ul style="padding-left: 14px; margin: 4px 0 0 0; line-height: 1.35;">
+                                            <li>Período extraído corresponde al solicitado</li>
+                                            <li>Totalidad de cuentas y centros de costo</li>
+                                            <li>Conciliación con balanza de comprobación</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Columna 3: Prompt IA -->
+                        <div class="workshop-section" style="flex: 1.8;">
+                            <h3 style="color: var(--brand-green);"><span class="material-symbols-outlined" style="font-size: 1.1em;">chat</span> 4. Procesamiento (Prompt IA)</h3>
+                            <div style="background-color: #f8fafc; border-left: 4px solid var(--brand-green); padding: 10px; border-radius: 6px; font-size: 0.72em; line-height: 1.35; margin-bottom: 10px; font-family: 'Courier New', monospace; color: #1e293b;">
+                                <strong style="color: var(--brand-green);">Rol:</strong> Eres un Auditor Financiero Forense y Analista de Datos experto en NIIF/NIC, NIA 240 (fraude), NIA 315/330 (riesgos y respuestas), técnicas de CAATs (Computer Assisted Audit Techniques), Ley de Benford, análisis estadístico de datos contables y detección de anomalías transaccionales.<br><br>
+                                <strong style="color: var(--brand-green);">Contexto:</strong> Se te entregará un dataset de transacciones financieras (libro mayor, diario contable, auxiliar por tercero o extracto bancario) en formato CSV o Excel. El dataset contiene columnas como: Fecha, Nro. Comprobante, Cuenta Contable, Débito, Crédito, Tercero/NIT, Centro de Costo, Descripción, Usuario. Marco aplicable: NIIF/NIC, NIA 240, NIA 500/505, Estatuto Tributario colombiano, PUC (Plan Único de Cuentas) y políticas contables internas.<br><br>
+                                <strong style="color: var(--brand-green);">Tarea 1 — Perfilamiento del Dataset:</strong> Analiza la estructura y calidad del dataset:<br>
+                                <ul style="padding-left: 16px; margin: 3px 0 6px 0; line-height: 1.3;">
+                                    <li><strong>Estadísticas descriptivas:</strong> Total de registros, rango de fechas, total débitos/créditos, # cuentas únicas, # terceros únicos, # centros de costo</li>
+                                    <li><strong>Calidad de datos:</strong> % campos nulos por columna, registros con formatos inconsistentes, duplicados exactos, registros con fecha fuera de período</li>
+                                    <li><strong>Distribución:</strong> Top 10 cuentas por volumen transaccional, top 10 terceros por monto, distribución por mes/semana, concentración por usuario</li>
+                                </ul>
+                                <strong style="color: var(--brand-green);">Tarea 2 — Validaciones de Integridad Contable:</strong> Ejecuta las siguientes pruebas sobre los datos:<br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #fef2f2; border-radius: 4px; border: 1px solid #fecaca;">
+                                    <strong style="color: #991b1b;">V1. Balance por Asiento</strong> — Para cada Nro. Comprobante: Σ Débitos = Σ Créditos. Identificar asientos descuadrados con detalle de diferencia.<br>
+                                    <strong style="color: #991b1b;">V2. Consistencia de Cuentas PUC</strong> — Cuentas contables válidas según PUC (4 dígitos mínimo), naturaleza correcta (débito/crédito según clase de cuenta), cuentas inexistentes o mal codificadas.<br>
+                                    <strong style="color: #991b1b;">V3. Integridad Temporal</strong> — Registros fuera del período fiscal declarado, gaps en consecutivos de comprobantes, transacciones en fechas no hábiles.<br>
+                                    <strong style="color: #991b1b;">V4. Coherencia de Terceros</strong> — NIT con formato inválido, terceros sin identificación, mismo tercero con diferentes razones sociales.
+                                </div>
+                                <strong style="color: var(--brand-green);">Tarea 3 — Detección de Anomalías y Red Flags de Fraude:</strong> Aplica técnicas forenses:<br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #fef2f2; border-radius: 4px; border: 1px solid #fecaca;">
+                                    <strong style="color: #dc2626;">🔍 RF1. Ley de Benford</strong> — Distribución del primer y segundo dígito de los montos (débitos y créditos). Identificar desviaciones significativas que sugieran manipulación.<br>
+                                    <strong style="color: #dc2626;">🔍 RF2. Duplicados Sospechosos</strong> — Mismo monto + mismo tercero + misma cuenta en fechas cercanas; mismo concepto con diferentes comprobantes; registros idénticos con distinto timestamp.<br>
+                                    <strong style="color: #dc2626;">🔍 RF3. Montos Atípicos (Outliers)</strong> — Z-score &gt; 2.5 o IQR × 1.5 por cuenta contable. Montos exactamente redondos en cuentas que normalmente tienen decimales. Análisis por percentiles.<br>
+                                    <strong style="color: #dc2626;">🔍 RF4. Patrones Temporales</strong> — Concentración de registros en cierres de período (últimos 3 días del mes). Transacciones fuera de horario laboral. Ráfagas de registros por mismo usuario.<br>
+                                    <strong style="color: #dc2626;">🔍 RF5. Fraccionamiento (Splitting)</strong> — Múltiples transacciones del mismo tercero/concepto con montos similares justo debajo de umbrales de aprobación, en fechas consecutivas.<br>
+                                    <strong style="color: #dc2626;">🔍 RF6. Concentración y Segregación</strong> — Misma persona registra y aprueba; un solo usuario concentra &gt;30% de las transacciones; tercero con facturación desproporcionada vs. resto.
+                                </div>
+                                <strong style="color: var(--brand-green);">Tarea 4 — Scoring de Riesgo por Transacción:</strong> Asigna nivel de riesgo:<br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #eff6ff; border-radius: 4px; border: 1px solid #bfdbfe;">
+                                    <strong style="color: #1e40af;">A) Riesgo por Anomalías:</strong><br>
+                                    <span style="padding-left: 8px;">• <strong style="color: #dc2626;">Alto:</strong> ≥ 3 red flags o asiento descuadrado o fallo en Benford</span><br>
+                                    <span style="padding-left: 8px;">• <strong style="color: #f59e0b;">Medio:</strong> 1–2 red flags o falla de integridad en V2–V4</span><br>
+                                    <span style="padding-left: 8px;">• <strong style="color: #16a34a;">Bajo:</strong> Sin anomalías detectadas</span><br><br>
+                                    <strong style="color: #1e40af;">B) Riesgo por Materialidad:</strong> Percentiles dinámicos del dataset.<br>
+                                    <strong style="color: #1e40af;">C) Riesgo Final = máx(A, B)</strong>
+                                </div>
+                                <strong style="color: var(--brand-green);">Formato de salida — HTML AUTOCONTENIDO:</strong> La respuesta DEBE ser ÚNICAMENTE un archivo HTML autocontenido que funcione como Tablero de Control moderno y ejecutivo.<br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #f0fdf4; border-radius: 4px; border: 1px solid #bbf7d0;">
+                                    <strong style="color: #065f46;">Tecnologías:</strong> Tailwind CSS (CDN), fuente Inter + Monotype, gráficos con CSS/SVG o Chart.js.<br>
+                                    <strong style="color: #065f46;">Diseño:</strong> Colores sobrios — fondos blancos, azul corporativo, verde y rojo. Estilo ejecutivo y limpio.
+                                </div>
+                                <strong style="color: var(--brand-green);">Secciones del Tablero:</strong><br>
+                                <span style="padding-left: 8px;">1.</span> <strong>Resumen Ejecutivo:</strong> KPIs del dataset — total registros, período, total D/C, # anomalías, % registros con riesgo alto<br>
+                                <span style="padding-left: 8px;">2.</span> <strong>Perfilamiento:</strong> Estadísticas descriptivas, distribución por cuenta/tercero/período, calidad de datos<br>
+                                <span style="padding-left: 8px;">3.</span> <strong>Validaciones de Integridad:</strong> Matriz V1–V4 con estado ✅/⚠️/❌ y detalle de excepciones<br>
+                                <span style="padding-left: 8px;">4.</span> <strong>Dashboard Forense:</strong> Análisis de Benford (gráfico), mapa de duplicados, outliers, patrones temporales (heatmap calendario), análisis de fraccionamiento<br>
+                                <span style="padding-left: 8px;">5.</span> <strong>Observaciones MIPP:</strong> Hallazgos con Criterio (norma NIA/NIIF), Condición (anomalía detectada), Causa (origen de la brecha) e Impacto (efecto financiero/regulatorio)<br>
+                                <span style="padding-left: 8px;">6.</span> <strong>Remediación, Monitoreo y Mejora Continua:</strong><br>
+                                <span style="padding-left: 24px;">a)</span> <strong>Planes de Acción:</strong> Ajustes contables, reclasificaciones, bloqueo de registros sospechosos<br>
+                                <span style="padding-left: 24px;">b)</span> <strong>Monitoreo Continuo:</strong> KRIs transaccionales, alertas automáticas de outliers y duplicados<br>
+                                <span style="padding-left: 24px;">c)</span> <strong>Reentrenamiento:</strong> Feedback del auditor para ajustar umbrales y patrones<br>
+                                <span style="padding-left: 8px;">7.</span> <strong>Ranking de Riesgo:</strong> Tabla de transacciones ordenadas por scoring, heatmap de factores
+                            </div>
+
+                            <h3 style="color: var(--az087-a); font-size: 1em;"><span class="material-symbols-outlined" style="font-size: 1.1em;">verified</span> 5-6. Resultados y Remediación</h3>
+                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                <div style="flex: 1; background: #f0fdf4; padding: 8px; border-radius: 6px; border-top: 3px solid var(--brand-green);">
+                                    <strong style="font-size: 0.78em; color: var(--brand-green); display: block; margin-bottom: 4px;">Entregables Analíticos</strong>
+                                    <ul style="font-size: 0.72em; padding-left: 12px; color: #334155; line-height: 1.3; margin-bottom: 0;">
+                                        <li>Perfilamiento completo del dataset</li>
+                                        <li>Matriz de integridad (V1–V4)</li>
+                                        <li>Análisis de Benford y outliers</li>
+                                        <li>Scoring de riesgo por transacción</li>
+                                    </ul>
+                                </div>
+                                <div style="flex: 1; background: #eff6ff; padding: 8px; border-radius: 6px; border-top: 3px solid var(--brand-blue);">
+                                    <strong style="font-size: 0.78em; color: var(--brand-blue); display: block; margin-bottom: 4px;">Dashboard Consolidado</strong>
+                                    <ul style="font-size: 0.72em; padding-left: 12px; color: #334155; line-height: 1.3; margin-bottom: 0;">
+                                        <li>Heatmap temporal de transacciones</li>
+                                        <li>Ranking de riesgo global</li>
+                                        <li>Mapa de duplicados y splitting</li>
+                                        <li>% transacciones Alto/Medio/Bajo</li>
+                                    </ul>
+                                </div>
+                                <div style="flex: 1; background: #fff7ed; padding: 8px; border-radius: 6px; border-top: 3px solid var(--nr001-a);">
+                                    <strong style="font-size: 0.78em; color: var(--nr001-a); display: block; margin-bottom: 4px;">Remediación y Mejora Continua</strong>
+                                    <ul style="font-size: 0.72em; padding-left: 12px; color: #334155; line-height: 1.3; margin-bottom: 0;">
+                                        <li><strong>Planes de Acción:</strong> Ajustes contables y reclasificaciones correctivas</li>
+                                        <li><strong>Monitoreo:</strong> KRIs transaccionales y alertas automáticas</li>
+                                        <li><strong>Reentrenamiento:</strong> Feedback del auditor para ajustar umbrales</li>
+                                        <li>Fortalecimiento de controles de registro</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <!-- Escala de valoración visual -->
+                            <div style="display: flex; gap: 6px; align-items: center; font-size: 0.7em; color: #64748b; padding: 4px 0; flex-wrap: wrap;">
+                                <span style="font-weight: 600;">Riesgo Final = máx(Anomalías, Materialidad):</span>
+                                <span style="background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 10px; font-weight: 600;">Alto</span>
+                                <span style="background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 10px; font-weight: 600;">Medio</span>
+                                <span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 10px; font-weight: 600;">Bajo</span>
+                                <span style="margin-left: 4px;">| Técnicas: Benford · Duplicados · Outliers · Fraccionamiento · Concentración</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Footer -->
+                <div style="margin-top: auto; width: 100%; padding: 0 50px;">
+                    <hr style="margin-top: 10px; margin-bottom: 10px; border: none; border-top: 1px solid rgba(9, 62, 94, 0.15);">
+                    <div style="font-size: 0.85em; color: #64748b;">
+                        <strong>Formatos:</strong> CSV, XLSX, SQL &nbsp;|&nbsp; <strong>Marcos:</strong> NIIF/NIC, NIA 240/315/330/500, PUC, Estatuto Tributario &nbsp;|&nbsp; <strong>Técnicas:</strong> CAATs, Benford, Z-score, IQR, Duplicados.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- SLIDE 3: Caso 3 — Análisis de Nómina y Recursos Humanos -->
+            <!-- ============================================================ -->
+            <div class="slide" style="display:none">
+                <button onclick="goToSlide(0)" style="position: absolute; top: 30px; left: 30px; background: transparent; border: 1px solid var(--az087-a); color: var(--az087-a); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s; z-index: 10;">
+                    <span class="material-symbols-outlined" style="vertical-align: text-bottom; font-size: 1.25em;">arrow_back</span> Volver al Hub
+                </button>
+                <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: left; padding: 20px 40px; overflow-y: auto;">
+                    <span class="tag" style="background-color: var(--brand-green); font-size: 1.1em; margin-bottom: 15px;">Caso 3 de 5</span>
+                    <h2 style="border:none; font-size: 1.8em; margin-bottom: 8px; text-align: center; color: var(--az087-a);">
+                        <span class="material-symbols-outlined" style="vertical-align: bottom; font-size: 1.1em;">groups</span>
+                        Análisis Inteligente de Nómina y Recursos Humanos
+                    </h2>
+                    <p style="font-size: 0.95em; color: #64748b; text-align: center; margin-bottom: 20px; max-width: 800px;">Auditoría de liquidaciones de nómina, deducciones, aportes a seguridad social, horas extras, prestaciones sociales y detección de empleados fantasma a partir de datos estructurados.</p>
+
+                    <!-- Flowchart de Metodología -->
+                    <div style="display: flex; justify-content: center; align-items: flex-start; gap: 8px; margin-bottom: 20px; width: 100%; max-width: 1100px; flex-wrap: wrap;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge"><div class="step-num" style="background: var(--az087-a);">1</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Planificación</span></div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.3;">Ciclo de nómina<br>Período y área</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge"><div class="step-num" style="background: var(--az087-a);">2</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Contexto</span></div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.3;">CST, Ley 100<br>Normativa laboral</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge"><div class="step-num" style="background: var(--az087-a);">3</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Fuentes</span></div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.3;">CSV/XLSX nómina<br>Maestro empleados</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--brand-green);"><div class="step-num" style="background: var(--brand-green);">4</div><span style="font-size: 0.8em; font-weight: 600; color: var(--brand-green);">Procesamiento</span></div>
+                            <div style="background: #f0fdf4; border: 1px dashed #34d399; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #065f46; text-align: center; width: 130px; line-height: 1.3;">Recalcular liquidación<br>Detectar fantasmas</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--brand-green);"><div class="step-num" style="background: var(--brand-green);">5</div><span style="font-size: 0.8em; font-weight: 600; color: var(--brand-green);">Resultados</span></div>
+                            <div style="background: #f0fdf4; border: 1px dashed #34d399; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #065f46; text-align: center; width: 130px; line-height: 1.3;">Excepciones laborales<br>Scoring de riesgo</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--nr001-a);"><div class="step-num" style="background: var(--nr001-a);">6</div><span style="font-size: 0.8em; font-weight: 600; color: var(--nr001-a);">Remediación</span></div>
+                            <div style="background: #fff7ed; border: 1px dashed #fb923c; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #9a3412; text-align: center; width: 130px; line-height: 1.3;">Correcciones laborales<br>Controles de nómina</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 20px; width: 100%; max-width: 1100px; margin-bottom: 20px;">
+                        
+                        <!-- Columna 1: Planificación -->
+                        <div class="workshop-section" style="flex: 1; display: flex; flex-direction: column;">
+                            <h3 style="color: var(--nr001-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">checklist</span> 1. Planificación</h3>
+                            <p style="font-size: 0.8em; color: #64748b; margin-bottom: 10px; line-height: 1.4;">Definición del objetivo de auditoría de nómina y parámetros de revisión.</p>
+                            <ul style="font-size: 0.8em; padding-left: 15px; color: #334155; line-height: 1.4; margin-bottom: 15px;">
+                                <li><strong>Ciclo de Nómina:</strong> Mensual, quincenal; período de análisis.</li>
+                                <li><strong>Objetivo:</strong> Validar liquidación, detectar empleados fantasma, verificar aportes SS.</li>
+                                <li><strong>Alcance:</strong> Total planta, contratistas, temporales; áreas o sucursales.</li>
+                                <li><strong>Materialidad:</strong> Costo total de nómina, % sobre ingresos, provisiones.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Columna 2: Contexto y Fuentes -->
+                        <div class="workshop-section" style="flex: 1.2;">
+                            <h3 style="color: var(--az087-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">groups</span> 2-3. Contexto y Fuentes</h3>
+                            <p style="font-size: 0.8em; color: #64748b; margin-bottom: 10px; line-height: 1.4;">Marco normativo laboral y los datasets fuente de nómina.</p>
+                            
+                            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                                <span class="doc-format-tag" style="background: #d1fae5; color: var(--brand-green);"><span class="material-symbols-outlined" style="font-size: 1em;">grid_on</span> Nómina CSV</span>
+                                <span class="doc-format-tag" style="background: #e0f2fe; color: var(--brand-blue);"><span class="material-symbols-outlined" style="font-size: 1em;">table_view</span> Maestro XLSX</span>
+                                <span class="doc-format-tag" style="background: #fef3c7; color: var(--brand-orange);"><span class="material-symbols-outlined" style="font-size: 1em;">badge</span> Novedades</span>
+                            </div>
+
+                            <h4 style="font-size: 0.85em; color: var(--az087-a); margin-bottom: 8px;">Campos Clave del Dataset:</h4>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.78em; margin-bottom: 10px;">
+                                <tr style="background: rgba(9, 62, 94, 0.05); text-align: left;"><th style="padding: 5px; border-bottom: 1px solid #cbd5e1;">Campo</th><th style="padding: 5px; border-bottom: 1px solid #cbd5e1;">Descripción</th></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Cédula / ID Empleado</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Documento de identidad del trabajador</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Nombre Completo</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Nombres y apellidos del empleado</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Cargo / Área</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Denominación del cargo y centro de costo</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Salario Base</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Asignación básica mensual</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Fecha Ingreso / Retiro</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Fechas de vinculación y desvinculación</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Devengados</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Salario, HE, bonificaciones, comisiones, auxilios</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Deducciones</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Salud, pensión, FSP, retención, libranzas, embargos</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Aportes Empleador</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Salud, pensión, ARL, caja, ICBF, SENA</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Neto a Pagar</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Total devengado menos deducciones</td></tr>
+                                <tr><td style="padding: 5px; font-weight: 600;">Cuenta Bancaria</td><td style="padding: 5px;">Banco y número de cuenta para dispersión</td></tr>
+                            </table>
+                            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px; border-radius: 4px; font-size: 0.8em; color: #92400e; line-height: 1.4; margin-top: auto;">
+                                <strong>Validación Previa:</strong> Confirmar que el dataset incluye la totalidad de empleados activos y las novedades del período.
+                            </div>
+                        </div>
+                        
+                        <!-- Columna 3: Prompt IA -->
+                        <div class="workshop-section" style="flex: 1.5;">
+                            <h3 style="color: var(--brand-green);"><span class="material-symbols-outlined" style="font-size: 1.1em;">chat</span> 4. Procesamiento (Prompt IA)</h3>
+                            <div style="background-color: #f8fafc; border-left: 4px solid var(--brand-green); padding: 10px; border-radius: 6px; font-size: 0.72em; line-height: 1.35; margin-bottom: 10px; font-family: 'Courier New', monospace; color: #1e293b;">
+                                <strong style="color: var(--brand-green);">Rol:</strong> Eres un Auditor Laboral y Analista de Datos experto en Código Sustantivo del Trabajo (CST) colombiano, Ley 100 de 1993, normativa de seguridad social, UGPP, NIIF/NIC 19, técnicas de auditoría de nómina y detección de fraude laboral.<br><br>
+                                <strong style="color: var(--brand-green);">Contexto:</strong> Se te entregará un dataset de nómina (liquidación mensual/quincenal) y un maestro de empleados en formato CSV o Excel. Columnas típicas: Cédula, Nombre, Cargo, Área, Salario Base, Fecha Ingreso, Devengados (HE, bonificaciones, comisiones, auxilios), Deducciones (salud, pensión, FSP, retención, libranzas), Aportes Empleador, Neto a Pagar, Cuenta Bancaria. Marco aplicable: CST, Ley 100/1993, Ley 1819/2016, Decreto 780/2016, normativa UGPP y NIIF/NIC 19.<br><br>
+                                <strong style="color: var(--brand-green);">Tarea 1 — Perfilamiento del Dataset de Nómina:</strong><br>
+                                <ul style="padding-left: 16px; margin: 3px 0 6px 0; line-height: 1.3;">
+                                    <li><strong>Estadísticas:</strong> Total empleados, costo total nómina, salario promedio/mediana/max/min, distribución por área/cargo, antigüedad promedio</li>
+                                    <li><strong>Calidad:</strong> % campos nulos, cédulas duplicadas, empleados sin cuenta bancaria, registros con salario $0 o negativo</li>
+                                    <li><strong>Distribución:</strong> Rango salarial por cuartiles, concentración por área, % de HE sobre total devengado</li>
+                                </ul>
+                                <strong style="color: var(--brand-green);">Tarea 2 — Validaciones de Liquidación Laboral:</strong><br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #fef2f2; border-radius: 4px; border: 1px solid #fecaca;">
+                                    <strong style="color: #991b1b;">V1. Cálculos Legales</strong> — Recalcular: aporte salud empleado (4%), pensión empleado (4%), FSP si aplica (&gt;4 SMMLV), retención en fuente según tabla vigente; verificar salario ≥ SMMLV; auxilio de transporte si salario ≤ 2 SMMLV; recargos HE según tipo (diurna 25%, nocturna 75%, dominical/festivo 75%+25%).<br>
+                                    <strong style="color: #991b1b;">V2. Aportes Empleador</strong> — Salud (8.5%), pensión (12%), ARL según clase de riesgo (I-V), caja de compensación (4%), ICBF (3%), SENA (2%). Verificar exoneración Ley 1607/2012 si aplica.<br>
+                                    <strong style="color: #991b1b;">V3. Consistencia Aritmética</strong> — Total devengado = salario + HE + auxilios + bonificaciones; Neto = devengado − deducciones; Σ nómina = Σ individual de cada empleado.<br>
+                                    <strong style="color: #991b1b;">V4. Integridad de Maestro</strong> — Empleado activo sin fecha de retiro; empleados retirados con liquidación posterior; cédulas en nómina que no existen en maestro; cambios salariales sin novedad registrada.
+                                </div>
+                                <strong style="color: var(--brand-green);">Tarea 3 — Red Flags de Fraude de Nómina:</strong><br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #fef2f2; border-radius: 4px; border: 1px solid #fecaca;">
+                                    <strong style="color: #dc2626;">🔍 RF1. Empleados Fantasma</strong> — Cédulas no cruzables con bases externas, misma cuenta bancaria para múltiples empleados, IDs con formato inválido, empleados sin actividad laboral registrada.<br>
+                                    <strong style="color: #dc2626;">🔍 RF2. Horas Extras Anómalas</strong> — HE &gt; 50% del salario base; HE consistentes mes a mes (patrón sospechoso); HE para cargos directivos/confianza; HE que exceden límite legal.<br>
+                                    <strong style="color: #dc2626;">🔍 RF3. Anomalías Salariales</strong> — Salarios outlier por cargo (Z-score &gt; 2.5); aumentos desproporcionados entre períodos; salario inconsistente con nivel de cargo; bonificaciones atípicas concentradas en pocos empleados.<br>
+                                    <strong style="color: #dc2626;">🔍 RF4. Patrones de Dispersión</strong> — Múltiples empleados con misma cuenta bancaria; cuentas bancarias en entidades no convencionales; pagos a cuentas de terceros no empleados.<br>
+                                    <strong style="color: #dc2626;">🔍 RF5. Novedades Sospechosas</strong> — Cambios masivos de cargo/salario previo a liquidación; empleados ingresados y retirados en el mismo período; alta rotación en un área específica.
+                                </div>
+                                <strong style="color: var(--brand-green);">Formato de salida — HTML AUTOCONTENIDO:</strong> Tablero de Control con:<br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #f0fdf4; border-radius: 4px; border: 1px solid #bbf7d0;">
+                                    <strong style="color: #065f46;">Tecnologías:</strong> Tailwind CSS (CDN), fuente Inter + Monotype, gráficos con CSS/SVG o Chart.js.<br>
+                                    <strong style="color: #065f46;">Diseño:</strong> Colores sobrios — fondos blancos, azul corporativo, verde y rojo. Estilo ejecutivo y limpio.
+                                </div>
+                                <strong style="color: var(--brand-green);">Secciones del Tablero:</strong><br>
+                                <span style="padding-left: 8px;">1.</span> <strong>Resumen Ejecutivo:</strong> KPIs de nómina — total empleados, costo total, salario promedio, % HE, # excepciones<br>
+                                <span style="padding-left: 8px;">2.</span> <strong>Perfilamiento:</strong> Distribución salarial, pirámide por cargo/área, análisis de antigüedad<br>
+                                <span style="padding-left: 8px;">3.</span> <strong>Validaciones Laborales:</strong> Matriz V1–V4 con estado ✅/⚠️/❌ y excepciones detalladas<br>
+                                <span style="padding-left: 8px;">4.</span> <strong>Dashboard de Red Flags:</strong> Empleados fantasma candidatos, outliers salariales, análisis de HE, patrones de dispersión<br>
+                                <span style="padding-left: 8px;">5.</span> <strong>Observaciones MIPP:</strong> Hallazgos con Criterio (CST, Ley 100), Condición, Causa e Impacto<br>
+                                <span style="padding-left: 8px;">6.</span> <strong>Remediación, Monitoreo y Mejora Continua:</strong><br>
+                                <span style="padding-left: 24px;">a)</span> <strong>Planes de Acción:</strong> Correcciones de liquidación, depuración de maestro, ajustes retroactivos<br>
+                                <span style="padding-left: 24px;">b)</span> <strong>Monitoreo:</strong> KRIs de nómina — variación mensual, % HE, # novedades, cuentas bancarias duplicadas<br>
+                                <span style="padding-left: 24px;">c)</span> <strong>Reentrenamiento:</strong> Feedback del auditor para ajustar umbrales de detección<br>
+                                <span style="padding-left: 8px;">7.</span> <strong>Ranking de Riesgo:</strong> Empleados ordenados por scoring de anomalías
+                            </div>
+
+                            <h3 style="color: var(--az087-a); font-size: 1em;"><span class="material-symbols-outlined" style="font-size: 1.1em;">verified</span> 5-6. Resultados y Remediación</h3>
+                            <div style="display: flex; gap: 10px;">
+                                <div style="flex: 1; background: #f0fdf4; padding: 10px; border-radius: 6px; border-top: 3px solid var(--brand-green);">
+                                    <strong style="font-size: 0.8em; color: var(--brand-green); display: block; margin-bottom: 4px;">Resultados Esperados</strong>
+                                    <ul style="font-size: 0.75em; padding-left: 12px; color: #334155; line-height: 1.3; margin-bottom: 0;">
+                                        <li>Perfilamiento completo de nómina</li>
+                                        <li>Validación de cálculos laborales</li>
+                                        <li>Detección de empleados fantasma</li>
+                                        <li>Outliers salariales y de HE</li>
+                                        <li><strong>Dashboard consolidado del lote</strong></li>
+                                        <li><strong>Ranking y patrones transversales</strong></li>
+                                    </ul>
+                                </div>
+                                <div style="flex: 1; background: #fff7ed; padding: 10px; border-radius: 6px; border-top: 3px solid var(--nr001-a);">
+                                    <strong style="font-size: 0.8em; color: var(--nr001-a); display: block; margin-bottom: 4px;">Acciones de Remediación</strong>
+                                    <ul style="font-size: 0.75em; padding-left: 12px; color: #334155; line-height: 1.3; margin-bottom: 0;">
+                                        <li>Corregir liquidaciones erróneas</li>
+                                        <li>Depurar maestro de empleados</li>
+                                        <li>Ajustar aportes a seguridad social</li>
+                                        <li><strong>Plan de acción consolidado</strong></li>
+                                        <li><strong>Priorizar por nivel de riesgo</strong></li>
+                                        <li>Fortalecer controles de nómina</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Footer -->
+                <div style="margin-top: auto; width: 100%; padding: 0 50px;">
+                    <hr style="margin-top: 10px; margin-bottom: 10px; border: none; border-top: 1px solid rgba(9, 62, 94, 0.15);">
+                    <div style="font-size: 0.85em; color: #64748b;">
+                        <strong>Formatos:</strong> CSV, XLSX &nbsp;|&nbsp; <strong>Marcos:</strong> CST, Ley 100/1993, UGPP, Decreto 780/2016, NIIF/NIC 19 &nbsp;|&nbsp; <strong>Técnicas:</strong> Recalculo de liquidación, detección de fantasmas, outliers Z-score, patrones de dispersión.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- SLIDE 4: Caso 4 — Análisis de Inventarios y Activos Fijos -->
+            <!-- ============================================================ -->
+            <div class="slide" style="display:none">
+                <button onclick="goToSlide(0)" style="position: absolute; top: 30px; left: 30px; background: transparent; border: 1px solid var(--az087-a); color: var(--az087-a); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s; z-index: 10;">
+                    <span class="material-symbols-outlined" style="vertical-align: text-bottom; font-size: 1.25em;">arrow_back</span> Volver al Hub
+                </button>
+                <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: left; padding: 20px 40px; overflow-y: auto;">
+                    <span class="tag" style="background-color: var(--brand-orange); font-size: 1.1em; margin-bottom: 15px;">Caso 4 de 5</span>
+                    <h2 style="border:none; font-size: 1.8em; margin-bottom: 8px; text-align: center; color: var(--az087-a);">
+                        <span class="material-symbols-outlined" style="vertical-align: bottom; font-size: 1.1em;">inventory_2</span>
+                        Análisis Inteligente de Inventarios y Activos Fijos
+                    </h2>
+                    <p style="font-size: 0.95em; color: #64748b; text-align: center; margin-bottom: 20px; max-width: 850px;">Análisis de existencias, valorización, obsolescencia, rotación, discrepancias físico-contables, vida útil de activos fijos, depreciación y detección de anomalías patrimoniales a partir de datos estructurados.</p>
+
+                    <!-- Flowchart de Metodología -->
+                    <div style="display: flex; justify-content: center; align-items: flex-start; gap: 8px; margin-bottom: 20px; width: 100%; max-width: 1100px; flex-wrap: wrap;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge"><div class="step-num" style="background: var(--az087-a);">1</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Planificación</span></div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.3;">Categorías de activos<br>Método de valoración</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge"><div class="step-num" style="background: var(--az087-a);">2</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Contexto</span></div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.3;">NIC 2, NIC 16, NIC 36<br>Políticas de activos</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge"><div class="step-num" style="background: var(--az087-a);">3</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Fuentes</span></div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.3;">CSV/XLSX inventario<br>Kardex, conteo físico</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--brand-green);"><div class="step-num" style="background: var(--brand-green);">4</div><span style="font-size: 0.8em; font-weight: 600; color: var(--brand-green);">Procesamiento</span></div>
+                            <div style="background: #f0fdf4; border: 1px dashed #34d399; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #065f46; text-align: center; width: 130px; line-height: 1.3;">Rotación, obsolescencia<br>Depreciación, VNR</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--brand-green);"><div class="step-num" style="background: var(--brand-green);">5</div><span style="font-size: 0.8em; font-weight: 600; color: var(--brand-green);">Resultados</span></div>
+                            <div style="background: #f0fdf4; border: 1px dashed #34d399; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #065f46; text-align: center; width: 130px; line-height: 1.3;">Discrepancias<br>Provisiones requeridas</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--nr001-a);"><div class="step-num" style="background: var(--nr001-a);">6</div><span style="font-size: 0.8em; font-weight: 600; color: var(--nr001-a);">Remediación</span></div>
+                            <div style="background: #fff7ed; border: 1px dashed #fb923c; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #9a3412; text-align: center; width: 130px; line-height: 1.3;">Ajustes de inventario<br>Bajas y provisiones</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 20px; width: 100%; max-width: 1100px; margin-bottom: 20px;">
+                        
+                        <!-- Columna 1: Planificación -->
+                        <div class="workshop-section" style="flex: 1; display: flex; flex-direction: column;">
+                            <h3 style="color: var(--nr001-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">checklist</span> 1. Planificación</h3>
+                            <p style="font-size: 0.8em; color: #64748b; margin-bottom: 10px; line-height: 1.4;">Definición de categorías de activos, método de valoración y parámetros de análisis.</p>
+                            <ul style="font-size: 0.8em; padding-left: 15px; color: #334155; line-height: 1.4; margin-bottom: 15px;">
+                                <li><strong>Categorías:</strong> Inventarios (materia prima, producto terminado, en proceso), activos fijos (maquinaria, vehículos, inmuebles, equipos TI).</li>
+                                <li><strong>Objetivo:</strong> Validar valorización, detectar obsolescencia, verificar depreciación y conciliar físico vs. contable.</li>
+                                <li><strong>Alcance:</strong> Bodegas, sucursales, centros de costo, clases de activo.</li>
+                                <li><strong>Materialidad:</strong> Valor total de inventarios, activos fijos netos, provisiones registradas.</li>
+                                <li><strong>Hipótesis de Riesgo:</strong> Sobrevaluación, ítems fantasma, depreciación incorrecta, faltantes, obsolescencia no provisionada.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Columna 2: Contexto y Fuentes -->
+                        <div class="workshop-section" style="flex: 1.2;">
+                            <h3 style="color: var(--az087-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">inventory_2</span> 2-3. Contexto y Fuentes</h3>
+                            <p style="font-size: 0.8em; color: #64748b; margin-bottom: 10px; line-height: 1.4;">Marco NIIF aplicable y los datasets fuente de inventarios y activos.</p>
+                            
+                            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                                <span class="doc-format-tag" style="background: #d1fae5; color: var(--brand-green);"><span class="material-symbols-outlined" style="font-size: 1em;">grid_on</span> Inventario CSV</span>
+                                <span class="doc-format-tag" style="background: #e0f2fe; color: var(--brand-blue);"><span class="material-symbols-outlined" style="font-size: 1em;">table_view</span> Activos Fijos XLSX</span>
+                                <span class="doc-format-tag" style="background: #fef3c7; color: var(--brand-orange);"><span class="material-symbols-outlined" style="font-size: 1em;">swap_horiz</span> Kardex</span>
+                                <span class="doc-format-tag" style="background: #ede9fe; color: var(--brand-purple);"><span class="material-symbols-outlined" style="font-size: 1em;">fact_check</span> Conteo Físico</span>
+                            </div>
+
+                            <h4 style="font-size: 0.85em; color: var(--az087-a); margin-bottom: 8px;">Campos Clave del Dataset:</h4>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.78em; margin-bottom: 10px;">
+                                <tr style="background: rgba(9, 62, 94, 0.05); text-align: left;"><th style="padding: 5px; border-bottom: 1px solid #cbd5e1;">Campo</th><th style="padding: 5px; border-bottom: 1px solid #cbd5e1;">Descripción</th></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Código / SKU / Placa</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Identificador único del ítem o activo</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Descripción</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Nombre y especificaciones del bien</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Categoría / Clase</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Clasificación contable del activo/inventario</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Cantidad en Sistema</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Existencias según sistema contable/ERP</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Cantidad Física</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Resultado del conteo físico (si disponible)</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Costo Unitario / Valor</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Costo promedio ponderado o costo histórico</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Fecha Adquisición</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Fecha de compra o capitalización</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Vida Útil / Depreciación</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Años de vida útil, método y % depreciación acumulada</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Ubicación / Bodega</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Localización física del bien</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Último Movimiento</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Fecha de última entrada o salida</td></tr>
+                                <tr><td style="padding: 5px; font-weight: 600;">Responsable / Custodio</td><td style="padding: 5px;">Persona asignada como custodio del bien</td></tr>
+                            </table>
+                            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px; border-radius: 4px; font-size: 0.8em; color: #92400e; line-height: 1.4; margin-top: auto;">
+                                <strong>Validación Previa:</strong> Confirmar que el dataset incluye la totalidad de ítems/activos y que el conteo físico está actualizado.
+                            </div>
+                        </div>
+                        
+                        <!-- Columna 3: Prompt IA -->
+                        <div class="workshop-section" style="flex: 1.5;">
+                            <h3 style="color: var(--brand-green);"><span class="material-symbols-outlined" style="font-size: 1.1em;">chat</span> 4. Procesamiento (Prompt IA)</h3>
+                            <div style="background-color: #f8fafc; border-left: 4px solid var(--brand-green); padding: 10px; border-radius: 6px; font-size: 0.72em; line-height: 1.35; margin-bottom: 10px; font-family: 'Courier New', monospace; color: #1e293b;">
+                                <strong style="color: var(--brand-green);">Rol:</strong> Eres un Auditor de Activos y Analista de Datos experto en NIC 2 (Inventarios), NIC 16 (Propiedad, Planta y Equipo), NIC 36 (Deterioro del Valor de los Activos), NIC 40 (Propiedades de Inversión), técnicas de auditoría de inventarios y control patrimonial.<br><br>
+                                <strong style="color: var(--brand-green);">Contexto:</strong> Se te entregarán datasets de inventarios (existencias con kardex y conteo físico) y/o activos fijos (maestro de activos con depreciación) en formato CSV o Excel. Marco aplicable: NIC 2 (VNR, costo-beneficio), NIC 16 (reconocimiento, medición, depreciación), NIC 36 (deterioro), políticas contables internas de capitalización, vidas útiles y métodos de valoración.<br><br>
+                                <strong style="color: var(--brand-green);">Tarea 1 — Perfilamiento del Dataset:</strong><br>
+                                <ul style="padding-left: 16px; margin: 3px 0 6px 0; line-height: 1.3;">
+                                    <li><strong>Inventarios:</strong> Total SKUs, valor total, distribución por categoría, rotación global, antigüedad promedio de stock</li>
+                                    <li><strong>Activos Fijos:</strong> Total activos, valor bruto/neto, distribución por clase, depreciación acumulada %, antigüedad promedio</li>
+                                    <li><strong>Calidad:</strong> % campos nulos, códigos duplicados, ítems sin categoría, activos sin custodio asignado</li>
+                                </ul>
+                                <strong style="color: var(--brand-green);">Tarea 2 — Validaciones de Integridad y Valoración:</strong><br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #fef2f2; border-radius: 4px; border: 1px solid #fecaca;">
+                                    <strong style="color: #991b1b;">V1. Conciliación Físico-Contable</strong> — Diferencia entre cantidad en sistema vs. conteo físico por ítem. Clasificar: faltante (sistema &gt; físico), sobrante (físico &gt; sistema), coincide. Totalizar monto de diferencias.<br>
+                                    <strong style="color: #991b1b;">V2. Valorización (NIC 2 / NIC 16)</strong> — Inventarios: costo unitario vs. VNR (Valor Neto Realizable), provisión de obsolescencia requerida. Activos: depreciación acumulada recalculada vs. registrada, valor residual coherente.<br>
+                                    <strong style="color: #991b1b;">V3. Rotación y Obsolescencia</strong> — Índice de rotación por categoría (ventas / inventario promedio). Ítems sin movimiento en &gt;6, &gt;12, &gt;24 meses. Activos totalmente depreciados aún en uso. Stock de lento movimiento.<br>
+                                    <strong style="color: #991b1b;">V4. Consistencia de Datos</strong> — Activos con fecha de adquisición futura, vida útil cero o negativa, depreciación &gt; costo histórico, ubicaciones inexistentes, custodios no empleados actuales.
+                                </div>
+                                <strong style="color: var(--brand-green);">Tarea 3 — Red Flags y Anomalías Patrimoniales:</strong><br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #fef2f2; border-radius: 4px; border: 1px solid #fecaca;">
+                                    <strong style="color: #dc2626;">🔍 RF1. Ítems Fantasma</strong> — Activos/ítems en sistema sin conteo físico, sin movimiento y sin custodio; activos con valor alto sin evidencia de uso.<br>
+                                    <strong style="color: #dc2626;">🔍 RF2. Sobrevaluación</strong> — Inventarios valorados por encima del VNR; activos no deteriorados cuando deberían estarlo; depreciación insuficiente respecto a vida útil transcurrida.<br>
+                                    <strong style="color: #dc2626;">🔍 RF3. Patrones de Movimiento</strong> — Entradas y salidas masivas en cierre de período; movimientos entre bodegas sin justificación; ajustes manuales frecuentes de cantidades.<br>
+                                    <strong style="color: #dc2626;">🔍 RF4. Concentración y Custodia</strong> — Un solo custodio responsable de porcentaje desproporcionado de activos; activos de alto valor sin custodio; ubicaciones con alta concentración de faltantes.<br>
+                                    <strong style="color: #dc2626;">🔍 RF5. Capitalización Indebida</strong> — Gastos capitalizados como activo fijo (montos menores al umbral de capitalización); adiciones que incrementan significativamente el valor sin aprobación documentada.
+                                </div>
+                                <strong style="color: var(--brand-green);">Formato de salida — HTML AUTOCONTENIDO:</strong> Tablero de Control con:<br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #f0fdf4; border-radius: 4px; border: 1px solid #bbf7d0;">
+                                    <strong style="color: #065f46;">Tecnologías:</strong> Tailwind CSS (CDN), fuente Inter + Monotype, gráficos con CSS/SVG o Chart.js.<br>
+                                    <strong style="color: #065f46;">Diseño:</strong> Colores sobrios — fondos blancos, azul corporativo, verde y rojo. Estilo ejecutivo y limpio.
+                                </div>
+                                <strong style="color: var(--brand-green);">Secciones del Tablero:</strong><br>
+                                <span style="padding-left: 8px;">1.</span> <strong>Resumen Ejecutivo:</strong> KPIs patrimoniales — total ítems/activos, valor total, % faltantes, provisiones requeridas, edad promedio<br>
+                                <span style="padding-left: 8px;">2.</span> <strong>Conciliación Físico-Contable:</strong> Tabla de diferencias con clasificación faltante/sobrante, monto de impacto, análisis por bodega/categoría<br>
+                                <span style="padding-left: 8px;">3.</span> <strong>Análisis de Rotación y Obsolescencia:</strong> Gráficos de rotación por categoría, aging de inventario, activos totalmente depreciados<br>
+                                <span style="padding-left: 8px;">4.</span> <strong>Dashboard de Red Flags:</strong> Ítems fantasma, sobrevaluación, patrones de movimiento, concentración de custodia<br>
+                                <span style="padding-left: 8px;">5.</span> <strong>Observaciones MIPP:</strong> Hallazgos con Criterio (NIC 2/16/36), Condición, Causa e Impacto<br>
+                                <span style="padding-left: 8px;">6.</span> <strong>Remediación, Monitoreo y Mejora Continua:</strong><br>
+                                <span style="padding-left: 24px;">a)</span> <strong>Planes de Acción:</strong> Ajustes de inventario, bajas de activos, provisiones por deterioro/obsolescencia<br>
+                                <span style="padding-left: 24px;">b)</span> <strong>Monitoreo:</strong> KRIs — índice de rotación, % faltantes, aging, depreciación vs. vida útil<br>
+                                <span style="padding-left: 24px;">c)</span> <strong>Reentrenamiento:</strong> Feedback del auditor para ajustar umbrales de obsolescencia y deterioro
+                            </div>
+
+                            <h3 style="color: var(--az087-a); font-size: 1em;"><span class="material-symbols-outlined" style="font-size: 1.1em;">verified</span> 5-6. Resultados y Remediación</h3>
+                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                <div style="flex: 1; background: #f0fdf4; padding: 8px; border-radius: 6px; border-top: 3px solid var(--brand-green);">
+                                    <strong style="font-size: 0.78em; color: var(--brand-green); display: block; margin-bottom: 4px;">Entregables por Categoría</strong>
+                                    <ul style="font-size: 0.72em; padding-left: 12px; color: #334155; line-height: 1.3; margin-bottom: 0;">
+                                        <li>Conciliación físico-contable</li>
+                                        <li>Análisis de rotación y aging</li>
+                                        <li>Validación de depreciación</li>
+                                        <li>Provisiones requeridas NIC 2/36</li>
+                                    </ul>
+                                </div>
+                                <div style="flex: 1; background: #eff6ff; padding: 8px; border-radius: 6px; border-top: 3px solid var(--brand-blue);">
+                                    <strong style="font-size: 0.78em; color: var(--brand-blue); display: block; margin-bottom: 4px;">Dashboard Consolidado</strong>
+                                    <ul style="font-size: 0.72em; padding-left: 12px; color: #334155; line-height: 1.3; margin-bottom: 0;">
+                                        <li>Mapa de discrepancias por bodega</li>
+                                        <li>Ranking de riesgo patrimonial</li>
+                                        <li>Gráfico de aging de inventario</li>
+                                        <li>% activos con anomalías</li>
+                                    </ul>
+                                </div>
+                                <div style="flex: 1; background: #fff7ed; padding: 8px; border-radius: 6px; border-top: 3px solid var(--nr001-a);">
+                                    <strong style="font-size: 0.78em; color: var(--nr001-a); display: block; margin-bottom: 4px;">Remediación y Mejora Continua</strong>
+                                    <ul style="font-size: 0.72em; padding-left: 12px; color: #334155; line-height: 1.3; margin-bottom: 0;">
+                                        <li><strong>Planes de Acción:</strong> Ajustes, bajas y provisiones correctivas</li>
+                                        <li><strong>Monitoreo:</strong> KRIs patrimoniales y alertas automáticas</li>
+                                        <li><strong>Reentrenamiento:</strong> Feedback para ajustar umbrales de obsolescencia</li>
+                                        <li>Conteos cíclicos y control de custodias</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Footer -->
+                <div style="margin-top: auto; width: 100%; padding: 0 50px;">
+                    <hr style="margin-top: 10px; margin-bottom: 10px; border: none; border-top: 1px solid rgba(9, 62, 94, 0.15);">
+                    <div style="font-size: 0.85em; color: #64748b;">
+                        <strong>Formatos:</strong> CSV, XLSX, ERP &nbsp;|&nbsp; <strong>Marcos:</strong> NIC 2 (Inventarios), NIC 16 (PP&E), NIC 36 (Deterioro), NIC 40, Políticas de Capitalización &nbsp;|&nbsp; <strong>Técnicas:</strong> Conciliación físico-contable, análisis de rotación, aging, VNR.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- SLIDE 5: Caso 5 — Análisis de Segregación de Funciones (SoD) -->
+            <!-- ============================================================ -->
+            <div class="slide" style="display:none">
+                <button onclick="goToSlide(0)" style="position: absolute; top: 30px; left: 30px; background: transparent; border: 1px solid var(--az087-a); color: var(--az087-a); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s; z-index: 10;">
+                    <span class="material-symbols-outlined" style="vertical-align: text-bottom; font-size: 1.25em;">arrow_back</span> Volver al Hub
+                </button>
+                <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: left; padding: 20px 40px; overflow-y: auto;">
+                    <span class="tag" style="background-color: var(--brand-purple); font-size: 1.1em; margin-bottom: 15px;">Caso 5 de 5</span>
+                    <h2 style="border:none; font-size: 1.8em; margin-bottom: 8px; text-align: center; color: var(--az087-a);">
+                        <span class="material-symbols-outlined" style="vertical-align: bottom; font-size: 1.1em;">admin_panel_settings</span>
+                        Análisis Inteligente de Segregación de Funciones (SoD)
+                        <span style="font-size: 0.5em; display: block; color: var(--brand-red); font-weight: 500;">Accesos, Roles y Controles ITGC</span>
+                    </h2>
+                    <p style="font-size: 0.95em; color: #64748b; text-align: center; margin-bottom: 20px; max-width: 900px;">Análisis de matrices de accesos, roles y permisos en ERP/sistemas: detección de conflictos de Segregación de Funciones (SoD), acumulación de privilegios, cuentas huérfanas, super-usuarios y validación de controles ITGC a partir de datos estructurados.</p>
+
+                    <!-- Flowchart de Metodología -->
+                    <div style="display: flex; justify-content: center; align-items: flex-start; gap: 8px; margin-bottom: 20px; width: 100%; max-width: 1100px; flex-wrap: wrap;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge"><div class="step-num" style="background: var(--az087-a);">1</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Planificación</span></div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.3;">Procesos críticos<br>Matriz SoD base</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge"><div class="step-num" style="background: var(--az087-a);">2</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Contexto</span></div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.3;">COSO, COBIT, SOX<br>ISO 27001, ITGC</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge"><div class="step-num" style="background: var(--az087-a);">3</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Fuentes</span></div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 130px; line-height: 1.3;">CSV/XLSX accesos<br>Roles, permisos, logs</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--brand-green);"><div class="step-num" style="background: var(--brand-green);">4</div><span style="font-size: 0.8em; font-weight: 600; color: var(--brand-green);">Procesamiento</span></div>
+                            <div style="background: #f0fdf4; border: 1px dashed #34d399; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #065f46; text-align: center; width: 130px; line-height: 1.3;">Conflictos SoD<br>Privilegios excesivos</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--brand-green);"><div class="step-num" style="background: var(--brand-green);">5</div><span style="font-size: 0.8em; font-weight: 600; color: var(--brand-green);">Resultados</span></div>
+                            <div style="background: #f0fdf4; border: 1px dashed #34d399; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #065f46; text-align: center; width: 130px; line-height: 1.3;">Mapa de conflictos<br>Scoring de riesgo</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--nr001-a);"><div class="step-num" style="background: var(--nr001-a);">6</div><span style="font-size: 0.8em; font-weight: 600; color: var(--nr001-a);">Remediación</span></div>
+                            <div style="background: #fff7ed; border: 1px dashed #fb923c; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #9a3412; text-align: center; width: 130px; line-height: 1.3;">Reasignación de roles<br>Controles compensatorios</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 20px; width: 100%; max-width: 1100px; margin-bottom: 20px;">
+                        
+                        <!-- Columna 1: Planificación -->
+                        <div class="workshop-section" style="flex: 1; display: flex; flex-direction: column;">
+                            <h3 style="color: var(--nr001-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">checklist</span> 1. Planificación</h3>
+                            <p style="font-size: 0.8em; color: #64748b; margin-bottom: 10px; line-height: 1.4;">Definición de procesos críticos, sistemas en alcance y matriz SoD de referencia.</p>
+                            <ul style="font-size: 0.8em; padding-left: 15px; color: #334155; line-height: 1.4; margin-bottom: 15px;">
+                                <li><strong>Procesos Críticos:</strong> Compras (P2P), pagos (AP), ventas (O2C), nómina (HR), tesorería, maestros.</li>
+                                <li><strong>Objetivo:</strong> Detectar conflictos SoD, privilegios excesivos, cuentas huérfanas, super-usuarios.</li>
+                                <li><strong>Alcance:</strong> Sistemas ERP/Core, # usuarios activos, módulos y transacciones.</li>
+                                <li><strong>Materialidad:</strong> Nivel de privilegio, acceso a datos sensibles, riesgo de fraude.</li>
+                                <li><strong>Hipótesis de Riesgo:</strong> Un usuario puede crear proveedor Y pagar; crear OC Y aprobar; registrar Y autorizar asientos.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Columna 2: Contexto y Fuentes -->
+                        <div class="workshop-section" style="flex: 1.2; display: flex; flex-direction: column;">
+                            <h3 style="color: var(--az087-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">admin_panel_settings</span> 2-3. Contexto y Fuentes</h3>
+                            <p style="font-size: 0.8em; color: #64748b; margin-bottom: 10px; line-height: 1.4;">Marcos de control y los datasets de accesos/roles a procesar.</p>
+                            
+                            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                                <span class="doc-format-tag" style="background: #d1fae5; color: var(--brand-green);"><span class="material-symbols-outlined" style="font-size: 1em;">grid_on</span> Usuarios CSV</span>
+                                <span class="doc-format-tag" style="background: #e0f2fe; color: var(--brand-blue);"><span class="material-symbols-outlined" style="font-size: 1em;">table_view</span> Roles XLSX</span>
+                                <span class="doc-format-tag" style="background: #fef3c7; color: var(--brand-orange);"><span class="material-symbols-outlined" style="font-size: 1em;">security</span> Matriz SoD</span>
+                                <span class="doc-format-tag" style="background: #ede9fe; color: var(--brand-purple);"><span class="material-symbols-outlined" style="font-size: 1em;">history</span> Logs Acceso</span>
+                            </div>
+
+                            <h4 style="font-size: 0.85em; color: var(--az087-a); margin-bottom: 8px;">Campos Clave del Dataset:</h4>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.78em; margin-bottom: 10px;">
+                                <tr style="background: rgba(9, 62, 94, 0.05); text-align: left;"><th style="padding: 5px; border-bottom: 1px solid #cbd5e1;">Campo</th><th style="padding: 5px; border-bottom: 1px solid #cbd5e1;">Descripción</th></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">ID Usuario</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Identificador único en el sistema</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Nombre / Cédula</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Persona natural asociada al usuario</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Rol / Perfil</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Rol(es) asignado(s) en el sistema</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Permisos / Transacciones</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Lista de permisos o tcodes habilitados</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Área / Departamento</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Unidad organizativa del usuario</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Estado</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Activo / Inactivo / Bloqueado</td></tr>
+                                <tr><td style="padding: 5px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Fecha Creación / Último Login</td><td style="padding: 5px; border-bottom: 1px solid #e2e8f0;">Cuándo se creó y cuándo accedió por última vez</td></tr>
+                                <tr><td style="padding: 5px; font-weight: 600;">Tipo de Cuenta</td><td style="padding: 5px;">Nombrada, genérica, servicio, administrador</td></tr>
+                            </table>
+
+                            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px; border-radius: 4px; font-size: 0.78em; color: #92400e; line-height: 1.4; margin-top: 10px;">
+                                <strong><span class="material-symbols-outlined" style="font-size: 1em; vertical-align: text-bottom;">verified_user</span> Validación de Fuentes (antes de IA):</strong>
+                                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                                    <div style="flex: 1;">
+                                        <strong style="font-size: 0.95em; color: #b45309;"><span class="material-symbols-outlined" style="font-size: 0.95em; vertical-align: text-bottom;">memory</span> Técnica:</strong>
+                                        <ul style="padding-left: 14px; margin: 4px 0 0 0; line-height: 1.35;">
+                                            <li>Extracción completa (todos los usuarios)</li>
+                                            <li>Roles mapeados a permisos expandidos</li>
+                                            <li>Matriz SoD de referencia validada</li>
+                                        </ul>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <strong style="font-size: 0.95em; color: #b45309;"><span class="material-symbols-outlined" style="font-size: 0.95em; vertical-align: text-bottom;">person_check</span> Negocio:</strong>
+                                        <ul style="padding-left: 14px; margin: 4px 0 0 0; line-height: 1.35;">
+                                            <li>Procesos en alcance confirmados</li>
+                                            <li>Umbrales de aprobación vigentes</li>
+                                            <li>Controles compensatorios documentados</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Columna 3: Prompt IA -->
+                        <div class="workshop-section" style="flex: 1.8;">
+                            <h3 style="color: var(--brand-green);"><span class="material-symbols-outlined" style="font-size: 1.1em;">chat</span> 4. Procesamiento (Prompt IA)</h3>
+                            <div style="background-color: #f8fafc; border-left: 4px solid var(--brand-green); padding: 10px; border-radius: 6px; font-size: 0.72em; line-height: 1.35; margin-bottom: 10px; font-family: 'Courier New', monospace; color: #1e293b;">
+                                <strong style="color: var(--brand-green);">Rol:</strong> Eres un Auditor de TI y Analista de Controles experto en COSO 2013 (Control Interno), COBIT 2019 (Gobierno de TI), SOX Sección 404, ISO 27001 (Seguridad de la Información), ITGC (IT General Controls), principios de mínimo privilegio y segregación de funciones en sistemas ERP (SAP, Oracle, Dynamics).<br><br>
+                                <strong style="color: var(--brand-green);">Contexto:</strong> Se te entregarán datasets de accesos/usuarios/roles de un sistema ERP o aplicación crítica en formato CSV o Excel, junto con una Matriz SoD de referencia que define los pares de funciones incompatibles. Columnas típicas del dataset: ID_Usuario, Nombre, Cédula, Rol/Perfil, Permisos/TCode, Área, Estado, Fecha_Creación, Último_Login, Tipo_Cuenta. La Matriz SoD contiene: Función_A, Función_B, Nivel_Riesgo (Alto/Medio/Bajo), Proceso, Descripción_Conflicto. Marco aplicable: COSO 2013, COBIT 2019 (DSS05, DSS06), SOX 404, ISO 27001 (A.9), NIA 315 (ITGC), principio de mínimo privilegio (PoLP).<br><br>
+
+                                <strong style="color: var(--brand-green);">Tarea 1 — Perfilamiento de Accesos:</strong><br>
+                                <ul style="padding-left: 16px; margin: 3px 0 6px 0; line-height: 1.3;">
+                                    <li><strong>Estadísticas:</strong> Total usuarios, # activos/inactivos/bloqueados, # roles únicos, # permisos únicos, promedio roles/usuario, promedio permisos/usuario</li>
+                                    <li><strong>Distribución:</strong> Usuarios por área, roles más asignados (top 10), permisos más frecuentes, distribución por tipo de cuenta</li>
+                                    <li><strong>Calidad:</strong> Usuarios sin rol, roles sin permisos, usuarios sin último login (&gt;90 días), cuentas genéricas/compartidas detectadas</li>
+                                </ul>
+                                <strong style="color: var(--brand-green);">Tarea 2 — Detección de Conflictos SoD:</strong> Cruza el dataset de usuarios-roles-permisos contra la Matriz SoD de referencia:<br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #fef2f2; border-radius: 4px; border: 1px solid #fecaca;">
+                                    <strong style="color: #991b1b;">V1. Conflictos SoD Directos</strong> — Para cada usuario, identificar si posee permisos que cubren ambas funciones de un par incompatible según la Matriz SoD. Ejemplo: Crear proveedor (Función A) + Registrar pago (Función B) = Conflicto Alto.<br>
+                                    <strong style="color: #991b1b;">V2. Conflictos por Acumulación de Roles</strong> — Usuario con múltiples roles que individualmente no conflictan pero combinados generan un conflicto SoD. Análisis de intersección de permisos entre roles asignados.<br>
+                                    <strong style="color: #991b1b;">V3. Super-Usuarios</strong> — Usuarios con acceso a &gt;80% de las transacciones o con roles de administrador/configuración + roles operativos. Cuentas con privilegios SAP_ALL o equivalentes.<br>
+                                    <strong style="color: #991b1b;">V4. Cuentas Huérfanas/Genéricas</strong> — Usuarios activos sin último login en &gt;90 días; cuentas genéricas (ADMIN, TEST, USER1) con permisos productivos; IDs de usuario no cruzables con el maestro de empleados activos.
+                                </div>
+                                <strong style="color: var(--brand-green);">Tarea 3 — Red Flags de Acceso y Control:</strong><br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #fef2f2; border-radius: 4px; border: 1px solid #fecaca;">
+                                    <strong style="color: #dc2626;">🔍 RF1. Privilegios Excesivos</strong> — Usuarios con significativamente más permisos que el promedio de su área/rol (Z-score &gt; 2); roles con permisos no relacionados con su función de negocio; acceso a módulos no requeridos.<br>
+                                    <strong style="color: #dc2626;">🔍 RF2. Concentración de Poder</strong> — Pocos usuarios con acceso a funciones críticas de extremo a extremo de un proceso (ej. crear proveedor→ crear OC → aprobar OC → registrar recepción → aprobar pago).<br>
+                                    <strong style="color: #dc2626;">🔍 RF3. Patrones de Asignación</strong> — Roles asignados en bloque a áreas completas sin diferenciación; asignaciones masivas recientes previas a auditoría; usuarios con roles de áreas a las que no pertenecen.<br>
+                                    <strong style="color: #dc2626;">🔍 RF4. Debilidades ITGC</strong> — Sin política de caducidad de contraseñas evidenciada; cuentas de servicio con login interactivo; ausencia de revisión periódica de accesos (sin desactivaciones recientes).<br>
+                                    <strong style="color: #dc2626;">🔍 RF5. Uso Efectivo vs. Asignado</strong> — Si se dispone de logs: permisos asignados pero nunca utilizados (over-provisioning); permisos sensibles utilizados en horarios no laborales; picos de actividad atípicos.
+                                </div>
+                                <strong style="color: var(--brand-green);">Tarea 4 — Scoring de Riesgo por Usuario:</strong><br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #eff6ff; border-radius: 4px; border: 1px solid #bfdbfe;">
+                                    <strong style="color: #1e40af;">A) Riesgo por Conflictos SoD:</strong><br>
+                                    <span style="padding-left: 8px;">• <strong style="color: #dc2626;">Crítico:</strong> ≥ 1 conflicto SoD de nivel Alto</span><br>
+                                    <span style="padding-left: 8px;">• <strong style="color: #dc2626;">Alto:</strong> ≥ 3 conflictos Medio o super-usuario detectado</span><br>
+                                    <span style="padding-left: 8px;">• <strong style="color: #f59e0b;">Medio:</strong> 1–2 conflictos Medio o ≥ 2 Bajo</span><br>
+                                    <span style="padding-left: 8px;">• <strong style="color: #16a34a;">Bajo:</strong> Sin conflictos SoD detectados</span><br><br>
+                                    <strong style="color: #1e40af;">B) Riesgo por Privilegios:</strong> Basado en # permisos, tipo de cuenta, inactividad, cuentas genéricas.<br>
+                                    <strong style="color: #1e40af;">C) Riesgo Final = máx(A, B)</strong>
+                                </div>
+
+                                <strong style="color: var(--brand-green);">Formato de salida — HTML AUTOCONTENIDO:</strong> La respuesta DEBE ser ÚNICAMENTE un archivo HTML.<br>
+                                <div style="margin: 6px 0; padding: 6px 8px; background: #f0fdf4; border-radius: 4px; border: 1px solid #bbf7d0;">
+                                    <strong style="color: #065f46;">Tecnologías:</strong> Tailwind CSS (CDN), fuente Inter + Monotype, gráficos con CSS/SVG o Chart.js.<br>
+                                    <strong style="color: #065f46;">Diseño:</strong> Colores sobrios — fondos blancos, azul corporativo, verde y rojo. Estilo ejecutivo y limpio.
+                                </div>
+                                <strong style="color: var(--brand-green);">Secciones del Tablero:</strong><br>
+                                <span style="padding-left: 8px;">1.</span> <strong>Resumen Ejecutivo:</strong> KPIs — total usuarios, # conflictos SoD (alto/medio/bajo), # super-usuarios, # cuentas huérfanas, % usuarios con conflicto<br>
+                                <span style="padding-left: 8px;">2.</span> <strong>Perfilamiento de Accesos:</strong> Distribución de roles, mapa de permisos por área, concentración de privilegios<br>
+                                <span style="padding-left: 8px;">3.</span> <strong>Mapa de Conflictos SoD:</strong> Heatmap de pares de funciones conflictivas × usuarios. Tabla detallada: Usuario | Función A | Función B | Nivel Riesgo | Proceso | Controles Compensatorios existentes<br>
+                                <span style="padding-left: 8px;">4.</span> <strong>Dashboard de Red Flags:</strong> Super-usuarios, cuentas huérfanas, privilegios excesivos, patrones de asignación anómalos<br>
+                                <span style="padding-left: 8px;">5.</span> <strong>Observaciones MIPP:</strong> Hallazgos con Criterio (COSO, COBIT, SOX, ISO 27001), Condición, Causa e Impacto<br>
+                                <span style="padding-left: 8px;">6.</span> <strong>Remediación, Monitoreo y Mejora Continua:</strong><br>
+                                <span style="padding-left: 24px;">a)</span> <strong>Planes de Acción:</strong> Reasignación de roles, eliminación de conflictos, implementación de controles compensatorios, desactivación de cuentas huérfanas<br>
+                                <span style="padding-left: 24px;">b)</span> <strong>Monitoreo:</strong> KRIs de acceso — # conflictos SoD abiertos, % usuarios con revisión vigente, # cuentas inactivas, alertas de asignación de privilegios críticos<br>
+                                <span style="padding-left: 24px;">c)</span> <strong>Reentrenamiento:</strong> Feedback del auditor para actualizar Matriz SoD con nuevos procesos y ajustar umbrales<br>
+                                <span style="padding-left: 8px;">7.</span> <strong>Ranking de Riesgo:</strong> Usuarios ordenados por scoring, heatmap de conflictos por proceso
+                            </div>
+
+                            <h3 style="color: var(--az087-a); font-size: 1em;"><span class="material-symbols-outlined" style="font-size: 1.1em;">verified</span> 5-6. Resultados y Remediación</h3>
+                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                <div style="flex: 1; background: #f0fdf4; padding: 8px; border-radius: 6px; border-top: 3px solid var(--brand-green);">
+                                    <strong style="font-size: 0.78em; color: var(--brand-green); display: block; margin-bottom: 4px;">Entregables Analíticos</strong>
+                                    <ul style="font-size: 0.72em; padding-left: 12px; color: #334155; line-height: 1.3; margin-bottom: 0;">
+                                        <li>Perfilamiento completo de accesos</li>
+                                        <li>Mapa de conflictos SoD detallado</li>
+                                        <li>Listado de super-usuarios</li>
+                                        <li>Scoring de riesgo por usuario</li>
+                                    </ul>
+                                </div>
+                                <div style="flex: 1; background: #fef2f2; padding: 8px; border-radius: 6px; border-top: 3px solid var(--brand-red);">
+                                    <strong style="font-size: 0.78em; color: var(--brand-red); display: block; margin-bottom: 4px;">Dashboard Consolidado</strong>
+                                    <ul style="font-size: 0.72em; padding-left: 12px; color: #334155; line-height: 1.3; margin-bottom: 0;">
+                                        <li>Heatmap SoD por proceso × usuario</li>
+                                        <li>Cuentas huérfanas y genéricas</li>
+                                        <li>Concentración de privilegios</li>
+                                        <li>% usuarios Crítico/Alto/Medio/Bajo</li>
+                                    </ul>
+                                </div>
+                                <div style="flex: 1; background: #fff7ed; padding: 8px; border-radius: 6px; border-top: 3px solid var(--nr001-a);">
+                                    <strong style="font-size: 0.78em; color: var(--nr001-a); display: block; margin-bottom: 4px;">Remediación y Mejora Continua</strong>
+                                    <ul style="font-size: 0.72em; padding-left: 12px; color: #334155; line-height: 1.3; margin-bottom: 0;">
+                                        <li><strong>Planes:</strong> Reasignación de roles, controles compensatorios</li>
+                                        <li><strong>Monitoreo:</strong> KRIs de acceso, alertas de privilegios críticos</li>
+                                        <li><strong>Reentrenamiento:</strong> Actualización de Matriz SoD y umbrales</li>
+                                        <li>Revisión periódica de accesos y certificación</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <!-- Escala de valoración visual -->
+                            <div style="display: flex; gap: 6px; align-items: center; font-size: 0.7em; color: #64748b; padding: 4px 0; flex-wrap: wrap;">
+                                <span style="font-weight: 600;">Riesgo Final = máx(Conflictos SoD, Privilegios):</span>
+                                <span style="background: #7f1d1d; color: #fff; padding: 2px 8px; border-radius: 10px; font-weight: 600;">Crítico</span>
+                                <span style="background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 10px; font-weight: 600;">Alto</span>
+                                <span style="background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 10px; font-weight: 600;">Medio</span>
+                                <span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 10px; font-weight: 600;">Bajo</span>
+                                <span style="margin-left: 4px;">| Marcos: COSO · COBIT · SOX · ISO 27001 · ITGC</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Footer -->
+                <div style="margin-top: auto; width: 100%; padding: 0 50px;">
+                    <hr style="margin-top: 10px; margin-bottom: 10px; border: none; border-top: 1px solid rgba(9, 62, 94, 0.15);">
+                    <div style="font-size: 0.85em; color: #64748b;">
+                        <strong>Formatos:</strong> CSV, XLSX, RBAC Exports &nbsp;|&nbsp; <strong>Marcos:</strong> COSO 2013, COBIT 2019, SOX 404, ISO 27001, NIA 315, ITGC &nbsp;|&nbsp; <strong>Técnicas:</strong> Cruce Matriz SoD, Análisis RBAC, mínimo privilegio, detección de super-usuarios.
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- Fin Track -->
+
+        <!-- Controles Interfaz -->
+        <div class="controls">
+            <button class="btn" id="prevBtn" onclick="moveSlide(-1)" disabled>Anterior</button>
+            <div class="indicators" id="indicatorsBox"></div>
+            <button class="btn" id="nextBtn" onclick="moveSlide(1)">Siguiente <span class="material-symbols-outlined" style="vertical-align: text-bottom;">arrow_forward</span></button>
+        </div>
+
+    </div>
+
+    <!-- Lógica del Slider -->
+    <script>
+        const track = document.getElementById('slidesTrack');
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const indicatorsBox = document.getElementById('indicatorsBox');
+        
+        const totalSlides = slides.length;
+        let currentIndex = 0;
+
+        // Asegurar que solo la primera diapositiva sea visible
+        slides.forEach((s, i) => {
+            s.classList.remove('active-slide');
+            s.style.display = 'none';
+        });
+        slides[0].classList.add('active-slide');
+        slides[0].style.display = 'flex';
+
+        // Crear los puntos (dots) indicadores
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            if (i === 0) dot.classList.add('active');
+            dot.onclick = () => goToSlide(i);
+            indicatorsBox.appendChild(dot);
+        }
+        
+        const dots = document.querySelectorAll('.dot');
+
+        function updateUI() {
+            slides.forEach((slide, i) => {
+                if (i === currentIndex) {
+                    slide.classList.add('active-slide');
+                    slide.style.display = 'flex';
+                } else {
+                    slide.classList.remove('active-slide');
+                    slide.style.display = 'none';
+                }
+            });
+            
+            prevBtn.disabled = currentIndex === 0;
+            
+            if (currentIndex === totalSlides - 1) {
+                nextBtn.disabled = true;
+                nextBtn.innerHTML = "Finalizado";
+            } else {
+                nextBtn.disabled = false;
+                nextBtn.innerHTML = 'Siguiente <span class="material-symbols-outlined" style="vertical-align: text-bottom;">arrow_forward</span>';
+            }
+
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentIndex);
+            });
+        }
+
+        window.moveSlide = function(direction) {
+            currentIndex += direction;
+            if (currentIndex < 0) currentIndex = 0;
+            if (currentIndex >= totalSlides) currentIndex = totalSlides - 1;
+            updateUI();
+        }
+
+        window.goToSlide = function(index) {
+            currentIndex = index;
+            updateUI();
+        }
+    </script>
+</body>
+</html>

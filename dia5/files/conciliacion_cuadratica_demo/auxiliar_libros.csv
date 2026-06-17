@@ -1,0 +1,12 @@
+fecha,concepto,tipo,valor,saldo
+2026-05-01,Saldo anterior,saldo_inicial,0,10000000
+2026-05-03,Recaudo cliente A FV-1001,credito,8000000,18000000
+2026-05-05,Cheque 1201 - Proveedor Insumos SAS,debito,4000000,14000000
+2026-05-10,Recaudo cliente B FV-1002,credito,6500000,20500000
+2026-05-12,Nomina mayo,debito,7000000,13500000
+2026-05-15,Cheque 1202 - Arrendamiento,debito,3000000,10500000
+2026-05-18,Recaudo cliente C FV-1003,credito,5500000,16000000
+2026-05-20,Pago servicios publicos,debito,2200000,13800000
+2026-05-25,Recaudo cliente D FV-1004,credito,5000000,18800000
+2026-05-28,Cheque 1203 - Proveedor Insumos SAS,debito,1500000,17300000
+2026-05-30,Cheque 1204 - Proveedor Logistica SAS,debito,800000,16500000

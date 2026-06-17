@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Instrucciones encadenadas con agentes — HiPanda Talleres
+    </title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Libre Franklin"', "sans-serif"],
+            },
+            colors: {
+              paper: "oklch(0.985 0.005 85)",
+              "paper-soft": "oklch(0.969 0.007 82)",
+              "paper-strong": "oklch(0.944 0.008 82)",
+              ink: "oklch(0.252 0.012 252)",
+              muted: "oklch(0.53 0.016 250)",
+              line: "oklch(0.865 0.008 80)",
+              accent: "oklch(0.59 0.074 46)",
+              "accent-soft": "oklch(0.946 0.022 46)",
+            },
+            boxShadow: {
+              paper: "0 24px 80px rgba(45,39,32,0.08)",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      :root {
+        --paper: oklch(0.985 0.005 85);
+        --paper-soft: oklch(0.969 0.007 82);
+        --paper-strong: oklch(0.944 0.008 82);
+        --ink: oklch(0.252 0.012 252);
+        --muted: oklch(0.53 0.016 250);
+        --line: oklch(0.865 0.008 80);
+        --accent: oklch(0.59 0.074 46);
+        --accent-soft: oklch(0.946 0.022 46);
+      }
+
+      html {
+        background:
+          radial-gradient(circle at top left, oklch(0.96 0.012 50) 0, transparent 28%),
+          radial-gradient(circle at top right, oklch(0.958 0.012 235) 0, transparent 30%),
+          linear-gradient(180deg, var(--paper) 0%, oklch(0.978 0.006 84) 100%);
+        background-attachment: fixed;
+        scroll-behavior: smooth;
+      }
+
+      .kicker {
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-size: 0.73rem;
+        font-weight: 700;
+      }
+
+      .section-title {
+        line-height: 1.02;
+        letter-spacing: -0.04em;
+      }
+
+      .measure {
+        max-width: 72ch;
+      }
+
+      .contract-shell::before {
+        content: "";
+        display: block;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          color-mix(in oklab, var(--accent) 95%, transparent),
+          color-mix(in oklab, var(--accent) 30%, transparent)
+        );
+        margin-bottom: 1.25rem;
+        border-radius: 999px;
+      }
+
+      .flow-index {
+        width: 2.2rem;
+        height: 2.2rem;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: color-mix(in oklab, var(--paper) 84%, var(--accent-soft));
+        color: var(--ink);
+        font-size: 0.85rem;
+        font-weight: 700;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .stat-line {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 1rem;
+        align-items: end;
+        padding: 0.95rem 0;
+        border-top: 1px solid var(--line);
+      }
+      .stat-line:first-child {
+        border-top: 0;
+        padding-top: 0;
+      }
+
+      .progress-bar {
+        height: 2px;
+        background: var(--line);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 50;
+      }
+      .progress-fill {
+        height: 100%;
+        background: var(--accent);
+        transition: width 0.3s ease;
+      }
+
+      .slide {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 5rem 2rem 6rem;
+      }
+
+      .slide-inner {
+        width: 100%;
+        max-width: 1280px;
+        margin: 0 auto;
+      }
+
+      .nav-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--paper);
+        border-top: 1px solid var(--line);
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5rem;
+        z-index: 40;
+      }
+
+      .nav-btn {
+        padding: 0.6rem 1.25rem;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: var(--paper);
+        color: var(--ink);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: inherit;
+      }
+      .nav-btn:hover {
+        background: var(--paper-strong);
+        border-color: var(--accent);
+      }
+      .nav-btn:disabled {
+        opacity: 0.35;
+        cursor: default;
+        pointer-events: none;
+      }
+
+      .slide-counter {
+        font-size: 0.8rem;
+        color: var(--muted);
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .code-block {
+        background: var(--paper-soft);
+        border: 1px solid var(--line);
+        border-radius: 0.75rem;
+        padding: 1rem 1.25rem;
+        font-size: 0.8rem;
+        line-height: 1.5;
+        color: var(--ink);
+        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .file-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.8rem;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: var(--paper);
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--ink);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+      .file-chip:hover {
+        background: var(--paper-strong);
+        border-color: var(--accent);
+      }
+
+      .download-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.75rem;
+      }
+
+      .arrow-connector {
+        color: var(--muted);
+        font-size: 1.4rem;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+    </style>
+  </head>
+  <body class="font-sans text-ink antialiased">
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 1 — Hero -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-01">
+      <div class="slide-inner">
+        <div class="grid lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.65fr)] gap-10 items-center">
+          <div>
+            <p class="kicker text-accent mb-4">Sesion 5 &middot; Taller Practico</p>
+            <h1 class="text-[4.2rem] leading-[0.95] tracking-[-0.04em] font-extrabold text-ink mb-6">
+              Instrucciones<br />encadenadas<br />con agentes
+            </h1>
+            <p class="text-xl leading-relaxed text-muted measure">
+              Como los agentes de IA ejecutan pasos estructurados con
+              entregables intermedios, manteniendo al humano en control de
+              cada decision. Sin caja negra. Sin magia.
+            </p>
+          </div>
+          <div>
+            <div class="rounded-[2rem] bg-[var(--paper-soft)] border border-line p-8 shadow-paper">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-4">
+                En este modulo
+              </p>
+              <div class="flex items-start gap-3 mb-3">
+                <div class="flow-index">1</div>
+                <p class="text-sm text-ink leading-relaxed">Por que una instruccion sola no basta</p>
+              </div>
+              <div class="flex items-start gap-3 mb-3">
+                <div class="flow-index">2</div>
+                <p class="text-sm text-ink leading-relaxed">Encadenar pasos con entregables intermedios</p>
+              </div>
+              <div class="flex items-start gap-3 mb-3">
+                <div class="flow-index">3</div>
+                <p class="text-sm text-ink leading-relaxed">Human in the loop: auditar y decidir en cada paso</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <div class="flow-index">4</div>
+                <p class="text-sm text-ink leading-relaxed">Demo practica: conciliacion cuadratica en VS Code</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 2 — El problema de la caja negra -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-02">
+      <div class="slide-inner">
+        <p class="kicker text-accent mb-4">El problema</p>
+        <h2 class="text-4xl font-bold section-title mb-6">
+          Una instruccion gigante<br />es una caja negra
+        </h2>
+
+        <div class="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10">
+          <div>
+            <p class="text-lg leading-relaxed text-ink mb-6 measure">
+              Cuando le pides a un agente que haga <em>todo de una vez</em>,
+              no sabes que paso en el medio. El resultado llega y tenes que
+              confiar. En tareas administrativas reales — una conciliacion,
+              un informe financiero, una auditoria — confiar sin verificar
+              no es una opcion.
+            </p>
+
+            <div class="rounded-[1.5rem] border border-line bg-[var(--accent-soft)] p-5 sm:p-6 mb-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent">
+                El riesgo
+              </p>
+              <p class="mt-3 text-base leading-7 text-ink">
+                El riesgo no es que la IA se equivoque. El riesgo es que vos
+                confies sin verificar. Y sin entregables intermedios, no hay
+                nada que verificar.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <div class="rounded-[1.75rem] bg-[var(--paper-soft)] border border-line p-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-4">
+                Instruccion unica
+              </p>
+              <div class="code-block mb-4">
+                Haceme la conciliacion bancaria<br />
+                de mayo 2026 y dame el informe.
+              </div>
+
+              <div class="flex justify-center my-6">
+                <span class="text-muted text-sm font-semibold tracking-widest uppercase">&darr; resultado unico, sin trazabilidad</span>
+              </div>
+
+              <div class="rounded-[1.25rem] border border-line bg-[var(--paper)] p-4">
+                <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted">Resultado</p>
+                <p class="mt-2 text-sm leading-6 text-muted">
+                  Llega un informe. Las cifras cuadran — o no. No sabes que
+                  partidas se consideraron, si se omitio algo, si una nota
+                  debito quedo sin registrar. No podes auditar el proceso
+                  porque el proceso no dejo huella.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 3 — La solucion: instrucciones encadenadas -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-03">
+      <div class="slide-inner">
+        <p class="kicker text-accent mb-4">La solucion</p>
+        <h2 class="text-4xl font-bold section-title mb-6">
+          Dividir en pasos.<br />Cada paso deja un entregable.
+        </h2>
+
+        <p class="text-lg leading-relaxed text-muted measure mb-10">
+          En lugar de pedir todo de una vez, das instrucciones paso a paso.
+          Cada instruccion produce un archivo concreto que podes abrir,
+          revisar, y decidir si seguir al siguiente paso o corregir antes
+          de continuar.
+        </p>
+
+        <!-- Flow: 3 pasos con flechas -->
+        <div class="flex flex-wrap items-center justify-center gap-3 mb-10">
+          <div class="rounded-[1.25rem] border border-line bg-[var(--paper)] p-5 text-center min-w-[220px]">
+            <div class="flow-index mx-auto mb-3">1</div>
+            <p class="text-sm font-bold text-ink mb-1">paso1.md</p>
+            <p class="text-xs text-muted leading-relaxed">
+              Construye el cuadro<br />de 4 columnas
+            </p>
+            <p class="text-[0.7rem] font-semibold text-accent mt-2">
+              &rarr; cuadro_4col.csv
+            </p>
+          </div>
+
+          <span class="arrow-connector">&rarr;</span>
+
+          <div class="rounded-[1.25rem] border border-line bg-[var(--paper)] p-5 text-center min-w-[220px]">
+            <div class="flow-index mx-auto mb-3">2</div>
+            <p class="text-sm font-bold text-ink mb-1">paso2.md</p>
+            <p class="text-xs text-muted leading-relaxed">
+              Identifica partidas<br />conciliatorias
+            </p>
+            <p class="text-[0.7rem] font-semibold text-accent mt-2">
+              &rarr; partidas_conciliatorias.csv
+            </p>
+          </div>
+
+          <span class="arrow-connector">&rarr;</span>
+
+          <div class="rounded-[1.25rem] border border-line bg-[var(--paper)] p-5 text-center min-w-[220px]">
+            <div class="flow-index mx-auto mb-3">3</div>
+            <p class="text-sm font-bold text-ink mb-1">paso3.md</p>
+            <p class="text-xs text-muted leading-relaxed">
+              Valida el cuadre y<br />emite el informe
+            </p>
+            <p class="text-[0.7rem] font-semibold text-accent mt-2">
+              &rarr; informe_cuadratica.md
+            </p>
+          </div>
+        </div>
+
+        <div class="rounded-[1.5rem] border border-line bg-[var(--paper-soft)] p-6">
+          <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-3">
+            Cada paso consume el entregable del anterior
+          </p>
+          <div class="grid grid-cols-3 gap-4">
+            <div class="rounded-[1rem] border border-line bg-[var(--paper)] p-4">
+              <p class="text-xs font-bold text-ink mb-1">Paso 1</p>
+              <p class="text-[0.7rem] text-muted leading-relaxed">
+                Lee CSV &rarr; Calcula &rarr; Escribe cuadro_4col.csv
+              </p>
+            </div>
+            <div class="rounded-[1rem] border border-line bg-[var(--paper)] p-4">
+              <p class="text-xs font-bold text-ink mb-1">Paso 2</p>
+              <p class="text-[0.7rem] text-muted leading-relaxed">
+                Lee cuadro_4col.csv &rarr; Cruza &rarr; Escribe partidas_conciliatorias.csv
+              </p>
+            </div>
+            <div class="rounded-[1rem] border border-line bg-[var(--paper)] p-4">
+              <p class="text-xs font-bold text-ink mb-1">Paso 3</p>
+              <p class="text-[0.7rem] text-muted leading-relaxed">
+                Lee ambos archivos &rarr; Ajusta &rarr; Valida &rarr; informe_cuadratica.md
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 4 — Human in the Loop -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-04">
+      <div class="slide-inner">
+        <div class="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10">
+          <div>
+            <p class="kicker text-accent mb-4">Concepto clave</p>
+            <h2 class="text-4xl font-bold section-title mb-6">
+              Human in<br />the loop
+            </h2>
+            <p class="text-lg leading-relaxed text-ink measure mb-8">
+              La IA no reemplaza al contador ni al auditor. Le quita el
+              trabajo mecanico para que enfoque su criterio donde realmente
+              importa. El humano decide en cada paso si el entregable es
+              valido antes de seguir.
+            </p>
+
+            <div class="rounded-[1.5rem] border border-line bg-[var(--accent-soft)] p-5 sm:p-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent">
+                Esto no es magia
+              </p>
+              <p class="mt-3 text-base leading-7 text-ink">
+                Abris el CSV intermedio. Lo revisas en Excel. Ves las cifras
+                con tus ojos. Si algo no cuadra, frenas y corregis. El agente
+                trabaja para vos, no al reves.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <div class="contract-shell rounded-[1.75rem] bg-[var(--paper-soft)] border border-line p-6 shadow-paper">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-4">
+                La diferencia
+              </p>
+
+              <div class="stat-line">
+                <span class="text-sm text-muted">Caja negra</span>
+                <span class="text-sm font-semibold text-muted">Sin entregables</span>
+              </div>
+              <div class="stat-line">
+                <span class="text-sm text-muted">Con trazabilidad</span>
+                <span class="text-sm font-semibold text-accent">Cada paso deja huella</span>
+              </div>
+              <div class="stat-line">
+                <span class="text-sm text-muted">Auditable</span>
+                <span class="text-sm font-semibold text-accent">Papel de trabajo</span>
+              </div>
+              <div class="stat-line">
+                <span class="text-sm text-muted">Control humano</span>
+                <span class="text-sm font-semibold text-accent">Vos decidis continuar</span>
+              </div>
+
+              <p class="mt-6 text-sm leading-relaxed text-muted">
+                Cada archivo intermedio es un papel de trabajo. Si dentro de
+                seis meses un revisor fiscal pregunta como se llego a ese
+                saldo, tenes la trazabilidad completa.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 5 — La demo: conciliacion cuadratica -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-05">
+      <div class="slide-inner">
+        <p class="kicker text-accent mb-4">Demo en vivo</p>
+        <h2 class="text-4xl font-bold section-title mb-6">
+          Conciliacion cuadratica<br />encadenada
+        </h2>
+
+        <p class="text-lg leading-relaxed text-muted measure mb-8">
+          El caso: conciliacion de la cuenta de bancos a mayo 2026. Dos
+          fuentes de datos — extracto bancario y libro auxiliar — procesadas
+          en tres pasos con entregables concretos.
+        </p>
+
+        <div class="grid lg:grid-cols-2 gap-8">
+          <!-- Insumos -->
+          <div class="rounded-[1.5rem] border border-line bg-[var(--paper-soft)] p-6">
+            <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-4">
+              Insumos
+            </p>
+            <div class="space-y-3">
+              <div class="rounded-[1rem] border border-line bg-[var(--paper)] p-4">
+                <p class="text-sm font-bold text-ink mb-1">extracto_banco.csv</p>
+                <p class="text-xs text-muted leading-relaxed">
+                  12 movimientos segun el banco. Columnas: fecha, concepto,
+                  tipo (saldo_inicial, credito, debito), valor, saldo.
+                </p>
+              </div>
+              <div class="rounded-[1rem] border border-line bg-[var(--paper)] p-4">
+                <p class="text-sm font-bold text-ink mb-1">auxiliar_libros.csv</p>
+                <p class="text-xs text-muted leading-relaxed">
+                  12 movimientos segun la contabilidad. Misma estructura.
+                  Los conceptos pueden variar entre fuentes.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Datos clave -->
+          <div class="rounded-[1.5rem] border border-line bg-[var(--paper-soft)] p-6">
+            <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-4">
+              Las cifras
+            </p>
+            <div class="stat-line">
+              <span class="text-sm text-muted">Saldo final BANCO</span>
+              <span class="text-sm font-bold text-ink">$17.000.000</span>
+            </div>
+            <div class="stat-line">
+              <span class="text-sm text-muted">Saldo final LIBROS</span>
+              <span class="text-sm font-bold text-ink">$16.500.000</span>
+            </div>
+            <div class="stat-line">
+              <span class="text-sm text-muted">Diferencia bruta</span>
+              <span class="text-sm font-bold text-accent">$500.000</span>
+            </div>
+
+            <p class="mt-5 text-sm leading-relaxed text-muted">
+              Los $500.000 de diferencia se explican con dos partidas:<br />
+              <strong class="text-ink">Cheque 1204 en circulacion</strong>
+              ($800.000) y
+              <strong class="text-ink">Nota debito comision + GMF</strong>
+              ($300.000).<br />
+              800.000 &minus; 300.000 = 500.000 &check;
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 6 — El orquestador -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-06">
+      <div class="slide-inner">
+        <p class="kicker text-accent mb-4">Nivel dos</p>
+        <h2 class="text-4xl font-bold section-title mb-6">
+          El orquestador:<br />los tres pasos de un tiron
+        </h2>
+
+        <div class="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10">
+          <div>
+            <p class="text-lg leading-relaxed text-ink measure mb-6">
+              Una vez que cada paso individual funciona, el archivo
+              <code class="font-semibold">orquestador.md</code> los encadena.
+              El agente ejecuta los tres pasos en secuencia, pero con una
+              regla de oro: el criterio de exito no es terminar, es
+              <strong>cuadrar</strong>.
+            </p>
+
+            <div class="code-block mb-6">
+# Orquestador — Conciliacion cuadratica completa
+
+Secuencia:
+1. Ejecuta paso1.md — genera cuadro_4col.csv
+   Si el cuadre interno falla, no continues.
+
+2. Ejecuta paso2.md — genera partidas_conciliatorias.csv
+
+3. Ejecuta paso3.md — genera informe_cuadratica.md
+
+Criterio de exito:
+EXITOSA solo si el informe concluye CUADRA
+en las cuatro columnas.
+
+Regla de oro:
+No inventes valores. Cada cifra debe
+rastrearse hasta los CSV originales.</div>
+
+            <p class="text-sm leading-relaxed text-muted">
+              Esto ya no es un prompt. Es un <strong class="text-ink">procedimiento</strong>.
+              Una secuencia repetible que deja trazabilidad completa y tiene
+              un criterio de calidad definido.
+            </p>
+          </div>
+
+          <div>
+            <div class="rounded-[1.5rem] border border-line bg-[var(--accent-soft)] p-6 mb-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-3">
+                El paralelo que importa
+              </p>
+              <div class="stat-line">
+                <span class="text-sm text-muted">Instruccion suelta</span>
+                <span class="text-sm font-semibold text-ink">Ad-hoc</span>
+              </div>
+              <div class="stat-line">
+                <span class="text-sm text-muted">orquestador.md</span>
+                <span class="text-sm font-semibold text-accent">Procedimiento</span>
+              </div>
+              <div class="stat-line">
+                <span class="text-sm text-muted">Skill empaquetada</span>
+                <span class="text-sm font-semibold text-ink">Politica</span>
+              </div>
+            </div>
+
+            <div class="rounded-[1.25rem] border border-line bg-[var(--paper)] p-4">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted">
+                El momento didactico
+              </p>
+              <p class="mt-2 text-sm leading-6 text-muted">
+                Abri <code>cuadro_4col.csv</code> antes de seguir al Paso 2.
+                Ahi cae la moneda: no es una caja negra, es un papel de
+                trabajo auditable. El ultimo eslabon <strong>valida</strong>,
+                no solo redacta.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 7 — VS Code: como ejecutarlo -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-07">
+      <div class="slide-inner">
+        <p class="kicker text-accent mb-4">Guia practica</p>
+        <h2 class="text-4xl font-bold section-title mb-6">
+          Como ejecutarlo<br />en VS Code
+        </h2>
+
+        <p class="text-lg leading-relaxed text-muted measure mb-8">
+          Necesitas VS Code con un agente activo (Cline, Copilot en modo
+          agente, Claude Code). El proceso toma menos de 5 minutos.
+        </p>
+
+        <div class="grid lg:grid-cols-2 gap-8">
+          <!-- Plano manual -->
+          <div class="rounded-[1.5rem] border border-line bg-[var(--paper-soft)] p-6">
+            <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-4">
+              Plano manual (paso a paso)
+            </p>
+
+            <div class="space-y-4">
+              <div class="flex items-start gap-3">
+                <div class="flow-index">1</div>
+                <div>
+                  <p class="text-sm font-bold text-ink">
+                    Abri la carpeta <code>dia5/files/</code> en VS Code
+                  </p>
+                  <p class="text-xs text-muted mt-1">
+                    Asegurate de que el agente tenga acceso a los archivos.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <div class="flow-index">2</div>
+                <div>
+                  <p class="text-sm font-bold text-ink">
+                    Decile al agente:
+                  </p>
+                  <div class="code-block mt-1">
+Seguí las instrucciones de paso1.md</div>
+                  <p class="text-xs text-muted mt-1">
+                    Revisa el archivo <code>cuadro_4col.csv</code> que genera.
+                    Abrilo. Mira las cifras.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <div class="flow-index">3</div>
+                <div>
+                  <p class="text-sm font-bold text-ink">
+                    Decile al agente:
+                  </p>
+                  <div class="code-block mt-1">
+Seguí las instrucciones de paso2.md</div>
+                  <p class="text-xs text-muted mt-1">
+                    Revisa <code>partidas_conciliatorias.csv</code>.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <div class="flow-index">4</div>
+                <div>
+                  <p class="text-sm font-bold text-ink">
+                    Decile al agente:
+                  </p>
+                  <div class="code-block mt-1">
+Seguí las instrucciones de paso3.md</div>
+                  <p class="text-xs text-muted mt-1">
+                    El agente emite el veredicto: CUADRA o NO CUADRA.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Plano orquestado -->
+          <div class="rounded-[1.5rem] border border-line bg-[var(--paper-soft)] p-6">
+            <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-4">
+              Plano orquestado (automatico)
+            </p>
+
+            <p class="text-sm text-muted leading-relaxed mb-4">
+              Despues de ver el encadenamiento manual, corre la version
+              orquestada para ver la diferencia:
+            </p>
+
+            <div class="code-block mb-4">
+Seguí las instrucciones de orquestador.md</div>
+
+            <p class="text-sm text-muted leading-relaxed mb-6">
+              El agente ejecuta los tres pasos en secuencia, validando
+              que cada entregable exista antes de seguir. El criterio
+              de exito es el cuadre en las cuatro columnas.
+            </p>
+
+            <div class="rounded-[1.25rem] border border-line bg-[var(--paper)] p-4">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-2">
+                Hacerlo fallar (opcional)
+              </p>
+              <p class="text-sm leading-6 text-muted">
+                En el Paso 2, pedile al agente que ignore la nota debito
+                (o borrala de <code>partidas_conciliatorias.csv</code>).
+                El Paso 3 reportara NO CUADRA por $300.000. Vuelve a
+                incluirla y ahora si cuadra. Esto demuestra que el ultimo
+                eslabon <strong>valida</strong>, no solo redacta.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 8 — Descargas y takeaway -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-08">
+      <div class="slide-inner">
+        <p class="kicker text-accent mb-4">Recursos</p>
+        <h2 class="text-4xl font-bold section-title mb-6">
+          Descarga los archivos<br />y probalo vos
+        </h2>
+
+        <p class="text-lg leading-relaxed text-muted measure mb-8">
+          Todos los archivos del kit estan disponibles para que los lleves
+          a tu VS Code y hagas la demo por tu cuenta.
+        </p>
+
+        <div class="grid lg:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.78fr)] gap-10">
+          <div>
+            <div class="rounded-[1.5rem] border border-line bg-[var(--paper-soft)] p-6 mb-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-4">
+                Archivos del kit
+              </p>
+              <div class="download-grid">
+                <a href="files/extracto_banco.csv" download class="file-chip">
+                  extracto_banco.csv
+                  <span class="text-[0.65rem] text-muted">1 KB</span>
+                </a>
+                <a href="files/auxiliar_libros.csv" download class="file-chip">
+                  auxiliar_libros.csv
+                  <span class="text-[0.65rem] text-muted">1 KB</span>
+                </a>
+                <a href="files/paso1.md" download class="file-chip">
+                  paso1.md
+                  <span class="text-[0.65rem] text-muted">1 KB</span>
+                </a>
+                <a href="files/paso2.md" download class="file-chip">
+                  paso2.md
+                  <span class="text-[0.65rem] text-muted">1 KB</span>
+                </a>
+                <a href="files/paso3.md" download class="file-chip">
+                  paso3.md
+                  <span class="text-[0.65rem] text-muted">1 KB</span>
+                </a>
+                <a href="files/orquestador.md" download class="file-chip">
+                  orquestador.md
+                  <span class="text-[0.65rem] text-muted">1 KB</span>
+                </a>
+                <a href="files/README.md" download class="file-chip">
+                  README.md
+                  <span class="text-[0.65rem] text-muted">Guia</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="rounded-[1.5rem] border border-line bg-[var(--accent-soft)] p-5 sm:p-6 mb-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent">
+                Key takeaway
+              </p>
+              <p class="mt-3 text-base leading-7 text-ink">
+                Instruccion suelta &rarr; <code>orquestador.md</code> &rarr;
+                <em>skill</em> equivale a
+                <strong>ad-hoc &rarr; procedimiento &rarr; politica</strong>.
+                La IA no es una caja negra cuando cada paso deja un entregable
+                y el humano decide si seguir.
+              </p>
+            </div>
+
+            <div class="rounded-[1.25rem] border border-line bg-[var(--paper)] p-4">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted">
+                La regla de oro
+              </p>
+              <p class="mt-2 text-sm leading-6 text-muted">
+                No inventes valores. Si un dato no esta en los insumos,
+                detenete y reportalo. Cada cifra del informe final debe
+                poder rastrearse hasta los CSV originales. Esa trazabilidad
+                es el papel de trabajo.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- Navegacion fija -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <nav class="nav-bar">
+      <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">Anterior</button>
+      <span class="slide-counter" id="slideCounter">1 / 8</span>
+      <button class="nav-btn" id="nextBtn" onclick="navigate(1)">Siguiente</button>
+    </nav>
+
+    <script>
+      (function () {
+        var slides = document.querySelectorAll(".slide");
+        var total = slides.length;
+        var current = 0;
+
+        var progressFill = document.getElementById("progressFill");
+        var counter = document.getElementById("slideCounter");
+        var prevBtn = document.getElementById("prevBtn");
+        var nextBtn = document.getElementById("nextBtn");
+
+        function showSlide(index) {
+          if (index < 0) index = 0;
+          if (index >= total) index = total - 1;
+          current = index;
+
+          slides.forEach(function (s, i) {
+            s.style.display = i === current ? "flex" : "none";
+          });
+
+          var pct = total > 1 ? Math.round((current / (total - 1)) * 100) : 100;
+          progressFill.style.width = pct + "%";
+          counter.textContent = current + 1 + " / " + total;
+          prevBtn.disabled = current === 0;
+          nextBtn.disabled = current === total - 1;
+
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        window.navigate = function (dir) {
+          showSlide(current + dir);
+        };
+
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+            e.preventDefault();
+            showSlide(current + 1);
+          }
+          if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+            e.preventDefault();
+            showSlide(current - 1);
+          }
+        });
+
+        // Touch swipe
+        var touchStartX = 0;
+        var touchStartY = 0;
+        document.addEventListener("touchstart", function (e) {
+          touchStartX = e.changedTouches[0].screenX;
+          touchStartY = e.changedTouches[0].screenY;
+        });
+        document.addEventListener("touchend", function (e) {
+          var dx = e.changedTouches[0].screenX - touchStartX;
+          var dy = e.changedTouches[0].screenY - touchStartY;
+          if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+            showSlide(current + (dx < 0 ? 1 : -1));
+          }
+        });
+
+        showSlide(0);
+      })();
+    </script>
+
+  </body>
+</html>
