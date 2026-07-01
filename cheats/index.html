@@ -827,6 +827,63 @@
               </div>
               <button type="button" class="btn-copy mt-4">Copiar prompt</button>
             </article>
+
+            <!-- Card 07: Imágenes en base64 -->
+            <article
+              class="group rounded-[1.75rem] border p-6 transition hover:-translate-y-1 hover:shadow-paper"
+              style="border-color: var(--line); background: var(--paper)"
+            >
+              <div class="flex items-start justify-between gap-4">
+                <span class="flow-index inline-flex items-center justify-center"
+                  >07</span
+                >
+                <span
+                  class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em]"
+                  style="
+                    background: color-mix(
+                      in oklab,
+                      var(--paper) 80%,
+                      var(--accent-soft)
+                    );
+                    color: var(--accent);
+                  "
+                  >Imágenes</span
+                >
+              </div>
+              <h3
+                class="mt-5 section-title text-2xl font-extrabold"
+                style="color: var(--ink)"
+              >
+                Imágenes en base64
+              </h3>
+              <p class="mt-3 text-sm leading-6" style="color: var(--muted)">
+                En un archivo HTML autocontenido, una imagen enlazada por ruta
+                externa se rompe al mover o compartir el archivo. Pedile que la
+                convierta a
+                <strong style="color: var(--ink)">base64</strong> para que quede
+                incrustada dentro del propio HTML y siempre se vea bien.
+              </p>
+              <div
+                class="mt-5 rounded-2xl p-4"
+                style="background: var(--slate-soft)"
+              >
+                <p
+                  class="text-xs font-bold uppercase tracking-[0.18em]"
+                  style="color: var(--accent)"
+                >
+                  Prompt rápido
+                </p>
+                <p
+                  class="prompt-text mt-2 text-sm leading-6"
+                  style="color: var(--ink)"
+                >
+                  Para que las imágenes queden bien en el archivo autocontenido,
+                  convertilas a base64 e incrustalas directamente en el HTML, sin
+                  depender de rutas ni archivos externos.
+                </p>
+              </div>
+              <button type="button" class="btn-copy mt-4">Copiar prompt</button>
+            </article>
           </div>
         </section>
 
@@ -917,7 +974,10 @@
                 profesional y visualmente atractiva. Si necesito datos
                 persistentes en el equipo del usuario, guardalos con
                 <strong>localStorage</strong>. Si hay datos para visualizar,
-                incorporá gráficos con <strong>Chart.js</strong>. Si te comparto
+                incorporá gráficos con <strong>Chart.js</strong>. Si usás
+                imágenes, convertilas a <strong>base64</strong> e incrustalas en
+                el HTML para que se vean bien sin depender de archivos externos.
+                Si te comparto
                 una imagen, actuá como <strong>OCR</strong> para extraer el
                 texto antes de estructurarlo. <strong>Sorprendeme</strong> con
                 una propuesta creativa, elegante y fácil de compartir.
