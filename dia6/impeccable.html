@@ -1,0 +1,922 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Tu marca en cada reporte con impeccable — HiPanda Talleres
+    </title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Libre Franklin"', "sans-serif"],
+            },
+            colors: {
+              paper: "oklch(0.985 0.005 85)",
+              "paper-soft": "oklch(0.969 0.007 82)",
+              "paper-strong": "oklch(0.944 0.008 82)",
+              ink: "oklch(0.252 0.012 252)",
+              muted: "oklch(0.53 0.016 250)",
+              line: "oklch(0.865 0.008 80)",
+              accent: "oklch(0.59 0.074 46)",
+              "accent-soft": "oklch(0.946 0.022 46)",
+            },
+            boxShadow: {
+              paper: "0 24px 80px rgba(45,39,32,0.08)",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      :root {
+        --paper: oklch(0.985 0.005 85);
+        --paper-soft: oklch(0.969 0.007 82);
+        --paper-strong: oklch(0.944 0.008 82);
+        --ink: oklch(0.252 0.012 252);
+        --muted: oklch(0.53 0.016 250);
+        --line: oklch(0.865 0.008 80);
+        --accent: oklch(0.59 0.074 46);
+        --accent-soft: oklch(0.946 0.022 46);
+      }
+
+      html {
+        background:
+          radial-gradient(circle at top left, oklch(0.96 0.012 50) 0, transparent 28%),
+          radial-gradient(circle at top right, oklch(0.958 0.012 235) 0, transparent 30%),
+          linear-gradient(180deg, var(--paper) 0%, oklch(0.978 0.006 84) 100%);
+        background-attachment: fixed;
+        scroll-behavior: smooth;
+      }
+
+      .kicker {
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-size: 0.73rem;
+        font-weight: 700;
+      }
+
+      .section-title {
+        line-height: 1.02;
+        letter-spacing: -0.04em;
+      }
+
+      .measure {
+        max-width: 72ch;
+      }
+
+      .contract-shell::before {
+        content: "";
+        display: block;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          color-mix(in oklab, var(--accent) 95%, transparent),
+          color-mix(in oklab, var(--accent) 30%, transparent)
+        );
+        margin-bottom: 1.25rem;
+        border-radius: 999px;
+      }
+
+      .flow-index {
+        width: 2.2rem;
+        height: 2.2rem;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: color-mix(in oklab, var(--paper) 84%, var(--accent-soft));
+        color: var(--ink);
+        font-size: 0.85rem;
+        font-weight: 700;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .stat-line {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 1rem;
+        align-items: end;
+        padding: 0.95rem 0;
+        border-top: 1px solid var(--line);
+      }
+      .stat-line:first-child {
+        border-top: 0;
+        padding-top: 0;
+      }
+
+      .progress-bar {
+        height: 2px;
+        background: var(--line);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 50;
+      }
+      .progress-fill {
+        height: 100%;
+        background: var(--accent);
+        transition: width 0.3s ease;
+      }
+
+      .slide {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 5rem 2rem 6rem;
+      }
+
+      .slide-inner {
+        width: 100%;
+        max-width: 1280px;
+        margin: 0 auto;
+      }
+
+      .nav-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--paper);
+        border-top: 1px solid var(--line);
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5rem;
+        z-index: 40;
+      }
+
+      .nav-btn {
+        padding: 0.6rem 1.25rem;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: var(--paper);
+        color: var(--ink);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: inherit;
+      }
+      .nav-btn:hover {
+        background: var(--paper-strong);
+        border-color: var(--accent);
+      }
+      .nav-btn:disabled {
+        opacity: 0.35;
+        cursor: default;
+        pointer-events: none;
+      }
+
+      .slide-counter {
+        font-size: 0.8rem;
+        color: var(--muted);
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .code-block {
+        background: var(--paper-soft);
+        border: 1px solid var(--line);
+        border-radius: 0.75rem;
+        padding: 1rem 1.25rem;
+        font-size: 0.8rem;
+        line-height: 1.5;
+        color: var(--ink);
+        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .cmd-token {
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      .arrow-connector {
+        color: var(--muted);
+        font-size: 1.4rem;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+
+      /* ── Boton volver ── */
+      .back-link {
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        z-index: 9999;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--ink);
+        color: var(--paper);
+        font-weight: 700;
+        font-size: 13px;
+        padding: 8px 14px;
+        border-radius: 10px;
+        text-decoration: none;
+        transition: background 0.2s, transform 0.15s;
+      }
+      .back-link:hover {
+        background: color-mix(in oklab, var(--ink) 85%, var(--accent));
+        transform: translateY(-1px);
+      }
+    </style>
+  </head>
+  <body class="font-sans text-ink antialiased">
+
+    <a href="index.html" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 5l-7 7 7 7" />
+      </svg>
+      Inicio
+    </a>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 1 — Hero -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-01">
+      <div class="slide-inner">
+        <div class="grid lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.65fr)] gap-10 items-center">
+          <div>
+            <p class="kicker text-accent mb-4">Sesion 6 &middot; Taller Practico</p>
+            <h1 class="text-[4.2rem] leading-[0.95] tracking-[-0.04em] font-extrabold text-ink mb-6">
+              Tu marca,<br />en cada<br />reporte
+            </h1>
+            <p class="text-xl leading-relaxed text-muted measure">
+              Como enseñarle a la IA tu manual de marca una sola vez, para
+              que todos tus reportes y visualizaciones salgan con tu
+              identidad. Sin diseñador, sin plantillas, sin repetir las
+              instrucciones cada vez.
+            </p>
+          </div>
+          <div>
+            <div class="rounded-[2rem] bg-[var(--paper-soft)] border border-line p-8 shadow-paper">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-4">
+                En este modulo
+              </p>
+              <div class="flex items-start gap-3 mb-3">
+                <div class="flow-index">1</div>
+                <p class="text-sm text-ink leading-relaxed">El problema: cada reporte se ve distinto</p>
+              </div>
+              <div class="flex items-start gap-3 mb-3">
+                <div class="flow-index">2</div>
+                <p class="text-sm text-ink leading-relaxed">La idea: tu manual de marca como instrucciones</p>
+              </div>
+              <div class="flex items-start gap-3 mb-3">
+                <div class="flow-index">3</div>
+                <p class="text-sm text-ink leading-relaxed">Los dos archivos: PRODUCT.md y DESIGN.md</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <div class="flow-index">4</div>
+                <p class="text-sm text-ink leading-relaxed">Como se le habla y los comandos basicos</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 2 — El problema -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-02">
+      <div class="slide-inner">
+        <p class="kicker text-accent mb-4">El problema</p>
+        <h2 class="text-4xl font-bold section-title mb-6">
+          Cada reporte<br />se ve distinto
+        </h2>
+
+        <div class="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10">
+          <div>
+            <p class="text-lg leading-relaxed text-ink mb-6 measure">
+              Tu empresa tiene un manual de marca. Colores, tipografia, logo,
+              un tono de voz. Pero cada vez que alguien arma un informe, una
+              presentacion o un tablero, lo interpreta a su manera. El
+              resultado: diez entregables, diez estilos. Ninguno se siente
+              <em>tuyo</em>.
+            </p>
+
+            <div class="rounded-[1.5rem] border border-line bg-[var(--accent-soft)] p-5 sm:p-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent">
+                El costo real
+              </p>
+              <p class="mt-3 text-base leading-7 text-ink">
+                La marca no vive en un PDF guardado en una carpeta. Vive en
+                lo que la gente ve. Si cada entregable se ve distinto, la
+                marca se diluye y el trabajo pierde profesionalismo.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <div class="rounded-[1.75rem] bg-[var(--paper-soft)] border border-line p-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-4">
+                Lo que pasa hoy
+              </p>
+              <div class="code-block mb-4">
+Armame un informe de<br />ventas del trimestre.</div>
+
+              <div class="flex justify-center my-6">
+                <span class="text-muted text-sm font-semibold tracking-widest uppercase">&darr; sin contexto de marca</span>
+              </div>
+
+              <div class="rounded-[1.25rem] border border-line bg-[var(--paper)] p-4">
+                <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted">Resultado</p>
+                <p class="mt-2 text-sm leading-6 text-muted">
+                  Colores genericos, tipografia del sistema, cero relacion
+                  con tu identidad. Funciona, pero podria ser de cualquier
+                  empresa. No dice nada de la tuya.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 3 — La idea -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-03">
+      <div class="slide-inner">
+        <p class="kicker text-accent mb-4">La idea</p>
+        <h2 class="text-4xl font-bold section-title mb-6">
+          Tu manual de marca,<br />convertido en instrucciones
+        </h2>
+
+        <p class="text-lg leading-relaxed text-muted measure mb-10">
+          <strong class="text-ink">impeccable</strong> es una <em>skill</em>,
+          una habilidad que le sumas a la IA. Le entregas tu manual de marca
+          (el PDF, el documento, lo que tengas) y una sola vez le pedis que
+          lo lea y lo traduzca a un formato que la IA entiende y respeta
+          siempre.
+        </p>
+
+        <!-- Flujo: manual -> impeccable -> dos archivos -->
+        <div class="flex flex-wrap items-center justify-center gap-3 mb-10">
+          <div class="rounded-[1.25rem] border border-line bg-[var(--paper)] p-5 text-center min-w-[220px]">
+            <p class="text-sm font-bold text-ink mb-1">Manual de marca</p>
+            <p class="text-xs text-muted leading-relaxed">
+              Tu PDF o documento<br />con colores, tipografia y tono
+            </p>
+          </div>
+
+          <span class="arrow-connector">&rarr;</span>
+
+          <div class="rounded-[1.25rem] border border-line bg-[var(--accent-soft)] p-5 text-center min-w-[220px]">
+            <p class="text-sm font-bold text-ink mb-1">impeccable</p>
+            <p class="text-xs text-muted leading-relaxed">
+              Lo lee y lo traduce<br />a instrucciones para la IA
+            </p>
+            <p class="text-[0.7rem] font-semibold text-accent mt-2">
+              lo enseñás una vez
+            </p>
+          </div>
+
+          <span class="arrow-connector">&rarr;</span>
+
+          <div class="rounded-[1.25rem] border border-line bg-[var(--paper)] p-5 text-center min-w-[220px]">
+            <p class="text-sm font-bold text-ink mb-1">PRODUCT.md + DESIGN.md</p>
+            <p class="text-xs text-muted leading-relaxed">
+              Dos archivos que la IA<br />lee antes de cada tarea
+            </p>
+            <p class="text-[0.7rem] font-semibold text-accent mt-2">
+              tu marca, lista
+            </p>
+          </div>
+        </div>
+
+        <div class="rounded-[1.5rem] border border-line bg-[var(--paper-soft)] p-6">
+          <p class="text-base leading-7 text-ink">
+            No programas nada. Le hablas en español, en modo agente, como le
+            hablarias a un asistente. El trabajo tecnico lo hace la
+            herramienta; vos solo entregas tu manual y revisas el resultado.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 4 — Los dos archivos -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-04">
+      <div class="slide-inner">
+        <p class="kicker text-accent mb-4">El resultado</p>
+        <h2 class="text-4xl font-bold section-title mb-6">
+          Dos archivos<br />que la IA lee siempre
+        </h2>
+
+        <p class="text-lg leading-relaxed text-muted measure mb-8">
+          Tu marca tiene dos caras: quien sos y como te ves. impeccable las
+          guarda por separado, en dos archivos de texto simple.
+        </p>
+
+        <div class="grid lg:grid-cols-2 gap-8">
+          <!-- PRODUCT.md -->
+          <div class="contract-shell rounded-[1.75rem] border border-line bg-[var(--paper-soft)] p-6 shadow-paper">
+            <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-1">
+              PRODUCT.md
+            </p>
+            <p class="text-2xl font-bold text-ink mb-4">Quien sos</p>
+            <p class="text-sm leading-6 text-muted mb-4">
+              Tu identidad en palabras. La estrategia detras de la marca.
+            </p>
+            <div class="stat-line">
+              <span class="text-sm text-muted">Para quien es</span>
+              <span class="text-sm font-semibold text-ink">Tu audiencia</span>
+            </div>
+            <div class="stat-line">
+              <span class="text-sm text-muted">Que tono usas</span>
+              <span class="text-sm font-semibold text-ink">Tu voz</span>
+            </div>
+            <div class="stat-line">
+              <span class="text-sm text-muted">Que NO queres parecer</span>
+              <span class="text-sm font-semibold text-ink">Tus limites</span>
+            </div>
+          </div>
+
+          <!-- DESIGN.md -->
+          <div class="contract-shell rounded-[1.75rem] border border-line bg-[var(--paper-soft)] p-6 shadow-paper">
+            <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-1">
+              DESIGN.md
+            </p>
+            <p class="text-2xl font-bold text-ink mb-4">Como te ves</p>
+            <p class="text-sm leading-6 text-muted mb-4">
+              Tu identidad visual. Las reglas concretas de diseno.
+            </p>
+            <div class="stat-line">
+              <span class="text-sm text-muted">Colores exactos</span>
+              <span class="text-sm font-semibold text-ink">Tu paleta</span>
+            </div>
+            <div class="stat-line">
+              <span class="text-sm text-muted">Tipografia</span>
+              <span class="text-sm font-semibold text-ink">Tus letras</span>
+            </div>
+            <div class="stat-line">
+              <span class="text-sm text-muted">Botones, tarjetas, titulos</span>
+              <span class="text-sm font-semibold text-ink">Tus componentes</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 rounded-[1.5rem] border border-line bg-[var(--accent-soft)] p-5 sm:p-6">
+          <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent">
+            Key takeaway
+          </p>
+          <p class="mt-3 text-base leading-7 text-ink">
+            Juntos son el <strong>traductor</strong> entre tu manual de marca
+            y la IA. Cada vez que pidas algo, la herramienta lee estos dos
+            archivos primero y diseña con tu marca puesta.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 5 — Lo enseñás una vez, lo respeta siempre -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-05">
+      <div class="slide-inner">
+        <div class="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10">
+          <div>
+            <p class="kicker text-accent mb-4">De ahora en adelante</p>
+            <h2 class="text-4xl font-bold section-title mb-6">
+              Lo enseñás una vez.<br />Lo respeta siempre.
+            </h2>
+            <p class="text-lg leading-relaxed text-ink measure mb-8">
+              Una vez que esos dos archivos existen en tu proyecto, no tenes
+              que volver a explicar tu marca. Cada reporte, cada grafico,
+              cada presentacion que le pidas va a salir con tu identidad de
+              forma automatica.
+            </p>
+
+            <div class="rounded-[1.5rem] border border-line bg-[var(--accent-soft)] p-5 sm:p-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent">
+                Esta presentacion es la prueba
+              </p>
+              <p class="mt-3 text-base leading-7 text-ink">
+                Todos los slides que estas viendo se diseñaron exactamente
+                asi. Un PRODUCT.md y un DESIGN.md que la IA respeta en cada
+                pantalla: los mismos colores, la misma tipografia, el mismo
+                criterio.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <div class="rounded-[1.75rem] bg-[var(--paper-soft)] border border-line p-6 shadow-paper">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-4">
+                Antes y ahora
+              </p>
+
+              <div class="stat-line">
+                <span class="text-sm text-muted">Repetir instrucciones cada vez</span>
+                <span class="text-sm font-semibold text-accent">La marca ya esta cargada</span>
+              </div>
+              <div class="stat-line">
+                <span class="text-sm text-muted">Cada persona interpreta distinto</span>
+                <span class="text-sm font-semibold text-accent">Una sola fuente de verdad</span>
+              </div>
+              <div class="stat-line">
+                <span class="text-sm text-muted">Reportes inconsistentes</span>
+                <span class="text-sm font-semibold text-accent">Todo se ve tuyo</span>
+              </div>
+              <div class="stat-line">
+                <span class="text-sm text-muted">Depender de un diseñador</span>
+                <span class="text-sm font-semibold text-accent">Autonomia del equipo</span>
+              </div>
+
+              <p class="mt-6 text-sm leading-relaxed text-muted">
+                Definis la identidad una vez. La herramienta la aplica en
+                cada entrega, sin que nadie tenga que acordarse de los
+                codigos de color.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 6 — Como se le habla -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-06">
+      <div class="slide-inner">
+        <p class="kicker text-accent mb-4">Modo agente</p>
+        <h2 class="text-4xl font-bold section-title mb-6">
+          Le hablas<br />en lenguaje natural
+        </h2>
+
+        <p class="text-lg leading-relaxed text-muted measure mb-8">
+          No hay comandos raros ni codigo. Trabajas desde un sistema como
+          este: un editor con un agente de IA activo (Claude Code, Cline, o
+          Copilot en modo agente). Le escribis lo que necesitas, en español.
+        </p>
+
+        <div class="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10">
+          <div>
+            <div class="space-y-4">
+              <div>
+                <p class="text-sm font-semibold text-ink mb-1">Para enseñar tu marca</p>
+                <div class="code-block">
+Lee mi manual de marca y crea<br />el PRODUCT.md y el DESIGN.md.</div>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-ink mb-1">Para pedir un entregable</p>
+                <div class="code-block">
+Armame un tablero de cartera<br />vencida con nuestra marca.</div>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-ink mb-1">Para pedir una revision</p>
+                <div class="code-block">
+Revisa esta presentacion y<br />deci que se puede mejorar.</div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="rounded-[1.75rem] border border-line bg-[var(--accent-soft)] p-6 mb-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent mb-3">
+                El principio que importa
+              </p>
+              <p class="text-base leading-7 text-ink">
+                La IA ejecuta. Vos dirigis y decidis. El criterio siempre es
+                humano: revisas lo que produce y aprobas antes de usarlo.
+              </p>
+            </div>
+
+            <div class="rounded-[1.25rem] border border-line bg-[var(--paper)] p-4">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted">
+                Un detalle util
+              </p>
+              <p class="mt-2 text-sm leading-6 text-muted">
+                Podes hablarle en lenguaje libre, o ir directo al grano con
+                un comando. Los dos caminos hacen lo mismo. Los comandos solo
+                son un atajo con nombre.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 7 — Comandos basicos -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-07">
+      <div class="slide-inner">
+        <p class="kicker text-accent mb-4">Comandos basicos</p>
+        <h2 class="text-4xl font-bold section-title mb-6">
+          Las palabras clave<br />de impeccable
+        </h2>
+
+        <p class="text-lg leading-relaxed text-muted measure mb-8">
+          Escribis <span class="cmd-token">$impeccable</span> seguido de una
+          palabra. Estos son los basicos, cada uno con una intencion clara.
+        </p>
+
+        <div class="grid lg:grid-cols-2 gap-x-10 gap-y-5">
+          <div class="flex items-start gap-4">
+            <div class="flow-index">01</div>
+            <div>
+              <p class="text-base font-bold text-ink">
+                <span class="cmd-token">teach</span> &middot; Ensenia tu marca
+              </p>
+              <p class="text-sm text-muted leading-6">
+                Lee tu manual y crea el PRODUCT.md y el DESIGN.md. El punto de
+                partida de todo.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="flow-index">02</div>
+            <div>
+              <p class="text-base font-bold text-ink">
+                <span class="cmd-token">document</span> &middot; Documenta lo que ya tenes
+              </p>
+              <p class="text-sm text-muted leading-6">
+                Genera el DESIGN.md a partir de un diseno que ya existe, para
+                capturar tu estilo actual.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="flow-index">03</div>
+            <div>
+              <p class="text-base font-bold text-ink">
+                <span class="cmd-token">craft</span> &middot; Construi algo nuevo
+              </p>
+              <p class="text-sm text-muted leading-6">
+                Un reporte, un tablero, una pagina, de punta a punta y con tu
+                marca puesta.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="flow-index">04</div>
+            <div>
+              <p class="text-base font-bold text-ink">
+                <span class="cmd-token">critique</span> &middot; Pedi una revision
+              </p>
+              <p class="text-sm text-muted leading-6">
+                Evalua el diseno y te dice, con criterio, que falla y como
+                mejorarlo.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="flow-index">05</div>
+            <div>
+              <p class="text-base font-bold text-ink">
+                <span class="cmd-token">polish</span> &middot; Dale el pulido final
+              </p>
+              <p class="text-sm text-muted leading-6">
+                Ajustes de calidad antes de entregar. El ultimo repaso.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="flow-index">06</div>
+            <div>
+              <p class="text-base font-bold text-ink">
+                <span class="cmd-token">bolder</span> / <span class="cmd-token">quieter</span> &middot; Subile o bajale el tono
+              </p>
+              <p class="text-sm text-muted leading-6">
+                Mas audaz cuando quedo plano, mas sobrio cuando quedo
+                cargado.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 rounded-[1.25rem] border border-line bg-[var(--paper)] p-4">
+          <p class="text-sm leading-6 text-muted">
+            Si escribis <span class="cmd-token">$impeccable</span> solo, sin
+            palabra, te muestra el menu completo de comandos y te pregunta que
+            queres hacer.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 8 — Tus primeros tres pasos -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-08">
+      <div class="slide-inner">
+        <p class="kicker text-accent mb-4">Guia practica</p>
+        <h2 class="text-4xl font-bold section-title mb-6">
+          Tus primeros<br />tres pasos
+        </h2>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+          <div class="rounded-[1.5rem] border border-line bg-[var(--paper-soft)] p-6">
+            <div class="flow-index mb-4">1</div>
+            <p class="text-base font-bold text-ink mb-2">Prepara el terreno</p>
+            <p class="text-sm text-muted leading-6">
+              Abri tu proyecto en el editor con un agente activo. Poni tu
+              manual de marca en la carpeta para que la IA lo pueda leer.
+            </p>
+          </div>
+
+          <div class="rounded-[1.5rem] border border-line bg-[var(--paper-soft)] p-6">
+            <div class="flow-index mb-4">2</div>
+            <p class="text-base font-bold text-ink mb-2">Ensenia tu marca</p>
+            <div class="code-block mb-3">
+<span class="cmd-token">$impeccable teach</span><br />Lee mi manual y crea el<br />PRODUCT.md y el DESIGN.md.</div>
+            <p class="text-sm text-muted leading-6">
+              Revisa los dos archivos que genera. Corregi lo que haga falta.
+            </p>
+          </div>
+
+          <div class="rounded-[1.5rem] border border-line bg-[var(--paper-soft)] p-6">
+            <div class="flow-index mb-4">3</div>
+            <p class="text-base font-bold text-ink mb-2">Pedi lo que necesites</p>
+            <div class="code-block mb-3">
+Armame el informe de cierre<br />mensual con nuestra marca.</div>
+            <p class="text-sm text-muted leading-6">
+              Sale on-brand. Y a partir de aca, cada pedido respeta tu
+              identidad sin que lo repitas.
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-8 rounded-[1.5rem] border border-line bg-[var(--accent-soft)] p-5 sm:p-6">
+          <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent">
+            El momento en que cae la moneda
+          </p>
+          <p class="mt-3 text-base leading-7 text-ink">
+            La primera vez que pedis un reporte despues del paso 2 y sale con
+            tus colores sin que lo hayas mencionado, entendes el valor: la
+            marca dejo de ser algo que hay que recordar y paso a ser algo que
+            simplemente sucede.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 9 — Takeaway -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section class="slide" id="slide-09">
+      <div class="slide-inner">
+        <p class="kicker text-accent mb-4">Para recordar</p>
+        <h2 class="text-4xl font-bold section-title mb-6">
+          La marca deja de ser<br />un PDF olvidado
+        </h2>
+
+        <div class="grid lg:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.78fr)] gap-10">
+          <div>
+            <div class="rounded-[1.75rem] border border-line bg-[var(--paper-soft)] p-6 mb-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted mb-4">
+                El camino completo
+              </p>
+              <div class="flex flex-wrap items-center gap-3">
+                <span class="rounded-[1rem] border border-line bg-[var(--paper)] px-4 py-2 text-sm font-semibold text-ink">
+                  Manual de marca
+                </span>
+                <span class="arrow-connector">&rarr;</span>
+                <span class="rounded-[1rem] border border-line bg-[var(--paper)] px-4 py-2 text-sm font-semibold text-ink">
+                  PRODUCT.md + DESIGN.md
+                </span>
+                <span class="arrow-connector">&rarr;</span>
+                <span class="rounded-[1rem] border border-line bg-[var(--accent-soft)] px-4 py-2 text-sm font-semibold text-accent">
+                  Cada reporte on-brand
+                </span>
+              </div>
+              <p class="mt-5 text-base leading-7 text-ink">
+                Se lo enseñás una vez, en español, y la IA lo respeta en
+                cada entrega. Sin diseñador de guardia, sin plantillas que
+                nadie mantiene, sin repetir los codigos de color.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <div class="rounded-[1.5rem] border border-line bg-[var(--accent-soft)] p-5 sm:p-6 mb-6">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-accent">
+                Key takeaway
+              </p>
+              <p class="mt-3 text-base leading-7 text-ink">
+                La IA no reemplaza tu criterio de marca. Lo hace
+                <strong>escalar</strong>. Vos definis la identidad una vez;
+                ella la aplica mil veces.
+              </p>
+            </div>
+
+            <div class="rounded-[1.25rem] border border-line bg-[var(--paper)] p-4">
+              <p class="text-sm font-semibold uppercase tracking-[0.12em] text-muted">
+                Empeza por aca
+              </p>
+              <p class="mt-2 text-sm leading-6 text-muted">
+                Un solo comando para arrancar:
+                <span class="cmd-token">$impeccable teach</span>. Con tu
+                manual de marca a mano, en cinco minutos tenes los dos
+                archivos y tu marca lista para siempre.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- Navegacion fija -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <nav class="nav-bar">
+      <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">Anterior</button>
+      <span class="slide-counter" id="slideCounter">1 / 9</span>
+      <button class="nav-btn" id="nextBtn" onclick="navigate(1)">Siguiente</button>
+    </nav>
+
+    <script>
+      (function () {
+        var slides = document.querySelectorAll(".slide");
+        var total = slides.length;
+        var current = 0;
+
+        var progressFill = document.getElementById("progressFill");
+        var counter = document.getElementById("slideCounter");
+        var prevBtn = document.getElementById("prevBtn");
+        var nextBtn = document.getElementById("nextBtn");
+
+        function showSlide(index) {
+          if (index < 0) index = 0;
+          if (index >= total) index = total - 1;
+          current = index;
+
+          slides.forEach(function (s, i) {
+            s.style.display = i === current ? "flex" : "none";
+          });
+
+          var pct = total > 1 ? Math.round((current / (total - 1)) * 100) : 100;
+          progressFill.style.width = pct + "%";
+          counter.textContent = current + 1 + " / " + total;
+          prevBtn.disabled = current === 0;
+          nextBtn.disabled = current === total - 1;
+
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        window.navigate = function (dir) {
+          showSlide(current + dir);
+        };
+
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+            e.preventDefault();
+            showSlide(current + 1);
+          }
+          if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+            e.preventDefault();
+            showSlide(current - 1);
+          }
+        });
+
+        // Touch swipe
+        var touchStartX = 0;
+        var touchStartY = 0;
+        document.addEventListener("touchstart", function (e) {
+          touchStartX = e.changedTouches[0].screenX;
+          touchStartY = e.changedTouches[0].screenY;
+        });
+        document.addEventListener("touchend", function (e) {
+          var dx = e.changedTouches[0].screenX - touchStartX;
+          var dy = e.changedTouches[0].screenY - touchStartY;
+          if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+            showSlide(current + (dx < 0 ? 1 : -1));
+          }
+        });
+
+        showSlide(0);
+      })();
+    </script>
+
+  </body>
+</html>
