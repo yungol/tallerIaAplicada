@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Sesión 6 - Consolidación y visualización inteligente de información</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <style>
+        :root {
+            --nr001-a: #F18446;
+            --nr025-t: #FEDB9B;
+            --az087-a: #093E5E;
+            --ne287-a: #1c1c1c;
+            --bg-body: #FBF3E4;
+            --vd214-t: #BED4CF;
+            --bg-surface: #ffffff;
+            --brand-blue: #0ea5e9;
+            --brand-green: #10b981;
+            --brand-orange: #f59e0b;
+            --brand-purple: #8b5cf6;
+            --brand-red: #ef4444;
+            --brand-teal: #14b8a6;
+            --brand-slate: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--ne287-a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            background: var(--bg-surface);
+            position: relative;
+            overflow: hidden;
+            border-top: 8px solid var(--nr001-a);
+        }
+
+        .slides-track {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            padding: 30px 50px 100px 50px;
+            overflow-y: auto;
+            display: none !important;
+            flex-direction: column;
+        }
+
+        .slide.active-slide {
+            display: flex !important;
+        }
+
+        h1, h2 { color: var(--az087-a); }
+        h1 { font-size: 2.2em; margin-bottom: 10px; }
+        h2 { font-size: 1.8em; margin-bottom: 20px; border-bottom: 2px solid var(--nr025-t); padding-bottom: 10px; }
+        h3 { color: var(--nr001-a); font-size: 1.15em; margin-top: 0; margin-bottom: 10px; }
+        h4 { color: var(--az087-a); font-size: 0.95em; margin-bottom: 8px; }
+        p { font-size: 1.02em; line-height: 1.55; margin-bottom: 12px; color: #4B4B4C; }
+        ul { padding-left: 18px; margin-bottom: 12px; }
+        li { font-size: 0.86em; margin-bottom: 8px; line-height: 1.45; color: #334155; }
+
+        .tag {
+            background-color: var(--nr001-a);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 40px;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .btn {
+            background-color: var(--az087-a);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.05em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover { background-color: var(--nr001-a); }
+        .btn:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
+
+        .indicators {
+            display: flex;
+            gap: 10px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background-color: #ccc;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .dot.active {
+            background-color: var(--nr001-a);
+            transform: scale(1.3);
+        }
+
+        .case-card {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 16px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .case-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        }
+
+        .case-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+
+        .case-card-title {
+            font-weight: 700;
+            color: var(--az087-a);
+            font-size: 1.02em;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .case-card-desc {
+            font-size: 0.84em;
+            color: #475569;
+            line-height: 1.45;
+        }
+
+        .workshop-section {
+            background: #fff;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .step-badge {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            border-radius: 30px;
+            padding: 4px 14px 4px 4px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            min-width: max-content;
+        }
+
+        .step-num {
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85em;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .doc-format-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .prompt-box {
+            background-color: #f8fafc;
+            border-left: 4px solid var(--brand-green);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.72em;
+            line-height: 1.35;
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+            color: #1e293b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.76em;
+        }
+
+        th, td {
+            padding: 5px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: rgba(9, 62, 94, 0.05);
+            border-bottom: 1px solid #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+    <style>
+      .back-link-d6 {
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        z-index: 9999;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #093E5E;
+        color: #FBF3E4;
+        font-family: "Inter", system-ui, sans-serif;
+        font-weight: 700;
+        font-size: 13px;
+        padding: 8px 14px;
+        border-radius: 10px;
+        text-decoration: none;
+        transition: background 0.2s, transform 0.15s;
+      }
+      .back-link-d6:hover {
+        background: #F18446;
+        transform: translateY(-1px);
+      }
+    </style>
+    <a href="index.html" class="back-link-d6">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 5l-7 7 7 7" />
+      </svg>
+      Inicio
+    </a>
+
+    <div class="presentation-container">
+        <div class="slides-track" id="slidesTrack">
+
+            <div class="slide active-slide" style="display:flex">
+                <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; padding: 10px 40px; overflow-y: auto;">
+                    <span class="tag" style="background: linear-gradient(135deg, var(--nr001-a), #e05a2a); font-size: 1.1em; margin-bottom: 15px;">Sesión 6 - Taller aplicado</span>
+                    <h2 style="border:none; font-size: 2em; margin-bottom: 8px; color: var(--az087-a);">
+                        <span class="material-symbols-outlined" style="vertical-align: bottom; font-size: 1.1em;">hub</span>
+                        Consolidación y visualización inteligente de información
+                    </h2>
+                    <p style="font-size: 1.02em; max-width: 980px; line-height: 1.6; margin-bottom: 14px; color: #475569;">
+                        Casos de uso aplicados para <strong>consolidar, sintetizar y visualizar información desestructurada del proceso de compras</strong> dentro del ciclo típico de auditoría interna bajo el <strong>MIPP del IIA</strong>, integrando evaluación de <strong>controles de tecnología</strong> y <strong>controles financieros</strong> con entregas tempranas, iterativas y accionables. La sesión cierra con un caso transversal para explotar <strong>bases históricas de observaciones, hallazgos y planes de acción</strong> a nivel corporativo.
+                    </p>
+
+                    <div style="display: flex; justify-content: center; align-items: flex-start; gap: 6px; margin-bottom: 20px; width: 100%; max-width: 1180px; flex-wrap: nowrap;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge"><div class="step-num" style="background: var(--az087-a);">1</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Planificación</span></div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.62em; font-weight: 500; color: #475569; text-align: center; width: 140px; line-height: 1.35;">Contexto de compras, objetivos, alcance, stakeholders y universo documental</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 8px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge"><div class="step-num" style="background: var(--az087-a);">2</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Entrevistas</span></div>
+                            <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.62em; font-weight: 500; color: #475569; text-align: center; width: 140px; line-height: 1.35;">Guiones, walkthroughs, evidencias, narrativas y puntos de control tecnológico y financiero</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 8px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--brand-green);"><div class="step-num" style="background: var(--brand-green);">3</div><span style="font-size: 0.8em; font-weight: 600; color: var(--brand-green);">Riesgos</span></div>
+                            <div style="background: #f0fdf4; border: 1px dashed #34d399; border-radius: 8px; padding: 5px 8px; font-size: 0.62em; font-weight: 500; color: #065f46; text-align: center; width: 140px; line-height: 1.35;">Riesgos, controles críticos TI/financieros, conclusiones tempranas y observaciones a validar</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 8px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--brand-green);"><div class="step-num" style="background: var(--brand-green);">4</div><span style="font-size: 0.8em; font-weight: 600; color: var(--brand-green);">Programa</span></div>
+                            <div style="background: #f0fdf4; border: 1px dashed #34d399; border-radius: 8px; padding: 5px 8px; font-size: 0.62em; font-weight: 500; color: #065f46; text-align: center; width: 140px; line-height: 1.35;">Automatización del diseño de pruebas de compras por diseño, cumplimiento y sustantiva/analítica</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 8px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--nr001-a);"><div class="step-num" style="background: var(--nr001-a);">5</div><span style="font-size: 0.8em; font-weight: 600; color: var(--nr001-a);">Acción</span></div>
+                            <div style="background: #fff7ed; border: 1px dashed #fb923c; border-radius: 8px; padding: 5px 8px; font-size: 0.62em; font-weight: 500; color: #9a3412; text-align: center; width: 140px; line-height: 1.35;">Planes de acción sobre compras, ERP, presupuesto, pagos y valor agregado</div>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 8px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <div class="step-badge" style="border-color: var(--brand-teal);"><div class="step-num" style="background: var(--brand-teal);">6</div><span style="font-size: 0.8em; font-weight: 600; color: var(--brand-teal);">Observatorio</span></div>
+                            <div style="background: #ecfeff; border: 1px dashed #2dd4bf; border-radius: 8px; padding: 5px 8px; font-size: 0.62em; font-weight: 500; color: #0f766e; text-align: center; width: 140px; line-height: 1.35;">Analítica histórica agregada para detectar brechas recurrentes, focos corporativos y madurez de remediación</div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; width: 100%; max-width: 1220px; margin-bottom: 22px;">
+                        <div class="case-card" onclick="goToSlide(1)" style="border-bottom: 4px solid var(--brand-blue);">
+                            <div class="case-icon" style="background: #e0f2fe; border: 2px solid var(--brand-blue);"><span class="material-symbols-outlined" style="font-size: 1.8em; color: var(--brand-blue);">travel_explore</span></div>
+                            <div class="case-card-title">Caso 1<br>Planificación del trabajo</div>
+                            <div class="case-card-desc">Consolidación de políticas de compras, matrices de aprobación, parametrización ERP e informes previos para definir alcance, objetivos y backlog inicial.</div>
+                        </div>
+
+                        <div class="case-card" onclick="goToSlide(2)" style="border-bottom: 4px solid var(--brand-green);">
+                            <div class="case-icon" style="background: #d1fae5; border: 2px solid var(--brand-green);"><span class="material-symbols-outlined" style="font-size: 1.8em; color: var(--brand-green);">diversity_3</span></div>
+                            <div class="case-card-title">Caso 2<br>Entrevistas y recorrido</div>
+                            <div class="case-card-desc">Síntesis de entrevistas, walkthroughs y evidencias del ciclo requisición-OC-recepción-factura-pago para visualizar proceso real, controles TI y controles financieros.</div>
+                        </div>
+
+                        <div class="case-card" onclick="goToSlide(3)" style="border-bottom: 4px solid var(--brand-red);">
+                            <div class="case-icon" style="background: #fee2e2; border: 2px solid var(--brand-red);"><span class="material-symbols-outlined" style="font-size: 1.8em; color: var(--brand-red);">warning</span></div>
+                            <div class="case-card-title">Caso 3<br>Riesgos y controles críticos</div>
+                            <div class="case-card-desc">Matriz narrativa de riesgos de compras y pagos con controles críticos de acceso, workflow, presupuesto, tres vías y registro contable.</div>
+                        </div>
+
+                        <div class="case-card" onclick="goToSlide(4)" style="border-bottom: 4px solid var(--brand-purple);">
+                            <div class="case-icon" style="background: #ede9fe; border: 2px solid var(--brand-purple);"><span class="material-symbols-outlined" style="font-size: 1.8em; color: var(--brand-purple);">schema</span></div>
+                            <div class="case-card-title">Caso 4<br>Programa de auditoría</div>
+                            <div class="case-card-desc">Automatización reusable para generar programas de auditoría de distintas temáticas, aplicada en el ejemplo al proceso de compras.</div>
+                        </div>
+
+                        <div class="case-card" onclick="goToSlide(5)" style="border-bottom: 4px solid var(--brand-orange);">
+                            <div class="case-icon" style="background: #fef3c7; border: 2px solid var(--brand-orange);"><span class="material-symbols-outlined" style="font-size: 1.8em; color: var(--brand-orange);">task_alt</span></div>
+                            <div class="case-card-title">Caso 5<br>Planes de acción</div>
+                            <div class="case-card-desc">Construcción de planes de acción sobre hallazgos de compras con foco en remediación operativa, tecnológica y financiera.</div>
+                        </div>
+
+                        <div class="case-card" onclick="goToSlide(6)" style="border-bottom: 4px solid var(--brand-teal);">
+                            <div class="case-icon" style="background: #ccfbf1; border: 2px solid var(--brand-teal);"><span class="material-symbols-outlined" style="font-size: 1.8em; color: var(--brand-teal);">query_stats</span></div>
+                            <div class="case-card-title">Caso 6<br>Analítica agregada histórica</div>
+                            <div class="case-card-desc">Explotación histórica de observaciones, hallazgos y planes de acción para detectar vacíos de cobertura, causas estructurales, madurez y focos corporativos.</div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(9, 62, 94, 0.04); border-left: 4px solid var(--az087-a); padding: 15px 25px; border-radius: 8px; max-width: 1140px; width: 100%; text-align: left;">
+                        <p style="font-size: 0.93em; color: var(--az087-a); margin-bottom: 8px; line-height: 1.5;">
+                            <strong><span class="material-symbols-outlined" style="vertical-align: text-bottom; font-size: 1.2em;">target</span> Objetivo de la sesión:</strong> Desarrollar prompts y artefactos visuales para transformar información desestructurada del proceso de compras en insumos útiles y oportunos para la auditoría interna, cubriendo controles operativos, tecnológicos y financieros desde la planificación hasta los planes de acción.
+                        </p>
+                        <p style="font-size: 0.9em; color: #475569; margin-bottom: 0; line-height: 1.5;">
+                            <strong>Fuentes típicas:</strong> políticas de compras, matrices de atribuciones, correos de aprobación, manuales del ERP, bitácoras de cambios, tickets, contratos, actas de comité, entrevistas, capturas del workflow, reportes presupuestales, conciliaciones, incidentes, documentación operativa y bases históricas de observaciones, hallazgos, informes y planes de acción.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="slide" style="display:none">
+                <button onclick="goToSlide(0)" style="position: absolute; top: 30px; left: 30px; background: transparent; border: 1px solid var(--az087-a); color: var(--az087-a); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; z-index: 10;">
+                    <span class="material-symbols-outlined" style="vertical-align: text-bottom; font-size: 1.25em;">arrow_back</span> Volver al Hub
+                </button>
+                <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: left; padding: 20px 40px; overflow-y: auto;">
+                    <span class="tag" style="background-color: var(--brand-blue); font-size: 1.1em; margin-bottom: 15px;">Caso 1 de 6</span>
+                    <h2 style="border:none; font-size: 1.8em; margin-bottom: 8px; text-align: center; color: var(--az087-a);">
+                        <span class="material-symbols-outlined" style="vertical-align: bottom; font-size: 1.1em;">travel_explore</span>
+                        Planificación del trabajo de auditoría
+                    </h2>
+                    <p style="font-size: 0.95em; color: #64748b; text-align: center; margin-bottom: 20px; max-width: 920px;">Uso de IA para consolidar información desestructurada del proceso de compras y producir un briefing ejecutivo que defina objetivos, alcance, stakeholders, hitos tempranos, hipótesis de riesgo y backlog de validaciones sobre controles tecnológicos y financieros.</p>
+
+                    <div style="display: flex; justify-content: center; align-items: flex-start; gap: 8px; margin-bottom: 20px; width: 100%; max-width: 1120px; flex-wrap: wrap;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;"><div class="step-badge"><div class="step-num" style="background: var(--az087-a);">1</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Fuentes</span></div><div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 135px; line-height: 1.3;">Políticas de compras, ERP, matrices de aprobación, auditorías previas y KPIs</div></div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;"><div class="step-badge"><div class="step-num" style="background: var(--az087-a);">2</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Consolidar</span></div><div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 135px; line-height: 1.3;">Resumen por temas, actores, riesgos de compras y dependencias ERP-finanzas</div></div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;"><div class="step-badge" style="border-color: var(--brand-green);"><div class="step-num" style="background: var(--brand-green);">3</div><span style="font-size: 0.8em; font-weight: 600; color: var(--brand-green);">Visualizar</span></div><div style="background: #f0fdf4; border: 1px dashed #34d399; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #065f46; text-align: center; width: 135px; line-height: 1.3;">Mapa de compras, controles TI/financieros y backlog ágil</div></div>
+                    </div>
+
+                    <div style="display: flex; gap: 20px; width: 100%; max-width: 1120px; margin-bottom: 20px;">
+                        <div class="workshop-section" style="flex: 1;">
+                            <h3 style="color: var(--nr001-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">checklist</span> Caso de uso</h3>
+                            <p style="font-size: 0.8em; color: #64748b;">Planeación de auditoría del proceso de compras y pagos consolidando insumos narrativos y documentales.</p>
+                            <ul>
+                                <li><strong>Objetivo:</strong> definir alcance, objetivos, hitos tempranos, criterios y universo documental del ciclo requisición-compra-recepción-pago.</li>
+                                <li><strong>Fuentes desestructuradas:</strong> manuales, flujogramas, actas de comité de compras, parametrización ERP, políticas de proveedores, matriz de delegaciones, presupuesto y reportes de variaciones.</li>
+                                <li><strong>Entregas tempranas:</strong> briefing de compras, mapa de stakeholders, hipótesis de riesgo, requerimientos iniciales sobre accesos, workflows, presupuesto y pagos, tablero de avance.</li>
+                                <li><strong>Visualizaciones esperadas:</strong> línea de tiempo del trabajo, mapa de actores, heatmap documental y tablero de controles tecnológicos y financieros por subproceso.</li>
+                            </ul>
+                        </div>
+
+                        <div class="workshop-section" style="flex: 1.1;">
+                            <h3 style="color: var(--az087-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">folder_managed</span> Consolidación de información</h3>
+                            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                                <span class="doc-format-tag" style="background: #e0f2fe; color: var(--brand-blue);">Políticas y manuales</span>
+                                <span class="doc-format-tag" style="background: #d1fae5; color: var(--brand-green);">Actas y minutas</span>
+                                <span class="doc-format-tag" style="background: #fee2e2; color: var(--brand-red);">Informes previos</span>
+                                <span class="doc-format-tag" style="background: #fef3c7; color: var(--brand-orange);">Normativa</span>
+                            </div>
+                            <table>
+                                <tr><th>Bloque</th><th>Salida esperada</th></tr>
+                                <tr><td><strong>Contexto del proceso</strong></td><td>Objetivo de compras, subprocesos, responsables, ERP, módulos financieros y terceros relevantes</td></tr>
+                                <tr><td><strong>Universo documental</strong></td><td>Inventario de documentos críticos, parametrizaciones clave y vacíos de información</td></tr>
+                                <tr><td><strong>Stakeholders</strong></td><td>Matriz RACI resumida y agenda sugerida con compras, TI, finanzas, presupuesto y cuentas por pagar</td></tr>
+                                <tr><td><strong>Hipótesis iniciales</strong></td><td>Riesgos de proveedores, aprobaciones, accesos, presupuesto, recepción, contabilización y pago</td></tr>
+                            </table>
+                            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px; border-radius: 4px; font-size: 0.78em; color: #92400e; line-height: 1.4; margin-top: 10px;">
+                                <strong>Entrega temprana sugerida:</strong> resumen ejecutivo de máximo 2 páginas con alcance, objetivos, exclusiones, requerimientos de información y primeras alertas sobre control de accesos, segregación, aprobación presupuestal y pagos.
+                            </div>
+                        </div>
+
+                        <div class="workshop-section" style="flex: 1.8;">
+                            <h3 style="color: var(--brand-green);"><span class="material-symbols-outlined" style="font-size: 1.1em;">chat</span> Prompt para planificación</h3>
+                            <div class="prompt-box">
+                                <strong style="color: var(--brand-green);">Rol:</strong> Eres un auditor interno senior bajo el MIPP del IIA, con enfoque de agilismo, planeación basada en riesgos y síntesis ejecutiva de documentación desestructurada del proceso de compras.<br><br>
+                                <strong style="color: var(--brand-green);">Contexto:</strong> Recibirás políticas, actas, informes previos, organigramas, matrices de aprobación, correos de solicitud, manuales del ERP, lineamientos de proveedores y normativa del proceso de compras. Debes consolidar la información para planificar un trabajo de auditoría con entregas tempranas sobre controles tecnológicos y financieros.<br><br>
+                                <strong style="color: var(--brand-green);">Instrucciones:</strong><br>
+                                1. Resume el proceso de compras, sus subprocesos, objetivos y actores clave desde requisición hasta pago.<br>
+                                2. Identifica objetivos de auditoría, alcance propuesto, exclusiones, criterios normativos y dependencias críticas entre compras, ERP, presupuesto y contabilidad.<br>
+                                3. Construye un backlog priorizado con quick wins, riesgos preliminares, requerimientos documentales y entrevistas sugeridas sobre alta de proveedores, workflow de aprobación, recepción, tres vías, contabilización y pago.<br>
+                                4. Señala vacíos de información, contradicciones y temas que requieren validación temprana en controles de acceso, segregación de funciones, límites de aprobación, disponibilidad presupuestal y conciliaciones.<br>
+                                5. Estructura la salida para comité de apertura: resumen ejecutivo, mapa de stakeholders, cronograma inicial, hipótesis de riesgo y próximos pasos.<br>
+                                6. Si se adjuntan imágenes, capturas, escaneos o fotografías, actúa primero como OCR: extrae el texto visible, ordénalo, indica campos dudosos y úsalo como insumo antes del análisis.<br><br>
+                                <strong style="color: var(--brand-green);">Salida obligatoria - HTML autocontenido:</strong> responde únicamente con un archivo HTML listo para abrir y compartir, sin texto adicional fuera del código. Debe usar Tailwind CSS vía CDN, aplicar principios sólidos de UX/UI con estética corporativa, jerarquía visual clara, navegación simple, tarjetas KPI y diseño responsive. Si existen datos cuantitativos, incorpora gráficos con Chart.js vía CDN; si no hay datos suficientes para graficar, no inventes valores y prioriza tarjetas, tablas y alertas cualitativas. Incluye una tabla ejecutiva con columnas tema, síntesis, implicación para auditoría, evidencia soporte, tipo de control involucrado y acción temprana sugerida, además de una vista backlog con prioridad alta/media/baja. El HTML debe incorporar un botón visible para exportar o imprimir las tablas de datos a Excel.
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <div style="flex: 1; background: #eff6ff; padding: 8px; border-radius: 6px; border-top: 3px solid var(--brand-blue);">
+                                    <strong style="font-size: 0.78em; color: var(--brand-blue); display: block; margin-bottom: 4px;">Visualizaciones</strong>
+                                    <ul style="margin-bottom: 0;">
+                                        <li>Mapa de actores y dependencias ERP-finanzas</li>
+                                        <li>Backlog por prioridad</li>
+                                        <li>Línea de tiempo de la auditoría</li>
+                                    </ul>
+                                </div>
+                                <div style="flex: 1; background: #f0fdf4; padding: 8px; border-radius: 6px; border-top: 3px solid var(--brand-green);">
+                                    <strong style="font-size: 0.78em; color: var(--brand-green); display: block; margin-bottom: 4px;">Valor para auditoría</strong>
+                                    <ul style="margin-bottom: 0;">
+                                        <li>Alcance claro y oportuno</li>
+                                        <li>Requerimientos anticipados</li>
+                                        <li>Inicio enfocado en riesgos de compras y pagos</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: auto; width: 100%; padding: 0 50px;"><hr style="margin-top: 10px; margin-bottom: 10px; border: none; border-top: 1px solid rgba(9, 62, 94, 0.15);"><div style="font-size: 0.85em; color: #64748b;"><strong>Foco:</strong> planificación del proceso de compras | <strong>Método:</strong> consolidación documental + síntesis ejecutiva | <strong>Entrega:</strong> briefing inicial y backlog ágil</div></div>
+            </div>
+
+            <div class="slide" style="display:none">
+                <button onclick="goToSlide(0)" style="position: absolute; top: 30px; left: 30px; background: transparent; border: 1px solid var(--az087-a); color: var(--az087-a); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; z-index: 10;"><span class="material-symbols-outlined" style="vertical-align: text-bottom; font-size: 1.25em;">arrow_back</span> Volver al Hub</button>
+                <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: left; padding: 20px 40px; overflow-y: auto;">
+                    <span class="tag" style="background-color: var(--brand-green); font-size: 1.1em; margin-bottom: 15px;">Caso 2 de 6</span>
+                    <h2 style="border:none; font-size: 1.8em; margin-bottom: 8px; text-align: center; color: var(--az087-a);"><span class="material-symbols-outlined" style="vertical-align: bottom; font-size: 1.1em;">diversity_3</span> Entrevistas y pruebas de recorrido</h2>
+                    <p style="font-size: 0.95em; color: #64748b; text-align: center; margin-bottom: 20px; max-width: 920px;">Consolidación de minutas, transcripciones, walkthroughs y evidencias narrativas para reconstruir el proceso real de compras, identificar desvíos frente al diseño y preparar validaciones tempranas sobre controles tecnológicos y financieros.</p>
+
+                    <div style="display: flex; gap: 20px; width: 100%; max-width: 1120px; margin-bottom: 20px;">
+                        <div class="workshop-section" style="flex: 1;">
+                            <h3 style="color: var(--nr001-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">forum</span> Caso de uso</h3>
+                            <ul>
+                                <li><strong>Escenario:</strong> walkthrough del ciclo de compras desde requisición hasta pago.</li>
+                                <li><strong>Fuentes:</strong> entrevistas a usuario solicitante, comprador, aprobador, cuentas por pagar y administrador del ERP.</li>
+                                <li><strong>Evidencias:</strong> capturas del ERP, narrativas, tickets, correos, formatos, logs explicativos y soportes de aprobación presupuestal/contable.</li>
+                                <li><strong>Salida:</strong> mapa del proceso real, variantes observadas, puntos de control tecnológico y financiero y excepciones narradas.</li>
+                            </ul>
+                        </div>
+
+                        <div class="workshop-section" style="flex: 1.1;">
+                            <h3 style="color: var(--az087-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">route</span> Estructura de consolidación</h3>
+                            <table>
+                                <tr><th>Elemento</th><th>Qué debe extraer la IA</th></tr>
+                                <tr><td><strong>Paso del proceso</strong></td><td>Actividad, responsable, sistema usado, entrada y salida</td></tr>
+                                <tr><td><strong>Control observado</strong></td><td>Quién lo ejecuta, cuándo, evidencia, frecuencia y si es tecnológico o financiero</td></tr>
+                                <tr><td><strong>Desvío</strong></td><td>Práctica real distinta al procedimiento formal o a la parametrización del sistema</td></tr>
+                                <tr><td><strong>Señal de riesgo</strong></td><td>Excepción, bypass, dependencia manual, ausencia de trazabilidad o falta de evidencia</td></tr>
+                            </table>
+                            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px; border-radius: 4px; font-size: 0.78em; color: #92400e; line-height: 1.4; margin-top: 10px;">
+                                <strong>Entrega temprana sugerida:</strong> narrativa consolidada del recorrido, diagrama SIPOC simplificado y lista de observaciones preliminares sobre acceso al maestro de proveedores, workflow de aprobación, three-way match y contabilización para validación en campo.
+                            </div>
+                        </div>
+
+                        <div class="workshop-section" style="flex: 1.8;">
+                            <h3 style="color: var(--brand-green);"><span class="material-symbols-outlined" style="font-size: 1.1em;">chat</span> Prompt para entrevistas y recorrido</h3>
+                            <div class="prompt-box">
+                                <strong style="color: var(--brand-green);">Rol:</strong> Eres un auditor interno experto en entrevistas, walkthroughs, documentación del proceso de compras y análisis de controles bajo el MIPP del IIA.<br><br>
+                                <strong style="color: var(--brand-green);">Contexto:</strong> Recibirás transcripciones de entrevistas, minutas, capturas del ERP, narrativas operativas, correos y evidencias del proceso de compras. Debes consolidarlas en una visión única del proceso real y sus diferencias frente al diseño esperado, incorporando controles tecnológicos y financieros.<br><br>
+                                <strong style="color: var(--brand-green);">Tareas:</strong><br>
+                                1. Construye una secuencia de actividades extremo a extremo con responsable, sistema, documento y control observado desde requisición hasta pago.<br>
+                                2. Identifica variaciones del proceso, pasos manuales, excepciones, dependencias de personas clave y controles compensatorios sobre alta de proveedores, workflow, recepción, factura, contabilización y pago.<br>
+                                3. Resume frases o evidencias relevantes que soporten cada observación.<br>
+                                4. Genera preguntas de validación para la etapa de ejecución de auditoría sobre accesos, segregación, límites, disponibilidad presupuestal, matching y conciliaciones.<br>
+                                5. Separa claramente hechos observados, inferencias del auditor y temas pendientes de confirmar.<br>
+                                6. Si se adjuntan imágenes, capturas, escaneos o fotografías, actúa primero como OCR: extrae el texto visible, estructura lo legible, marca incertidumbres y usa ese contenido como base del recorrido.<br><br>
+                                <strong style="color: var(--brand-green);">Salida obligatoria - HTML autocontenido:</strong> responde únicamente con un archivo HTML listo para abrir y compartir, sin explicaciones previas o posteriores. Debe usar Tailwind CSS vía CDN, mantener una interfaz profesional y fácil de leer, con flujo visual claro entre proceso diseñado, proceso real, desvíos y próximos pasos. Si hay datos tabulares o cuantitativos, agrega gráficos con Chart.js vía CDN para visualizar desvíos, responsables o concentración de excepciones; si no los hay, usa comparativos visuales, badges y diagramas ligeros sin inventar cifras. Incluye una matriz de recorrido con columnas etapa, actividad, responsable, evidencia, control, tipo de control, desviación, riesgo potencial y validación siguiente, más un resumen visual del proceso real vs proceso diseñado. El HTML debe incorporar un botón visible para exportar o imprimir las tablas de datos a Excel.
+                            </div>
+                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                <div style="flex: 1; background: #f0fdf4; padding: 8px; border-radius: 6px; border-top: 3px solid var(--brand-green);">
+                                    <strong style="font-size: 0.78em; color: var(--brand-green); display: block; margin-bottom: 4px;">Visualizaciones</strong>
+                                    <ul style="margin-bottom: 0;">
+                                        <li>Flujo real del proceso</li>
+                                        <li>Swimlane por responsables</li>
+                                        <li>Mapa de desvíos y excepciones</li>
+                                    </ul>
+                                </div>
+                                <div style="flex: 1; background: #eff6ff; padding: 8px; border-radius: 6px; border-top: 3px solid var(--brand-blue);">
+                                    <strong style="font-size: 0.78em; color: var(--brand-blue); display: block; margin-bottom: 4px;">Resultado para auditoría</strong>
+                                    <ul style="margin-bottom: 0;">
+                                        <li>Walkthrough documentado</li>
+                                        <li>Controles tecnológicos y financieros observados</li>
+                                        <li>Preguntas para validación</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: auto; width: 100%; padding: 0 50px;"><hr style="margin-top: 10px; margin-bottom: 10px; border: none; border-top: 1px solid rgba(9, 62, 94, 0.15);"><div style="font-size: 0.85em; color: #64748b;"><strong>Foco:</strong> walkthrough de compras | <strong>Método:</strong> síntesis de entrevistas | <strong>Entrega:</strong> proceso real, desvíos y validaciones</div></div>
+            </div>
+
+            <div class="slide" style="display:none">
+                <button onclick="goToSlide(0)" style="position: absolute; top: 30px; left: 30px; background: transparent; border: 1px solid var(--az087-a); color: var(--az087-a); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; z-index: 10;"><span class="material-symbols-outlined" style="vertical-align: text-bottom; font-size: 1.25em;">arrow_back</span> Volver al Hub</button>
+                <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: left; padding: 20px 40px; overflow-y: auto;">
+                    <span class="tag" style="background-color: var(--brand-red); font-size: 1.1em; margin-bottom: 15px;">Caso 3 de 6</span>
+                    <h2 style="border:none; font-size: 1.8em; margin-bottom: 8px; text-align: center; color: var(--az087-a);"><span class="material-symbols-outlined" style="vertical-align: bottom; font-size: 1.1em;">warning</span> Análisis de riesgos y controles críticos</h2>
+                    <p style="font-size: 0.95em; color: #64748b; text-align: center; margin-bottom: 20px; max-width: 960px;">Etapa posterior a walkthroughs y previa al diseño del programa, orientada a consolidar evidencias no estructuradas en una matriz de riesgos de compras, controles críticos tecnológicos y financieros, y observaciones preliminares para validación durante la ejecución.</p>
+
+                    <div style="display: flex; gap: 20px; width: 100%; max-width: 1120px; margin-bottom: 20px;">
+                        <div class="workshop-section" style="flex: 1;">
+                            <h3 style="color: var(--nr001-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">shield</span> Caso de uso</h3>
+                            <ul>
+                                <li><strong>Escenario:</strong> evaluación de riesgos del proceso de gestión de proveedores, órdenes de compra, recepción, contabilización y pagos.</li>
+                                <li><strong>Fuente base:</strong> walkthrough consolidado, manuales, políticas, incidentes, hallazgos históricos, evidencias de control y parametrización del ERP.</li>
+                                <li><strong>Objetivo:</strong> priorizar riesgos, identificar controles críticos TI/financieros y emitir conclusiones tempranas.</li>
+                                <li><strong>Salida:</strong> matriz riesgo-control con observaciones a validar en ejecución.</li>
+                            </ul>
+                        </div>
+
+                        <div class="workshop-section" style="flex: 1.15;">
+                            <h3 style="color: var(--az087-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">table_chart</span> Estructura mínima</h3>
+                            <table>
+                                <tr><th>Campo</th><th>Contenido esperado</th></tr>
+                                <tr><td><strong>Riesgo</strong></td><td>Evento, causa, consecuencia, objetivo afectado</td></tr>
+                                <tr><td><strong>Control crítico</strong></td><td>Preventivo/detectivo, manual/automático, frecuencia, dueño y capa TI/financiera</td></tr>
+                                <tr><td><strong>Soporte</strong></td><td>Evidencias o frases clave de entrevistas/documentos</td></tr>
+                                <tr><td><strong>Conclusión temprana</strong></td><td>Hipótesis del auditor y nivel de confianza</td></tr>
+                                <tr><td><strong>Validación siguiente</strong></td><td>Qué se probará en ejecución</td></tr>
+                            </table>
+                            <div style="background-color: #fee2e2; border-left: 4px solid var(--brand-red); padding: 10px; border-radius: 4px; font-size: 0.78em; color: #991b1b; line-height: 1.4; margin-top: 10px;">
+                                <strong>Requisito clave:</strong> diferenciar claramente entre riesgo inferido, control descrito, control evidenciado y observación preliminar para evitar sobredimensionar conclusiones antes de la ejecución.
+                            </div>
+                        </div>
+
+                        <div class="workshop-section" style="flex: 1.8;">
+                            <h3 style="color: var(--brand-green);"><span class="material-symbols-outlined" style="font-size: 1.1em;">chat</span> Prompt para riesgos y controles</h3>
+                            <div class="prompt-box">
+                                <strong style="color: var(--brand-green);">Rol:</strong> Eres un auditor interno experto en evaluación de riesgos del proceso de compras, matrices riesgo-control, controles clave y comunicación temprana de observaciones bajo el MIPP del IIA.<br><br>
+                                <strong style="color: var(--brand-green);">Contexto:</strong> Recibirás la documentación consolidada de walkthroughs, entrevistas, políticas, incidentes, actas, hallazgos previos y parametrización del ERP de compras. Debes construir una matriz de riesgos y controles críticos previa al diseño del programa de auditoría.<br><br>
+                                <strong style="color: var(--brand-green);">Tareas:</strong><br>
+                                1. Identifica riesgos inherentes y residuales a partir de la evidencia suministrada para alta de proveedores, aprobación, recepción, three-way match, contabilización y pago.<br>
+                                2. Asocia a cada riesgo los controles críticos descritos u observados, distinguiendo controles tecnológicos como perfiles, workflow, bitácoras, parametrización y bloqueos, y controles financieros como presupuesto, tolerancias, matching, contabilización y conciliaciones.<br>
+                                3. Estima criticidad del riesgo y madurez aparente del control.<br>
+                                4. Formula primeras conclusiones y observaciones preliminares que deban validarse en ejecución.<br>
+                                5. Propón visualizaciones: heatmap de riesgos, mapa de controles críticos y tablero de observaciones tempranas.<br>
+                                6. Si se adjuntan imágenes, capturas, matrices escaneadas o diagramas, actúa primero como OCR: extrae el texto, normalízalo, identifica posibles ambigüedades y luego intégralo al análisis de riesgos y controles.<br><br>
+                                <strong style="color: var(--brand-green);">Salida obligatoria - HTML autocontenido:</strong> responde únicamente con un archivo HTML listo para abrir y compartir, sin contenido adicional fuera del código. Debe usar Tailwind CSS vía CDN, diseño ejecutivo corporativo, filtros visuales simples y una jerarquía clara para distinguir riesgo, control, criticidad y evidencia. Si existe información cuantitativa o categorizable, incorpora gráficos con Chart.js vía CDN, especialmente heatmaps, barras o distribuciones de criticidad; si no hay volumen suficiente, prioriza semáforos, matrices y tarjetas de hallazgos sin fabricar datos. Incluye una matriz con columnas riesgo, evento, causa, impacto, control crítico, tipo de control, capa de control, evidencia disponible, observación preliminar, validación pendiente y prioridad, además de una sección final llamada primeras conclusiones y observaciones a validar. El HTML debe incorporar un botón visible para exportar o imprimir las tablas de datos a Excel.
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <div style="flex: 1; background: #fee2e2; padding: 8px; border-radius: 6px; border-top: 3px solid var(--brand-red);">
+                                    <strong style="font-size: 0.78em; color: var(--brand-red); display: block; margin-bottom: 4px;">Visualizaciones</strong>
+                                    <ul style="margin-bottom: 0;">
+                                        <li>Heatmap de criticidad</li>
+                                        <li>Matriz riesgo-control</li>
+                                        <li>Panel de observaciones tempranas</li>
+                                    </ul>
+                                </div>
+                                <div style="flex: 1; background: #f0fdf4; padding: 8px; border-radius: 6px; border-top: 3px solid var(--brand-green);">
+                                    <strong style="font-size: 0.78em; color: var(--brand-green); display: block; margin-bottom: 4px;">Resultado para auditoría</strong>
+                                    <ul style="margin-bottom: 0;">
+                                        <li>Priorización de ejecución</li>
+                                        <li>Foco en controles críticos TI y financieros</li>
+                                        <li>Mensajes oportunos al auditado</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: auto; width: 100%; padding: 0 50px;"><hr style="margin-top: 10px; margin-bottom: 10px; border: none; border-top: 1px solid rgba(9, 62, 94, 0.15);"><div style="font-size: 0.85em; color: #64748b;"><strong>Foco:</strong> riesgos y controles críticos de compras | <strong>Método:</strong> matriz narrativa | <strong>Entrega:</strong> conclusiones tempranas y observaciones a validar</div></div>
+            </div>
+
+            <div class="slide" style="display:none">
+                <button onclick="goToSlide(0)" style="position: absolute; top: 30px; left: 30px; background: transparent; border: 1px solid var(--az087-a); color: var(--az087-a); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; z-index: 10;"><span class="material-symbols-outlined" style="vertical-align: text-bottom; font-size: 1.25em;">arrow_back</span> Volver al Hub</button>
+                <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: left; padding: 20px 40px; overflow-y: auto;">
+                    <span class="tag" style="background-color: var(--brand-purple); font-size: 1.1em; margin-bottom: 15px;">Caso 4 de 6</span>
+                    <h2 style="border:none; font-size: 1.8em; margin-bottom: 8px; text-align: center; color: var(--az087-a);"><span class="material-symbols-outlined" style="vertical-align: bottom; font-size: 1.1em;">schema</span> Diseño y definición del programa de auditoría</h2>
+                    <p style="font-size: 0.95em; color: #64748b; text-align: center; margin-bottom: 20px; max-width: 980px;">Diseño de una automatización reusable que permita crear programas de auditoría para distintas temáticas, procesos u objetos de auditoría. Para el ejemplo, la automatización se aplica al proceso de compras y traduce riesgos y objetivos de control en pruebas estructuradas por <strong>1. Diseño, 2. Cumplimiento, 3. Sustantiva/Analítica</strong>.</p>
+
+                    <div style="display: flex; gap: 20px; width: 100%; max-width: 1120px; margin-bottom: 20px;">
+                        <div class="workshop-section" style="flex: 1;">
+                            <h3 style="color: var(--nr001-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">precision_manufacturing</span> Automatización requerida</h3>
+                            <ul>
+                                <li><strong>Entrada:</strong> parámetros generales del proceso u objeto de auditoría, incluyendo alcance, objetivos de control, riesgos relevantes y controles clave; para el ejemplo, compras.</li>
+                                <li><strong>Motor:</strong> prompt-plantilla que parametrice el proceso, la temática y los criterios de riesgo/control para generar automáticamente programas de auditoría.</li>
+                                <li><strong>Regla:</strong> la automatización debe replicarse a distintos contextos, manteniendo pruebas escalonadas de diseño, cumplimiento y sustantiva/analítica.</li>
+                                <li><strong>Salida:</strong> automatización documentada y programa de auditoría generado para el ejemplo de compras, listo para revisión experta.</li>
+                            </ul>
+                        </div>
+
+                        <div class="workshop-section" style="flex: 1.15;">
+                            <h3 style="color: var(--az087-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">assignment</span> Caracterización mínima de cada prueba</h3>
+                            <table>
+                                <tr><th>Campo</th><th>Contenido mínimo</th></tr>
+                                <tr><td><strong>Objetivo</strong></td><td>Qué pretende validar la prueba</td></tr>
+                                <tr><td><strong>Alcance</strong></td><td>Proceso, período, muestra o población</td></tr>
+                                <tr><td><strong>Procedimientos</strong></td><td>Pasos específicos a ejecutar por el auditor</td></tr>
+                                <tr><td><strong>Fuentes</strong></td><td>Documentos, reportes, entrevistas, logs o datos requeridos</td></tr>
+                                <tr><td><strong>Resultado de la prueba</strong></td><td>Criterio para concluir satisfactoria o con excepción</td></tr>
+                                <tr><td><strong>Tipo</strong></td><td>Diseño, cumplimiento, sustantiva/analítica</td></tr>
+                                <tr><td><strong>Posible resultado</strong></td><td>Conclusión o escenario probable asociado</td></tr>
+                            </table>
+                        </div>
+
+                        <div class="workshop-section" style="flex: 1.8;">
+                            <h3 style="color: var(--brand-green);"><span class="material-symbols-outlined" style="font-size: 1.1em;">chat</span> Prompt de automatización del programa</h3>
+                            <div class="prompt-box">
+                                <strong style="color: var(--brand-green);">Rol:</strong> Eres un experto de auditoría interna en diseño de automatizaciones para construir programas de auditoría basados en riesgos, con criterio profesional bajo el MIPP del IIA.<br><br>
+                                <strong style="color: var(--brand-green);">Contexto:</strong> Debes diseñar una automatización reusable que permita generar programas de auditoría estructurados y accionables para cualquier proceso u objeto de auditoría. La automatización no debe depender de cargar previamente una matriz de riesgos: los objetivos de control, riesgos relevantes y controles clave deben poder diligenciarse como parámetros generales una vez construida la automatización. Para el ejemplo de salida, aplica la automatización al proceso de compras.<br><br>
+                                <strong style="color: var(--brand-green);">Instrucciones obligatorias:</strong><br>
+                                1. Diseña una automatización generalizable que indique propósito, parámetros de entrada, reglas de diligenciamiento, lógica de generación y validaciones para producir programas de auditoría en distintas temáticas.<br>
+                                2. Define un esquema de parametrización general para proceso u objeto auditado, alcance, objetivos de control, riesgos relevantes y controles clave, de modo que la automatización pueda usarse aun cuando no exista una matriz formal previa.<br>
+                                3. Para cada prueba incluye como mínimo: objetivo, alcance, procedimientos de auditoría, fuentes de información y/o documentación requerida, resultado esperado, tipo de auditoría y posible resultado.<br>
+                                4. Define cómo la automatización convierte cada riesgo u objetivo de control parametrizado en tres bloques de pruebas: <strong>1. Diseño</strong>, <strong>2. Cumplimiento</strong> y <strong>3. Sustantiva/Analítica</strong>.<br>
+                                5. Mantén trazabilidad explícita entre proceso u objeto auditado, riesgo, objetivo de control, control clave y prueba propuesta, indicando qué partes son reutilizables y cuáles se parametrizan según el tema.<br>
+                                6. Ejecuta la automatización sobre el ejemplo del proceso de compras y prioriza pruebas de alto valor y entregas tempranas cuando existan señales críticas o controles débiles en alta de proveedores, workflow, límites, matching, contabilización o pagos.<br>
+                                7. Explica cómo la automatización puede completarse progresivamente: primero con parámetros generales y luego, si existe, con una matriz de riesgos más detallada.<br>
+                                8. Señala qué pruebas pueden automatizarse total o parcialmente y qué insumos necesitan.<br>
+                                9. Si se adjuntan imágenes, capturas, esquemas o matrices escaneadas, actúa primero como OCR: extrae y estructura el texto antes de incorporarlo como parámetro o evidencia de la automatización.<br><br>
+                                <strong style="color: var(--brand-green);">Salida obligatoria - HTML autocontenido:</strong> responde únicamente con un archivo HTML listo para abrir y compartir, sin texto externo al código. Debe usar Tailwind CSS vía CDN y presentar el programa de auditoría del proceso de compras ya construido y completo, dentro de un <strong>tablero interactivo y ajustable</strong> que permita al auditor operar sobre él sin modificar el código. El tablero debe incluir: <strong>1. Panel de filtros activos</strong> con controles para filtrar y combinar pruebas por tipo (diseño, cumplimiento, sustantiva/analítica), subproceso (alta de proveedores, aprobación, recepción, matching, contabilización, pago), riesgo asociado, capa de control (tecnológica/financiera), criticidad y estado de inclusión. <strong>2. Tabla maestra interactiva</strong> con una fila por prueba y columnas proceso u objeto auditado, riesgo, objetivo de control, control clave, secuencia, objetivo, alcance, procedimiento, fuente requerida, evidencia esperada, tipo, capa de control, resultado esperado, posible resultado y automatizable sí/no; cada fila debe incluir un <strong>toggle o checkbox de inclusión/exclusión</strong> que permita activar o desactivar pruebas del programa activo, y un selector de <strong>prioridad ajustable</strong> (alta/media/baja) editable directamente en la tabla. <strong>3. Vista resumen dinámica</strong> que actualice en tiempo real los conteos por tipo de prueba, subproceso y criticidad según los filtros y selecciones activas, apoyada con gráficos Chart.js vía CDN para mostrar distribución, cobertura y quick wins del programa activo. <strong>4. Sección de diseño de la automatización</strong> con propósito, parámetros de entrada, variables parametrizables, reglas de decisión, flujo de generación y consideraciones de reutilización para replicar el programa a otros procesos. <strong>5. Resumen ejecutivo</strong> de quick wins y pruebas de alto valor según la configuración y filtros activos. El HTML debe incluir un botón visible para exportar a Excel el programa según los filtros y selecciones vigentes, idealmente con SheetJS vía CDN, y soporte de impresión sin pérdida de formato.
+                            </div>
+                            <div style="background-color: #ede9fe; border-left: 4px solid var(--brand-purple); padding: 10px; border-radius: 4px; font-size: 0.78em; color: #5b21b6; line-height: 1.4; margin-top: 10px;">
+                                <strong>Resultado deseado:</strong> una automatización revisable, modular y reutilizable que permita generar programas de auditoría para múltiples procesos, usando compras como ejemplo sin perder el juicio profesional del auditor.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: auto; width: 100%; padding: 0 50px;"><hr style="margin-top: 10px; margin-bottom: 10px; border: none; border-top: 1px solid rgba(9, 62, 94, 0.15);"><div style="font-size: 0.85em; color: #64748b;"><strong>Foco:</strong> automatización reusable de programas de auditoría | <strong>Método:</strong> parametrización general de riesgos y controles | <strong>Entrega:</strong> diseño de automatización + ejemplo aplicado a compras</div></div>
+            </div>
+
+            <div class="slide" style="display:none">
+                <button onclick="goToSlide(0)" style="position: absolute; top: 30px; left: 30px; background: transparent; border: 1px solid var(--az087-a); color: var(--az087-a); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; z-index: 10;"><span class="material-symbols-outlined" style="vertical-align: text-bottom; font-size: 1.25em;">arrow_back</span> Volver al Hub</button>
+                <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: left; padding: 20px 40px; overflow-y: auto;">
+                    <span class="tag" style="background-color: var(--brand-orange); font-size: 1.1em; margin-bottom: 15px;">Caso 5 de 6</span>
+                    <h2 style="border:none; font-size: 1.8em; margin-bottom: 8px; text-align: center; color: var(--az087-a);"><span class="material-symbols-outlined" style="vertical-align: bottom; font-size: 1.1em;">task_alt</span> Planes de acción de auditoría</h2>
+                    <p style="font-size: 0.95em; color: #64748b; text-align: center; margin-bottom: 20px; max-width: 960px;">Construcción de planes de acción a partir de resultados de pruebas y hallazgos del proceso de compras, incorporando análisis de causa raíz, costo-efectividad de la respuesta y valor agregado esperado para el negocio.</p>
+
+                    <div style="display: flex; gap: 20px; width: 100%; max-width: 1120px; margin-bottom: 20px;">
+                        <div class="workshop-section" style="flex: 1;">
+                            <h3 style="color: var(--nr001-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">fact_check</span> Caso de uso</h3>
+                            <ul>
+                                <li><strong>Entrada:</strong> hallazgos, resultados de pruebas, evidencias y comentarios del auditado sobre compras, ERP, presupuesto y pagos.</li>
+                                <li><strong>Objetivo:</strong> proponer acciones viables y priorizadas, no solo correctivas sino preventivas y de eficiencia.</li>
+                                <li><strong>Enfoque:</strong> causa raíz, dueños, fechas, dependencia tecnológica, fortalecimiento financiero y relación costo-beneficio.</li>
+                                <li><strong>Salida:</strong> plan de acción priorizado y tablero de seguimiento.</li>
+                            </ul>
+                        </div>
+
+                        <div class="workshop-section" style="flex: 1.1;">
+                            <h3 style="color: var(--az087-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">analytics</span> Estructura del análisis</h3>
+                            <table>
+                                <tr><th>Componente</th><th>Qué debe entregar</th></tr>
+                                <tr><td><strong>Resultado de prueba</strong></td><td>Condición observada y evidencia soporte</td></tr>
+                                <tr><td><strong>Causa raíz</strong></td><td>Proceso, tecnología, datos, talento, gobierno o debilidad financiera</td></tr>
+                                <tr><td><strong>Acción propuesta</strong></td><td>Correctiva, preventiva o de automatización</td></tr>
+                                <tr><td><strong>Costo-efectividad</strong></td><td>Esfuerzo estimado vs mitigación o eficiencia esperada</td></tr>
+                                <tr><td><strong>Valor agregado</strong></td><td>Impacto en control, agilidad, cumplimiento, ahorro o calidad de información financiera</td></tr>
+                            </table>
+                        </div>
+
+                        <div class="workshop-section" style="flex: 1.8;">
+                            <h3 style="color: var(--brand-green);"><span class="material-symbols-outlined" style="font-size: 1.1em;">chat</span> Prompt para planes de acción</h3>
+                            <div class="prompt-box">
+                                <strong style="color: var(--brand-green);">Rol:</strong> Eres un auditor interno senior orientado a agregar valor, con experiencia en redacción de hallazgos de compras, análisis de causa raíz y definición de planes de acción costo-efectivos.<br><br>
+                                <strong style="color: var(--brand-green);">Contexto:</strong> Recibirás resultados de pruebas, hallazgos, respuestas del auditado, evidencias y restricciones operativas del proceso de compras. Debes proponer planes de acción que mitiguen el riesgo y generen valor agregado medible.<br><br>
+                                <strong style="color: var(--brand-green);">Tareas:</strong><br>
+                                1. Resume cada resultado de prueba en términos de criterio, condición, causa e impacto.<br>
+                                2. Determina la causa raíz más probable y clasifícala por proceso, tecnología, datos, talento, gobierno o debilidad financiera.<br>
+                                3. Propón una o más acciones costo-efectivas, con dueño sugerido, dependencia y plazo tentativo, incluyendo remediaciones sobre ERP, workflow, presupuesto, matching, contabilización y pagos cuando aplique.<br>
+                                4. Explica el valor agregado esperado de cada acción y su relación con la mitigación del riesgo.<br>
+                                5. Prioriza las acciones en corto, medio y largo plazo y destaca quick wins.<br>
+                                6. Si se adjuntan imágenes, capturas, escaneos o tablas embebidas en documentos, actúa primero como OCR: extrae el texto, reorganízalo y úsalo como insumo antes de proponer acciones.<br><br>
+                                <strong style="color: var(--brand-green);">Salida obligatoria - HTML autocontenido:</strong> responde únicamente con un archivo HTML listo para abrir y compartir, sin explicaciones adicionales. Debe usar Tailwind CSS vía CDN, aplicar principios sólidos de UX/UI y mostrar un tablero ejecutivo atractivo, profesional y fácil de socializar con auditoría y negocio. Si hay datos cuantitativos, incorpora gráficos con Chart.js vía CDN para mostrar priorización, esfuerzo vs beneficio, quick wins o roadmap; si no hay datos suficientes, usa matrices visuales, timelines y tarjetas narrativas sin inventar cifras. Incluye una matriz con columnas hallazgo, resultado de prueba, causa raíz, acción propuesta, tipo de acción, capa impactada, dueño sugerido, plazo, costo-esfuerzo estimado, beneficio esperado, valor agregado y prioridad, más un tablero ejecutivo con quick wins y acciones estructurales. El HTML debe incorporar un botón visible para exportar o imprimir las tablas de datos a Excel.
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <div style="flex: 1; background: #fff7ed; padding: 8px; border-radius: 6px; border-top: 3px solid var(--nr001-a);">
+                                    <strong style="font-size: 0.78em; color: var(--nr001-a); display: block; margin-bottom: 4px;">Visualizaciones</strong>
+                                    <ul style="margin-bottom: 0;">
+                                        <li>Mapa causa raíz - acción</li>
+                                        <li>Matriz esfuerzo vs beneficio</li>
+                                        <li>Roadmap de remediación</li>
+                                    </ul>
+                                </div>
+                                <div style="flex: 1; background: #f0fdf4; padding: 8px; border-radius: 6px; border-top: 3px solid var(--brand-green);">
+                                    <strong style="font-size: 0.78em; color: var(--brand-green); display: block; margin-bottom: 4px;">Resultado para auditoría</strong>
+                                    <ul style="margin-bottom: 0;">
+                                        <li>Planes accionables y medibles</li>
+                                        <li>Discusión basada en valor y sostenibilidad del control</li>
+                                        <li>Seguimiento más claro</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: auto; width: 100%; padding: 0 50px;"><hr style="margin-top: 10px; margin-bottom: 10px; border: none; border-top: 1px solid rgba(9, 62, 94, 0.15);"><div style="font-size: 0.85em; color: #64748b;"><strong>Foco:</strong> remediación y valor agregado en compras | <strong>Método:</strong> causa raíz + costo-efectividad | <strong>Entrega:</strong> plan de acción priorizado</div></div>
+            </div>
+
+            <div class="slide" style="display:none">
+                <button onclick="goToSlide(0)" style="position: absolute; top: 30px; left: 30px; background: transparent; border: 1px solid var(--az087-a); color: var(--az087-a); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; z-index: 10;"><span class="material-symbols-outlined" style="vertical-align: text-bottom; font-size: 1.25em;">arrow_back</span> Volver al Hub</button>
+                <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: left; padding: 20px 40px; overflow-y: auto;">
+                    <span class="tag" style="background-color: var(--brand-teal); font-size: 1.1em; margin-bottom: 15px;">Caso 6 de 6</span>
+                    <h2 style="border:none; font-size: 1.8em; margin-bottom: 8px; text-align: center; color: var(--az087-a);"><span class="material-symbols-outlined" style="vertical-align: bottom; font-size: 1.1em;">query_stats</span> Analítica agregada de observaciones, hallazgos y planes de acción históricos</h2>
+                    <p style="font-size: 0.95em; color: #64748b; text-align: center; margin-bottom: 20px; max-width: 980px;">Caso transversal para una base histórica de un equipo de auditoría. La IA consolida observaciones, hallazgos, planes de acción y fechas de trabajo para revelar cobertura temática, problemáticas estructurales, correlaciones, causas raíz probables, focos corporativos de intervención y madurez real de remediación por proceso, periodo y estado.</p>
+
+                    <div style="display: flex; justify-content: center; align-items: flex-start; gap: 8px; margin-bottom: 20px; width: 100%; max-width: 1120px; flex-wrap: wrap;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;"><div class="step-badge"><div class="step-num" style="background: var(--az087-a);">1</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Base histórica</span></div><div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 145px; line-height: 1.3;">Informes, observaciones, hallazgos, temas, procesos, responsables, fechas y planes</div></div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;"><div class="step-badge"><div class="step-num" style="background: var(--az087-a);">2</div><span style="font-size: 0.8em; font-weight: 600; color: var(--az087-a);">Normalizar</span></div><div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #475569; text-align: center; width: 145px; line-height: 1.3;">Agrupar temas, subtemas, proceso, causa, estado, criticidad y periodos comparables</div></div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;"><div class="step-badge" style="border-color: var(--brand-teal);"><div class="step-num" style="background: var(--brand-teal);">3</div><span style="font-size: 0.8em; font-weight: 600; color: var(--brand-teal);">Detectar</span></div><div style="background: #ecfeff; border: 1px dashed #2dd4bf; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #0f766e; text-align: center; width: 145px; line-height: 1.3;">Cobertura, concentración, recurrencia, correlaciones, reincidencia e ineficiencias</div></div>
+                        <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 1em; margin-top: 6px;">east</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;"><div class="step-badge" style="border-color: var(--brand-orange);"><div class="step-num" style="background: var(--brand-orange);">4</div><span style="font-size: 0.8em; font-weight: 600; color: var(--brand-orange);">Actuar</span></div><div style="background: #fff7ed; border: 1px dashed #fb923c; border-radius: 8px; padding: 5px 8px; font-size: 0.68em; font-weight: 500; color: #9a3412; text-align: center; width: 145px; line-height: 1.3;">Focos estratégicos, causas raíz probables, backlog corporativo y alertas de sobreesfuerzo</div></div>
+                    </div>
+
+                    <div style="display: flex; gap: 20px; width: 100%; max-width: 1120px; margin-bottom: 20px;">
+                        <div class="workshop-section" style="flex: 1;">
+                            <h3 style="color: var(--nr001-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">dataset</span> Caso de uso</h3>
+                            <ul>
+                                <li><strong>Entrada:</strong> histórico de informes, observaciones, hallazgos, acciones, procesos, áreas, criticidad, fechas de ejecución, fechas compromiso y estado de cierre.</li>
+                                <li><strong>Objetivo:</strong> construir un observatorio ejecutivo de aprendizaje histórico para decidir dónde profundizar auditoría, qué brechas sistémicas persisten y dónde existe fatiga o duplicidad de esfuerzos.</li>
+                                <li><strong>Decisiones esperadas:</strong> ranking de temas cubiertos, temas ausentes frente a una cadena de valor genérica, top de problemáticas estructurales, focos de acción corporativos y priorización por madurez o reincidencia.</li>
+                                <li><strong>Filtro crítico:</strong> permitir cortes por periodo, proceso, unidad, severidad, estado de plan y recurrencia del tema.</li>
+                            </ul>
+                        </div>
+
+                        <div class="workshop-section" style="flex: 1.15;">
+                            <h3 style="color: var(--az087-a);"><span class="material-symbols-outlined" style="font-size: 1.1em;">lan</span> Método y estructura analítica</h3>
+                            <table>
+                                <tr><th>Bloque</th><th>Qué debe entregar la IA</th></tr>
+                                <tr><td><strong>Cobertura temática</strong></td><td>Ranking de temas auditados, densidad por periodo y temas posiblemente no abordados frente a abastecimiento, operación, ventas, TI, finanzas, talento, cumplimiento y gobierno</td></tr>
+                                <tr><td><strong>Problemas estructurales</strong></td><td>Concentración del top de brechas por proceso, causa recurrente, criticidad, reincidencia y antigüedad</td></tr>
+                                <tr><td><strong>Correlaciones</strong></td><td>Coincidencia entre temas, procesos, áreas, causas y estados para inferir patrones que alimentan hallazgos o retrasos</td></tr>
+                                <tr><td><strong>Madurez</strong></td><td>Distribución por abierto, vencido, cerrado, reabierto, repetido y no medible; si falta estado de acción, alertar el vacío de datos</td></tr>
+                                <tr><td><strong>Ineficiencias</strong></td><td>Procesos con alta carga histórica, auditorías repetitivas sobre el mismo problema, acciones de baja efectividad o exceso de remediación táctica</td></tr>
+                            </table>
+                            <div style="background-color: #ecfeff; border-left: 4px solid var(--brand-teal); padding: 10px; border-radius: 4px; font-size: 0.78em; color: #115e59; line-height: 1.4; margin-top: 10px;">
+                                <strong>Entrega sorprendente sugerida:</strong> incluir una vista tipo radar corporativo con <strong>temas sobreatendidos</strong>, <strong>temas subauditados</strong>, <strong>hallazgos crónicos</strong>, <strong>acciones que no maduran</strong> y <strong>zonas de fricción operacional</strong> para discusión ejecutiva.
+                            </div>
+                        </div>
+
+                        <div class="workshop-section" style="flex: 1.8;">
+                            <h3 style="color: var(--brand-green);"><span class="material-symbols-outlined" style="font-size: 1.1em;">chat</span> Prompt para analítica agregada histórica</h3>
+                            <div class="prompt-box">
+                                <strong style="color: var(--brand-green);">Rol:</strong> Eres un líder de analítica para auditoría interna, especializado en minería de observaciones, hallazgos, planes de acción y señales de causa raíz, con criterio ejecutivo y enfoque del MIPP del IIA.<br><br>
+                                <strong style="color: var(--brand-green);">Contexto:</strong> Recibirás una base histórica de trabajos de auditoría y seguimiento, que puede incluir observaciones, hallazgos, recomendaciones, planes de acción, procesos, áreas, responsables, criticidad, fechas de trabajo y estados de cierre. Debes consolidar la información para construir un análisis corporativo amplio, útil para comité de auditoría, planeación anual y priorización de intervenciones estructurales.<br><br>
+                                <strong style="color: var(--brand-green);">Tareas obligatorias:</strong><br>
+                                1. Genera un ranking de los temas, procesos y subprocesos más cubiertos en el periodo analizado y contrástalo con una cadena de valor genérica para identificar temas posiblemente no abordados o insuficientemente cubiertos.<br>
+                                2. Detecta la concentración del top de problemáticas o situaciones estructurales críticas: recurrencia, antigüedad, áreas impactadas, criticidad, reincidencia y volumen de acciones asociadas.<br>
+                                3. Analiza correlaciones o asociaciones útiles entre tema, proceso, tipo de hallazgo, causa probable, área responsable, estado del plan, tiempo de cierre y repetición en el tiempo. No inventes causalidad; distingue correlación, hipótesis y hecho observado.<br>
+                                4. Sugiere posibles causas raíz predominantes según la evidencia histórica, agrupándolas en gobierno, diseño de proceso, tecnología, datos, talento/capacidad, cultura de control, terceros o disciplina financiera/operativa.<br>
+                                5. Propón focos de acción corporativos y estratégicos por grandes procesos organizacionales para atacar causas de raíz y no solo síntomas, separando quick wins, acciones estructurales y apuestas de monitoreo continuo.<br>
+                                6. Si existen fechas de trabajos, informes o planes, habilita análisis comparativo por periodos, cohortes o ventanas temporales. Si existen fechas compromiso y fechas reales de cierre, analiza atraso, maduración y velocidad de remediación.<br>
+                                7. Refleja la distribución del estado de maduración o solución de situaciones estructurales según estado de cierre, reapertura o repetición del mismo tema. Si la base no trae estado de planes de acción, dilo explícitamente y sugiere al usuario incorporar ese dato para enriquecer el análisis.<br>
+                                8. Identifica análisis complementarios relevantes según la data disponible, como clustering de hallazgos, mapa de calor por combinación proceso-tema, embudo de remediación, curva de reincidencia, áreas con sobreauditoría o acciones de bajo impacto sostenido.<br>
+                                9. Señala posibles ineficiencias o esfuerzos excesivos en áreas o procesos con alta frecuencia de hallazgos similares, muchas acciones tácticas y poca mejora observable.<br>
+                                10. Si se adjuntan capturas, PDFs escaneados, imágenes o tablas embebidas, actúa primero como OCR: extrae el texto visible, normalízalo y úsalo como parte de la base antes del análisis.<br><br>
+                                <strong style="color: var(--brand-green);">Salida obligatoria - HTML autocontenido:</strong> responde únicamente con un archivo HTML listo para abrir y compartir, sin texto fuera del código. Debe usar Tailwind CSS vía CDN, una estética ejecutiva de alto impacto visual y navegación clara. Incorpora filtros visibles por periodo, proceso, severidad, estado y recurrencia. Usa Chart.js vía CDN cuando existan datos suficientes para mostrar ranking temático, distribución de madurez, recurrencia histórica, cobertura vs cadena de valor y focos de ineficiencia; si faltan métricas, no inventes valores y prioriza tarjetas, mapas de calor cualitativos, matrices y alertas narrativas. Incluye como mínimo: un tablero ejecutivo superior, una sección de cobertura temática vs cadena de valor, una sección de problemáticas estructurales, una sección de correlaciones e hipótesis de causa raíz, una sección de focos corporativos de acción, una sección de madurez/remediación, una sección de ineficiencias o sobreesfuerzo y un bloque final llamado <strong>"lo que el comité no está viendo"</strong> con hallazgos estratégicos no obvios. Agrega una tabla maestra exportable con columnas periodo, trabajo, proceso, tema, subtema, observación/hallazgo, criticidad, causa probable, acción asociada, estado, recurrencia, antigüedad, área responsable, foco estratégico y comentario ejecutivo. El HTML debe incorporar un botón visible para exportar o imprimir las tablas de datos a Excel.
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <div style="flex: 1; background: #ecfeff; padding: 8px; border-radius: 6px; border-top: 3px solid var(--brand-teal);">
+                                    <strong style="font-size: 0.78em; color: var(--brand-teal); display: block; margin-bottom: 4px;">Visualizaciones</strong>
+                                    <ul style="margin-bottom: 0;">
+                                        <li>Ranking temático y vacíos vs cadena de valor</li>
+                                        <li>Mapa de recurrencia, madurez y reincidencia</li>
+                                        <li>Matriz de focos corporativos e ineficiencias</li>
+                                    </ul>
+                                </div>
+                                <div style="flex: 1; background: #eff6ff; padding: 8px; border-radius: 6px; border-top: 3px solid var(--brand-blue);">
+                                    <strong style="font-size: 0.78em; color: var(--brand-blue); display: block; margin-bottom: 4px;">Resultado para auditoría</strong>
+                                    <ul style="margin-bottom: 0;">
+                                        <li>Planeación anual más basada en evidencia histórica</li>
+                                        <li>Discusión ejecutiva sobre causas sistémicas</li>
+                                        <li>Priorización corporativa de remediación y monitoreo</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: auto; width: 100%; padding: 0 50px;"><hr style="margin-top: 10px; margin-bottom: 10px; border: none; border-top: 1px solid rgba(9, 62, 94, 0.15);"><div style="font-size: 0.85em; color: #64748b;"><strong>Foco:</strong> aprendizaje histórico y priorización corporativa | <strong>Método:</strong> analítica agregada + correlación + madurez de remediación | <strong>Entrega:</strong> observatorio ejecutivo de causas estructurales y focos de acción</div></div>
+            </div>
+
+        </div>
+
+        <div class="controls">
+            <button class="btn" id="prevBtn" onclick="moveSlide(-1)" disabled>Anterior</button>
+            <div class="indicators" id="indicatorsBox"></div>
+            <button class="btn" id="nextBtn" onclick="moveSlide(1)">Siguiente <span class="material-symbols-outlined" style="vertical-align: text-bottom;">arrow_forward</span></button>
+        </div>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const indicatorsBox = document.getElementById('indicatorsBox');
+
+        const totalSlides = slides.length;
+        let currentIndex = 0;
+
+        slides.forEach((slide, index) => {
+            slide.classList.remove('active-slide');
+            slide.style.display = 'none';
+            if (index === 0) {
+                slide.classList.add('active-slide');
+                slide.style.display = 'flex';
+            }
+        });
+
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            if (i === 0) dot.classList.add('active');
+            dot.onclick = () => goToSlide(i);
+            indicatorsBox.appendChild(dot);
+        }
+
+        const dots = document.querySelectorAll('.dot');
+
+        function updateUI() {
+            slides.forEach((slide, index) => {
+                if (index === currentIndex) {
+                    slide.classList.add('active-slide');
+                    slide.style.display = 'flex';
+                } else {
+                    slide.classList.remove('active-slide');
+                    slide.style.display = 'none';
+                }
+            });
+
+            prevBtn.disabled = currentIndex === 0;
+            if (currentIndex === totalSlides - 1) {
+                nextBtn.disabled = true;
+                nextBtn.innerHTML = 'Finalizado';
+            } else {
+                nextBtn.disabled = false;
+                nextBtn.innerHTML = 'Siguiente <span class="material-symbols-outlined" style="vertical-align: text-bottom;">arrow_forward</span>';
+            }
+
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentIndex);
+            });
+        }
+
+        window.moveSlide = function(direction) {
+            currentIndex += direction;
+            if (currentIndex < 0) currentIndex = 0;
+            if (currentIndex >= totalSlides) currentIndex = totalSlides - 1;
+            updateUI();
+        };
+
+        window.goToSlide = function(index) {
+            currentIndex = index;
+            updateUI();
+        };
+    </script>
+</body>
+</html>
